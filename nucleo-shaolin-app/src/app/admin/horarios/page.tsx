@@ -40,7 +40,7 @@ export default async function AdminHorariosPage() {
   const modalities = (modalitiesRes.data as RawModality[]) ?? []
 
   return (
-    <main className="max-w-4xl mx-auto px-4 md:px-6 py-6 flex flex-col gap-6 animate-fade-in">
+    <main className="page-container py-5 sm:py-6 flex flex-col gap-5 sm:gap-6 animate-fade-in">
       <div className="section-header pb-2 border-b border-[var(--color-border)]">
         <div>
           <h1 className="nkfs-h-m text-main font-bold">Grade Oficial de Aulas</h1>

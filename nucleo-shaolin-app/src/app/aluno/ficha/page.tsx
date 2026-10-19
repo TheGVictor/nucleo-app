@@ -40,37 +40,35 @@ export default async function AlunoFichaPage() {
 
   return (
     <main className="page-container py-5 flex flex-col gap-6 animate-fade-in">
-      {/* ── CABEÇALHO DO ALUNO COM STATUS MARCIAL ──────────────── */}
-      <div className="card-gold p-6 text-center flex flex-col items-center relative overflow-hidden shadow-gold">
+      {/* ── CABEÇALHO DO ALUNO COM STATUS MARCIAL E TEMA DA FAIXA ── */}
+      <div
+        className="p-5 sm:p-6 rounded-[var(--radius-xl)] flex flex-col sm:flex-row items-center sm:items-start gap-4 relative overflow-hidden border transition-all text-center sm:text-left shadow-md"
+        style={{
+          background: `linear-gradient(135deg, ${technicalData?.graduationColor || '#D4AF37'}18 0%, rgba(20, 24, 33, 0.8) 100%)`,
+          borderColor: `${technicalData?.graduationColor || '#D4AF37'}40`,
+        }}
+      >
         <Avatar name={profile.full_name} size="xl" gold />
-        <h1 className="nkfs-h-m text-main font-extrabold mt-3">{profile.full_name}</h1>
-        <p className="nkfs-p-m text-muted mt-0.5">Registro Oficial do Praticante</p>
-
-        <div className="flex items-center gap-2 mt-3 flex-wrap justify-center">
-          <Badge variant="gold">Aluno Oficial Shaolin</Badge>
-          <Badge variant="success">Matrícula Ativa</Badge>
-          <span className="nkfs-tag-p text-faint">
-            Membro desde{' '}
-            {new Date(profile.created_at).toLocaleDateString('pt-BR', {
-              month: 'short',
-              year: 'numeric',
-            })}
-          </span>
+        <div className="flex-1 min-w-0">
+          <h1 className="nkfs-h-m text-main font-extrabold truncate">{profile.full_name}</h1>
+          <p className="text-xs sm:text-sm text-muted mt-0.5">
+            {technicalData?.modalityName || 'Kung Fu Shaolin'} • <strong className="text-main">{technicalData?.graduationName || 'Faixa Oficial'}</strong>
+          </p>
+          <p className="text-xs text-faint mt-1">
+            Praticante ativo desde {new Date(profile.created_at).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}
+          </p>
         </div>
       </div>
 
       {/* ── FICHA DE ACOMPANHAMENTO TÉCNICO OFICIAL ─────────────── */}
       <section className="flex flex-col gap-3">
-        <div className="section-header">
-          <div className="flex items-center gap-2">
-            <h2 className="section-title nkfs-tag-m text-gold">
-              Ficha de Acompanhamento Técnico
-            </h2>
-            <Badge variant="gold">
-              {technicalData?.graduationName || 'Faixa Oficial'}
-            </Badge>
-          </div>
-          <span className="nkfs-tag-p text-muted">Controle de Técnicas & Katis</span>
+        <div className="flex items-center justify-between pb-1 border-b border-[var(--color-border)]">
+          <h2 className="nkfs-h-p text-main font-bold">
+            Ficha de Acompanhamento Técnico
+          </h2>
+          <span className="text-xs text-muted font-medium">
+            {technicalData?.graduationName || 'Faixa Oficial'}
+          </span>
         </div>
 
         {technicalData ? (

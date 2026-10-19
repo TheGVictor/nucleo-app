@@ -105,7 +105,7 @@ export default async function AdminAlunosPage() {
   })
 
   return (
-    <main className="max-w-6xl mx-auto px-4 md:px-6 py-6 flex flex-col gap-6 animate-fade-in">
+    <main className="page-container py-5 sm:py-6 flex flex-col gap-5 sm:gap-6 animate-fade-in">
       {/* Cabeçalho da Central de Alunos */}
       <div className="section-header pb-2 border-b border-[var(--color-border)]">
         <div>

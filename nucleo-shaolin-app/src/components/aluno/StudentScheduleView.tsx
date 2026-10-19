@@ -165,30 +165,25 @@ export function StudentScheduleView({
                     return (
                       <div
                         key={cls.id}
-                        className={`card-elevated p-4 flex flex-col justify-between transition-all hover:border-[var(--color-border-gold)] ${
-                          isToday ? 'border-l-4 border-l-[var(--color-gold)]' : ''
+                        className={`card-elevated p-3.5 sm:p-4 flex flex-col justify-between transition-all hover:border-[var(--color-border-gold)] ${
+                          isToday ? 'border-l-4 border-l-[var(--color-gold)] shadow-xs' : ''
                         }`}
                       >
-                        <div>
-                          {/* Horário & Modalidade */}
-                          <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                            <span className="nkfs-tag-p font-mono text-gold font-bold px-2 py-0.5 rounded bg-[var(--color-gold-muted)] border border-[var(--color-border-gold)]">
+                        <div className="flex flex-col gap-1.5">
+                          {/* Horário & Modalidade em linha limpa */}
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <span className="font-mono text-xs text-gold font-bold px-2 py-0.5 rounded bg-[var(--color-gold-muted)] border border-[var(--color-border-gold)]">
                               ⏰ {startFormatted} – {endFormatted}
                             </span>
-                            <span className="nkfs-tag-p text-muted font-medium">
-                              {cls.modality?.name ? `🥋 ${cls.modality.name}` : '🥋 Kung Fu Shaolin'}
+                            <span className="text-[11px] sm:text-xs text-muted font-medium">
+                              {cls.modality?.name ? cls.modality.name : 'Kung Fu Shaolin'}
                             </span>
                           </div>
 
                           {/* Título da Turma */}
-                          <h4 className="nkfs-h-p font-bold text-main leading-snug">
+                          <h4 className="nkfs-h-p font-bold text-main leading-snug pt-0.5">
                             {cls.title}
                           </h4>
-                        </div>
-
-                        <div className="pt-2 mt-3 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-muted">
-                          <span className="nkfs-tag-p text-faint">📍 Dojô Núcleo Shaolin</span>
-                          <span className="nkfs-tag-p text-gold font-medium">Presencial</span>
                         </div>
                       </div>
                     )

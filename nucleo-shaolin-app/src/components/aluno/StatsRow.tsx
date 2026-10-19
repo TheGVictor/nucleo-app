@@ -10,18 +10,23 @@ interface StatsRowProps {
 
 export function StatsRow({ stats }: StatsRowProps) {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
-        gap: '0.75rem',
-      }}
-    >
-      {stats.map(stat => (
-        <div key={stat.label} className="stat-box">
-          <span className="stat-label">{stat.label}</span>
-          <span className="stat-value">{stat.value}</span>
-          {stat.sub && <span className="stat-sub">{stat.sub}</span>}
+    <div className="grid grid-cols-3 gap-2 sm:gap-3.5 w-full">
+      {stats.map((stat) => (
+        <div
+          key={stat.label}
+          className="card p-3 sm:p-4 flex flex-col justify-between gap-1 min-w-0 transition-all hover:border-[var(--color-border-gold)] shadow-xs"
+        >
+          <span className="text-[10px] sm:text-xs font-semibold text-muted uppercase tracking-wider truncate">
+            {stat.label}
+          </span>
+          <span className="text-xl sm:text-2xl font-black text-main leading-tight tracking-tight truncate">
+            {stat.value}
+          </span>
+          {stat.sub && (
+            <span className="text-[10px] sm:text-xs text-muted truncate mt-0.5">
+              {stat.sub}
+            </span>
+          )}
         </div>
       ))}
     </div>

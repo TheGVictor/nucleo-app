@@ -96,7 +96,7 @@ export default async function AdminPage() {
   ])
 
   return (
-    <main className="max-w-5xl mx-auto px-4 md:px-6 py-6 flex flex-col gap-6 animate-fade-in">
+    <main className="page-container py-5 sm:py-6 flex flex-col gap-5 sm:gap-6 animate-fade-in">
       
       {/* Banner do Sifu / Header Operacional */}
       <div className="card-gold p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-gold">

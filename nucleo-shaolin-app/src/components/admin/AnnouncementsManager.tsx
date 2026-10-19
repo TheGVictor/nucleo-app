@@ -34,14 +34,6 @@ interface AnnouncementsManagerProps {
 
 const CATEGORIES = ['Aviso', 'Exame', 'Seminário', 'Feriado', 'Evento']
 
-const CATEGORY_BADGE: Record<string, 'muted' | 'warning' | 'primary' | 'error' | 'gold'> = {
-  Aviso: 'muted',
-  Exame: 'warning',
-  Seminário: 'primary',
-  Feriado: 'error',
-  Evento: 'gold',
-}
-
 export function AnnouncementsManager({
   initialAnnouncements,
   modalities,
@@ -378,28 +370,31 @@ export function AnnouncementsManager({
                 className="card-elevated p-4 flex flex-col justify-between hover:border-[var(--color-border-gold)] transition-all group"
               >
                 <div>
-                  {/* Metadados: Categoria, Modalidade/Grupo e Data do Evento */}
+                  {/* Metadados: Categoria e Modalidade/Grupo */}
                   <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <Badge variant={CATEGORY_BADGE[item.category] ?? 'muted'}>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold text-main flex items-center gap-1.5">
+                        <span
+                          className={`w-2 h-2 rounded-full ${
+                            item.category === 'Exame'
+                              ? 'bg-amber-400'
+                              : item.category === 'Seminário'
+                              ? 'bg-blue-400'
+                              : item.category === 'Feriado'
+                              ? 'bg-red-400'
+                              : 'bg-neutral-400'
+                          }`}
+                        />
                         {item.category}
-                      </Badge>
-                      {isTargetedGroup ? (
-                        <Badge variant="gold">
-                          👥 Grupo ({targetStudentIds?.length} {targetStudentIds?.length === 1 ? 'aluno' : 'alunos'})
-                        </Badge>
-                      ) : item.modality?.name ? (
-                        <span className="nkfs-tag-p text-muted">
-                          🥋 {item.modality.name}
-                        </span>
-                      ) : (
-                        <span className="nkfs-tag-p text-muted">
-                          🌐 Geral
-                        </span>
-                      )}
-                      {imageUrl && (
-                        <Badge variant="gold">🖼️ Cartaz</Badge>
-                      )}
+                      </span>
+                      <span className="text-faint text-xs">•</span>
+                      <span className="text-xs text-muted">
+                        {isTargetedGroup
+                          ? `👥 ${targetStudentIds?.length} ${targetStudentIds?.length === 1 ? 'aluno' : 'alunos'}`
+                          : item.modality?.name
+                          ? item.modality.name
+                          : 'Geral'}
+                      </span>
                     </div>
 
                     <span className="nkfs-tag-p text-faint font-mono">
@@ -514,7 +509,7 @@ export function AnnouncementsManager({
       {/* ── MODAL DE CRIAÇÃO / EDIÇÃO ──────────────────────────── */}
       {isModalOpen && (
         <div className="modal-overlay animate-fade-in">
-          <div className="card w-full max-w-lg p-6 shadow-2xl relative animate-slide-up flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+          <div className="card w-full max-w-lg p-4 sm:p-6 shadow-2xl relative animate-slide-up flex flex-col gap-4 max-h-[90vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl">
             {/* Header do Modal */}
             <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
               <div>

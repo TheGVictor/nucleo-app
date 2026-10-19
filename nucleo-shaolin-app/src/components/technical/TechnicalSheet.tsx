@@ -239,8 +239,15 @@ export function TechnicalSheet({
         </div>
       )}
 
+      {/* Dica de rolagem suave no mobile */}
+      <div className="flex md:hidden items-center justify-between text-[11px] text-muted px-1">
+        <span>👆 Arraste para os lados para visualizar a folha completa</span>
+        <span className="font-mono text-[10px] uppercase font-bold text-gold">Folha Oficial A4</span>
+      </div>
+
       {/* ── DOCUMENTO DA FICHA TÉCNICA (SEMPRE BRANCA COMO A FOLHA A4 FÍSICA) ── */}
-      <div className="bg-white text-black border border-neutral-300 p-5 sm:p-8 rounded-sm shadow-2xl font-sans relative overflow-hidden select-none">
+      <div className="w-full overflow-x-auto pb-3 no-scrollbar -mx-2 px-2 sm:mx-0 sm:px-0">
+        <div className="min-w-[640px] md:min-w-0 bg-white text-black border border-neutral-300 p-4 sm:p-8 rounded-sm shadow-xl font-sans relative select-none">
         
         {/* ── 1. CABEÇALHO PRETO CONFORME DOCUMENTO ORIGINAL ────────── */}
         <div className="bg-[#1C1C1C] text-white p-3 sm:p-4 rounded-t-sm flex items-center justify-between">
@@ -635,6 +642,7 @@ export function TechnicalSheet({
           </div>
         </div>
       </div>
+    </div>
 
       {/* ── MODAL: FOTOGRAFIA DA FICHA ORIGINAL DE PAPEL ────────── */}
       {showOriginalModal && (

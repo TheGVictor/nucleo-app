@@ -47,6 +47,7 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
   const [search, setSearch] = useState('')
   const [filterModality, setFilterModality] = useState<string>('all')
   const [activeTab, setActiveTab] = useState<'technical' | 'attendance' | 'notice' | 'profile'>('technical')
+  const [mobileListExpanded, setMobileListExpanded] = useState(false)
 
   // Dados do aluno selecionado
   const [technicalData, setTechnicalData] = useState<
@@ -97,11 +98,15 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
   }, [selectedStudentId])
 
   function handleSelectStudent(id: string) {
-    if (id === selectedStudentId) return
+    if (id === selectedStudentId) {
+      setMobileListExpanded(false)
+      return
+    }
     setSelectedStudentId(id)
     setLoadingStudent(true)
     setNoticeSuccess(false)
     setNoticeError(null)
+    setMobileListExpanded(false)
   }
 
   function handleSendNotice(e: React.FormEvent) {
@@ -148,8 +153,38 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
+      {/* ── SELETOR COMPACTO PARA MOBILE QUANDO LISTA RECOLHIDA ──── */}
+      {selectedStudent && !mobileListExpanded && (
+        <div className="lg:hidden w-full flex items-center justify-between p-3 rounded-[var(--radius-md)] bg-[var(--color-bg-card)] border border-[var(--color-border)] shadow-xs">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Avatar name={selectedStudent.full_name} size="sm" />
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-main truncate leading-tight">
+                {selectedStudent.full_name}
+              </p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: selectedStudent.graduationColor }}
+                />
+                <span className="text-[11px] text-muted truncate">
+                  {selectedStudent.graduationName}
+                </span>
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setMobileListExpanded(true)}
+            className="btn btn-outline btn-sm py-1 px-3 text-xs shrink-0"
+          >
+            🔍 Trocar Aluno
+          </button>
+        </div>
+      )}
+
       {/* ── PAINEL ESQUERDO: CENTRAL DE BUSCA E FILTROS ──────────── */}
-      <div className="w-full lg:w-84 shrink-0 flex flex-col gap-3">
+      <div className={`w-full lg:w-84 shrink-0 flex flex-col gap-3 ${selectedStudent && !mobileListExpanded ? 'hidden lg:flex' : 'flex'}`}>
         {/* Cabeçalho da Lista */}
         <div className="card p-4 flex flex-col gap-3 shadow-md">
           <div className="flex items-center justify-between">
@@ -157,7 +192,19 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
               <span className="text-xl">🥋</span>
               <h2 className="nkfs-h-p text-main font-bold">Buscar Alunos</h2>
             </div>
-            <Badge variant="gold">{filteredStudents.length} de {students.length}</Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="gold">{filteredStudents.length} de {students.length}</Badge>
+              {selectedStudent && (
+                <button
+                  type="button"
+                  onClick={() => setMobileListExpanded(false)}
+                  className="lg:hidden text-xs text-muted hover:text-main px-1.5 py-0.5 rounded border border-[var(--color-border)]"
+                  title="Fechar lista"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Campo de Busca Rápida */}
@@ -268,8 +315,14 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
       <div className="flex-1 w-full min-w-0 flex flex-col gap-4">
         {selectedStudent ? (
           <>
-            {/* Banner de Identificação do Aluno */}
-            <div className="card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-l-4 border-l-[var(--color-gold)] shadow-md">
+            {/* Banner de Identificação do Aluno com Tema da Faixa */}
+            <div
+              className="card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-l-4 shadow-md transition-all"
+              style={{
+                borderLeftColor: selectedStudent.graduationColor || 'var(--color-gold)',
+                background: `linear-gradient(135deg, ${selectedStudent.graduationColor || '#D4AF37'}12 0%, var(--color-bg-card) 100%)`,
+              }}
+            >
               <div className="flex items-center gap-3.5">
                 <Avatar name={selectedStudent.full_name} size="lg" gold />
                 <div>
@@ -307,7 +360,7 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
             </div>
 
             {/* Abas de Navegação do Aluno */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 bg-[var(--color-bg-card)] p-1.5 rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-xs">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 bg-[var(--color-bg-card)] p-1.5 rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-xs no-scrollbar">
               <button
                 type="button"
                 onClick={() => setActiveTab('technical')}

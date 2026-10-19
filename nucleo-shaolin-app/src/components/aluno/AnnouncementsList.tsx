@@ -89,77 +89,100 @@ export function AnnouncementsList({ items }: { items: EnrichedAnnouncement[] }) 
       </div>
 
       {/* Lista de comunicados */}
-      <div className="flex flex-col gap-2.5">
-        {filteredItems.map(item => {
+      <div className="flex flex-col gap-3">
+        {filteredItems.map((item) => {
           const { text, imageUrl } = parseAnnouncementContent(item.content)
 
           return (
             <div
               key={item.id}
               onClick={() => setActiveItem(item)}
-              className="card-elevated p-4 hover:border-[var(--color-border-gold)] transition-all cursor-pointer group flex flex-col gap-2 shadow-sm"
+              className="card p-4 sm:p-5 hover:border-[var(--color-border-gold)] transition-all cursor-pointer group flex flex-col gap-2.5 shadow-xs"
               role="button"
               tabIndex={0}
-              onKeyDown={e => {
+              onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   setActiveItem(item)
                 }
               }}
             >
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant={CATEGORY_STYLE[item.category] ?? 'muted'}>
+              {/* Header do Card: Categoria limpa e Data de postagem */}
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${
+                    item.category === 'Exame'
+                      ? 'bg-amber-400'
+                      : item.category === 'Seminário' || item.category === 'Seminário'
+                      ? 'bg-blue-400'
+                      : item.category === 'Feriado'
+                      ? 'bg-red-400'
+                      : 'bg-gold'
+                  }`} />
+                  <span className="font-bold text-main uppercase tracking-wider text-[11px]">
                     {item.category}
-                  </Badge>
+                  </span>
                   {imageUrl && (
-                    <Badge variant="gold">🖼️ Cartaz</Badge>
-                  )}
-                  {item.event_date && (
-                    <span className="nkfs-tag-p text-gold font-mono flex items-center gap-1">
-                      📅 {new Date(item.event_date).toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: '2-digit' })}
-                    </span>
+                    <span className="text-muted text-[11px]">• 🖼️ Cartaz</span>
                   )}
                 </div>
-                <span className="nkfs-tag-p text-faint font-mono">
+                <span className="text-[11px] text-muted font-mono">
                   {formatDate(item.created_at)}
                 </span>
               </div>
 
-              {/* Título Padronizado */}
-              <p className="nkfs-h-p font-bold text-main group-hover:text-gold transition-colors leading-snug">
+              {/* Título Principal */}
+              <h3 className="nkfs-h-p font-bold text-main group-hover:text-gold transition-colors leading-snug">
                 {item.title}
-              </p>
+              </h3>
 
-              {/* Preview de Imagem se houver */}
+              {/* Metadados unificados em uma linha sutil (sem excesso de badges) */}
+              {(item.event_date || item.modality?.name) && (
+                <div className="flex items-center gap-2 text-xs text-muted flex-wrap">
+                  {item.modality?.name && (
+                    <span>🥋 {item.modality.name}</span>
+                  )}
+                  {item.modality?.name && item.event_date && (
+                    <span>•</span>
+                  )}
+                  {item.event_date && (
+                    <span className="text-gold font-medium">
+                      📅 Data: {new Date(item.event_date).toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: '2-digit' })}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Preview de Imagem (se houver) */}
               {imageUrl && (
                 <div className="relative aspect-video w-full rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] bg-black/40 my-1">
                   <Image
                     src={imageUrl}
                     alt={item.title}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-cover group-hover:scale-102 transition-transform duration-300"
                     unoptimized
                   />
                 </div>
               )}
 
-              {/* Texto Padronizado */}
+              {/* Texto prévia */}
               {text ? (
-                <p className="line-clamp-2 nkfs-p-m text-muted leading-relaxed">
+                <p className="line-clamp-2 text-xs sm:text-sm text-muted leading-relaxed">
                   {text}
                 </p>
               ) : imageUrl ? (
-                <p className="nkfs-p-m text-gold italic font-medium">
-                  Clique para visualizar o cartaz oficial completo →
+                <p className="text-xs text-gold italic font-medium">
+                  Toque para abrir e ver o cartaz completo →
                 </p>
               ) : null}
 
-              <div className="flex items-center justify-between pt-1 border-t border-[var(--color-border)] mt-1">
-                <span className="nkfs-tag-p text-faint">
-                  {item.modality?.name ? `🥋 ${item.modality.name}` : '🌐 Comunicado Geral'}
+              {/* Rodapé do Card */}
+              <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)] text-xs text-muted">
+                <span className="text-[11px] text-faint">
+                  {item.modality?.name ? item.modality.name : 'Comunicado Geral'}
                 </span>
-                <span className="nkfs-tag-p text-gold font-bold group-hover:translate-x-1 transition-transform">
-                  Ver detalhes completos →
+                <span className="text-[11px] text-gold font-semibold group-hover:translate-x-0.5 transition-transform">
+                  Ver detalhes →
                 </span>
               </div>
             </div>
@@ -171,7 +194,7 @@ export function AnnouncementsList({ items }: { items: EnrichedAnnouncement[] }) 
       {activeItem && activeParsed && (
         <div className="modal-overlay animate-fade-in" onClick={() => setActiveItem(null)}>
           <div
-            className="card w-full max-w-lg p-6 shadow-2xl relative animate-slide-up flex flex-col gap-4 max-h-[90vh] overflow-y-auto"
+            className="card w-full max-w-lg p-4 sm:p-6 shadow-2xl relative animate-slide-up flex flex-col gap-4 max-h-[90vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl"
             onClick={e => e.stopPropagation()}
           >
             {/* Header do Modal */}
@@ -181,12 +204,9 @@ export function AnnouncementsList({ items }: { items: EnrichedAnnouncement[] }) 
                   <Badge variant={CATEGORY_STYLE[activeItem.category] ?? 'muted'}>
                     {activeItem.category}
                   </Badge>
-                  <span className="nkfs-tag-p text-muted">
+                  <span className="text-xs text-muted">
                     {activeItem.modality?.name ? `🥋 ${activeItem.modality.name}` : '🌐 Comunicado Geral'}
                   </span>
-                  {activeParsed.imageUrl && (
-                    <Badge variant="gold">Cartaz Oficial</Badge>
-                  )}
                 </div>
                 <h3 className="nkfs-h-m text-main font-bold leading-snug">
                   {activeItem.title}
