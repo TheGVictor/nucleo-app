@@ -17,6 +17,8 @@ export default function AguardandoPage() {
   const [studentName, setStudentName] = useState('')
   const [countdown, setCountdown] = useState<number | null>(null)
 
+  const [isChecking, setIsChecking] = useState(false)
+
   // Efeito para contagem regressiva suave após aprovação
   useEffect(() => {
     if (countdown === null) return
@@ -31,11 +33,9 @@ export default function AguardandoPage() {
     }
   }, [countdown, router])
 
-  useEffect(() => {
-    let channel: ReturnType<typeof supabase.channel> | null = null
-    let isMounted = true
-
-    async function checkStatusAndSubscribe() {
+  async function checkStatus(isManual = false) {
+    if (isManual) setIsChecking(true)
+    try {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -49,7 +49,7 @@ export default function AguardandoPage() {
         .eq('id', user.id)
         .single()
 
-      if (profile && isMounted) {
+      if (profile) {
         setStudentName(profile.full_name)
       }
 
@@ -60,54 +60,82 @@ export default function AguardandoPage() {
         .maybeSingle()
 
       const currentStatus = studentModality?.status ?? profile?.status ?? 'pending_approval'
-      if (isMounted) {
-        if (currentStatus === 'active' || currentStatus === 'rejected') {
-          setStatus(currentStatus)
-        } else {
-          setStatus('pending_approval')
-        }
+      if (currentStatus === 'active' || currentStatus === 'rejected') {
+        setStatus(currentStatus)
+      } else {
+        setStatus('pending_approval')
       }
 
-      // Se já estiver ativo no carregamento inicial, inicia contagem
       if (currentStatus === 'active') {
-        if (isMounted) setCountdown(3)
-        return
+        setCountdown(3)
       }
+    } catch {
+      // Falha silenciosa em checagem de fundo
+    } finally {
+      if (isManual) setIsChecking(false)
+    }
+  }
 
-      // Escuta alterações em tempo real via Supabase Realtime
-      channel = supabase
-        .channel(`realtime_status_${user.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'student_modalities',
-            filter: `student_id=eq.${user.id}`,
-          },
-          (payload: { new: { status: 'pending_approval' | 'active' | 'rejected' } }) => {
-            const newStatus = payload.new.status
-            if (isMounted) {
-              setStatus(newStatus)
-              if (newStatus === 'active') {
-                setCountdown(3)
-              }
-            }
+  useEffect(() => {
+    let ignore = false
+
+    async function loadInitialStatus() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+          router.push('/login')
+          return
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, status')
+          .eq('id', user.id)
+          .single()
+
+        if (!ignore && profile) {
+          setStudentName(profile.full_name)
+        }
+
+        const { data: studentModality } = await supabase
+          .from('student_modalities')
+          .select('status')
+          .eq('student_id', user.id)
+          .maybeSingle()
+
+        const currentStatus = studentModality?.status ?? profile?.status ?? 'pending_approval'
+        if (!ignore) {
+          if (currentStatus === 'active' || currentStatus === 'rejected') {
+            setStatus(currentStatus)
+          } else {
+            setStatus('pending_approval')
           }
-        )
-        .subscribe()
+
+          if (currentStatus === 'active') {
+            setCountdown(3)
+          }
+        }
+      } catch {
+        // Falha silenciosa
+      }
     }
 
-    checkStatusAndSubscribe()
+    loadInitialStatus()
+
+    // Verificação periódica suave (a cada 30s) somente se a aba estiver visível
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        checkStatus()
+      }
+    }, 30000)
 
     return () => {
-      isMounted = false
-      if (channel) {
-        supabase.removeChannel(channel)
-      }
+      ignore = true
+      clearInterval(interval)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router])
+  }, [])
 
   if (status === 'loading') {
     return (
@@ -144,14 +172,33 @@ export default function AguardandoPage() {
             </div>
             
             <div className="alert alert-warning text-left w-full">
-              <span className="text-sm">⚡</span>
+              <span className="text-sm">ℹ️</span>
               <p className="nkfs-p-p leading-tight">
-                Esta tela atualiza automaticamente em tempo real assim que o Sifu aprovar o seu acesso.
+                Assim que sua matrícula for aprovada pelo Sifu, o acesso será liberado automaticamente.
               </p>
             </div>
 
-            <div className="mt-6 w-full">
-              <Link href="/login" className="btn btn-outline btn-sm btn-full">
+            <div className="mt-5 w-full flex flex-col gap-2.5">
+              <button
+                type="button"
+                onClick={() => checkStatus(true)}
+                disabled={isChecking}
+                className="btn btn-primary btn-full flex items-center justify-center gap-2"
+              >
+                {isChecking ? (
+                  <>
+                    <Spinner size="sm" />
+                    <span>Verificando...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>🔄</span>
+                    <span>Verificar Aprovação Agora</span>
+                  </>
+                )}
+              </button>
+
+              <Link href="/login" className="btn btn-outline btn-sm btn-full text-center">
                 Sair / Voltar ao Login
               </Link>
             </div>
