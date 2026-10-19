@@ -15,6 +15,15 @@ import {
   type StudentTechnicalSheetResponse,
 } from '@/app/admin/attendance/technicalActions'
 import { sendPersonalNoticeAction } from '@/app/admin/alunos/actions'
+import { toggleInstructorRoleAction } from '@/app/admin/instrutores/actions'
+
+export interface StudentModalityIndicator {
+  id: string
+  modalityName: string
+  shortName: string
+  graduationName: string
+  graduationColor: string
+}
 
 export interface StudentModalityIndicator {
   id: string
@@ -49,8 +58,8 @@ interface StudentHubProps {
   currentUserRole?: string
 }
 
-export function StudentHub({ initialStudents, currentUserRole = 'super_admin' }: StudentHubProps) {
-  const [students] = useState<DetailedStudent[]>(initialStudents)
+export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: StudentHubProps) {
+  const [students, setStudents] = useState<DetailedStudent[]>(initialStudents)
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
     initialStudents[0]?.id || null
   )
@@ -71,6 +80,30 @@ export function StudentHub({ initialStudents, currentUserRole = 'super_admin' }:
   const [noticeSuccess, setNoticeSuccess] = useState(false)
   const [noticeError, setNoticeError] = useState<string | null>(null)
   const [isSendingNotice, startNoticeTransition] = useTransition()
+
+  // Promoção de Instrutor (Apenas Sifu)
+  const [isTogglingInstructor, startInstructorTransition] = useTransition()
+
+  function handleToggleInstructorRole(student: DetailedStudent) {
+    const isCurrentlyInstructor = student.role === 'instructor' || student.role === 'admin'
+    const newRole = isCurrentlyInstructor ? 'student' : 'instructor'
+    const confirmMsg = isCurrentlyInstructor
+      ? `Deseja remover as permissões de instrutor de ${student.full_name}?`
+      : `Deseja promover ${student.full_name} a Instrutor? Ele terá acesso ao painel de instrutores, anotações de fichas e envio de listas de exame ao Sifu.`
+
+    if (!confirm(confirmMsg)) return
+
+    startInstructorTransition(async () => {
+      const res = await toggleInstructorRoleAction(student.id, newRole)
+      if (res.success && res.newRole) {
+        setStudents((prev) =>
+          prev.map((s) => (s.id === student.id ? { ...s, role: res.newRole! } : s))
+        )
+      } else {
+        alert(res.error || 'Erro ao alterar permissão de instrutor')
+      }
+    })
+  }
 
   const selectedStudent = students.find((s) => s.id === selectedStudentId)
 
@@ -605,6 +638,54 @@ export function StudentHub({ initialStudents, currentUserRole = 'super_admin' }:
                       {new Date(selectedStudent.created_at).toLocaleDateString('pt-BR', { dateStyle: 'long' })}
                     </strong>
                   </div>
+
+                  {/* Seção de Gestão de Instrutor (Apenas Sifu) */}
+                  {currentUserRole === 'super_admin' && (
+                    <div className="p-4 rounded-[var(--radius-md)] bg-[var(--color-bg-card)] border border-[var(--color-border)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:col-span-2 mt-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">🛡️</span>
+                          <span className="font-bold text-main text-xs">Acesso de Instrutor da Escola</span>
+                          {selectedStudent.role === 'instructor' || selectedStudent.role === 'admin' ? (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[var(--color-gold)] text-black">
+                              Instrutor Ativo
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-neutral-800 text-muted">
+                              Apenas Aluno
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-muted mt-1 leading-snug">
+                          {selectedStudent.role === 'instructor' || selectedStudent.role === 'admin'
+                            ? `${selectedStudent.full_name} tem acesso ao painel de instrutores para anotar fichas técnicas e submeter listas de exame ao Sifu.`
+                            : `Promova ${selectedStudent.full_name} a Instrutor para permitir anotações de fichas técnicas e envio de listas de exame.`}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={isTogglingInstructor}
+                        onClick={() => handleToggleInstructorRole(selectedStudent)}
+                        className={`btn btn-sm text-xs font-bold shrink-0 shadow-xs ${
+                          selectedStudent.role === 'instructor' || selectedStudent.role === 'admin'
+                            ? 'btn-secondary text-red-500 hover:text-red-400'
+                            : 'btn-gold'
+                        }`}
+                      >
+                        {isTogglingInstructor ? (
+                          <div className="flex items-center gap-1.5">
+                            <Spinner size="sm" />
+                            <span>Atualizando...</span>
+                          </div>
+                        ) : selectedStudent.role === 'instructor' || selectedStudent.role === 'admin' ? (
+                          'Remover Cargo de Instrutor'
+                        ) : (
+                          'Promover a Instrutor 🥋'
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

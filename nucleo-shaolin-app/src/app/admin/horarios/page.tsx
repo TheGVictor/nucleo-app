@@ -27,11 +27,11 @@ export default async function AdminHorariosPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
+  if (!profile || !['instructor', 'admin', 'super_admin'].includes(profile.role)) {
     redirect('/aluno')
   }
 
-  const isReadOnly = false
+  const isReadOnly = profile.role !== 'super_admin'
 
   const adminClient = createAdminClient()
 

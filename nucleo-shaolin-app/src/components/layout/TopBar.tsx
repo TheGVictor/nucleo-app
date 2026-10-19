@@ -24,6 +24,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
     router.push('/login')
   }
 
+
   const title = explicitTitle ?? (
     pathname === '/aluno/aulas'
       ? 'Grade de Aulas'
@@ -36,11 +37,13 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
       : pathname === '/admin/alunos'
       ? 'Gestão de Alunos'
       : pathname === '/admin/horarios'
-      ? 'Grade de Horários'
+      ? (profile.role === 'super_admin' ? 'Grade de Horários' : 'Aulas & Horários')
       : pathname === '/admin/avisos'
       ? 'Mural de Avisos'
+      : pathname === '/admin/exames'
+      ? 'Listas de Exame'
       : pathname.startsWith('/admin')
-      ? 'Painel do Instrutor'
+      ? (profile.role === 'super_admin' ? 'Painel do Sifu' : 'Painel do Instrutor')
       : profile.full_name.split(' ')[0]
   )
 
@@ -76,7 +79,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
             <p className="nkfs-tag-p text-faint truncate">
               {profile.role === 'super_admin'
                 ? 'Sifu — Super Admin'
-                : profile.role === 'admin'
+                : (profile.role === 'admin' || profile.role === 'instructor')
                 ? 'Instrutor'
                 : beltName ? `Faixa ${beltName.replace('Faixa ', '')}` : 'Aluno'}
             </p>
@@ -84,7 +87,36 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
         </div>
 
         {/* Lado Direito: Ações Rápidas */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Alternar visão Aluno <-> Instrutor apenas para instrutores (que também são alunos) */}
+          {(profile.role === 'instructor' || profile.role === 'admin') && (
+            pathname.startsWith('/admin') ? (
+              <button
+                onClick={() => {
+                  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+                  window.location.href = '/aluno'
+                }}
+                className="btn btn-secondary btn-sm px-2.5 py-1 text-xs font-semibold flex items-center gap-1"
+                title="Acessar minha área de aluno"
+              >
+                <span>🥋</span>
+                <span className="hidden sm:inline">Ver como Aluno</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+                  window.location.href = '/admin'
+                }}
+                className="btn btn-gold btn-sm px-2.5 py-1 text-xs font-semibold flex items-center gap-1"
+                title="Acessar painel do instrutor"
+              >
+                <span>🛡️</span>
+                <span className="hidden sm:inline">Painel Instrutor</span>
+              </button>
+            )
+          )}
+
           <ThemeToggle />
           <Avatar name={profile.full_name} size="sm" gold />
           <button
@@ -92,8 +124,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
             className="btn btn-ghost btn-sm px-2.5 py-1 text-xs text-muted hover:text-main"
             title="Sair da conta"
           >
-            <span className="hidden sm:inline">Sair</span>
-            <span className="sm:hidden text-xs">Sair</span>
+            <span>Sair</span>
           </button>
         </div>
       </div>

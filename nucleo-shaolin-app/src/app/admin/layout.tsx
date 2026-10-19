@@ -24,13 +24,24 @@ export default async function AdminLayout({
     .single()
 
   if (!profile) redirect('/login')
-  if (!['admin', 'super_admin'].includes(profile.role)) redirect('/aluno')
+  if (!['instructor', 'admin', 'super_admin'].includes(profile.role)) {
+    redirect('/aluno')
+  }
 
-  // Busca contagem de cadastros pendentes para exibir no badge da navegação
-  const { count: pendingCount } = await supabase
-    .from('profiles')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending_approval')
+  // Busca contagem de cadastros pendentes e contagem de listas de exame pendentes
+  const [pendingRes, examsRes] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending_approval'),
+    supabase
+      .from('exam_lists')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending'),
+  ])
+
+  const pendingCount = pendingRes.count ?? 0
+  const pendingExamsCount = examsRes.count ?? 0
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-main flex flex-col justify-between">
@@ -38,7 +49,11 @@ export default async function AdminLayout({
       <div className="flex-1 pb-24">
         {children}
       </div>
-      <AdminBottomNav pendingCount={pendingCount ?? 0} />
+      <AdminBottomNav
+        pendingCount={pendingCount}
+        pendingExamsCount={pendingExamsCount}
+        role={profile.role}
+      />
     </div>
   )
 }

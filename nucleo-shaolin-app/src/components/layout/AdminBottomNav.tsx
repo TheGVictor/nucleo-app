@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
 interface NavItem {
   label: string
@@ -13,50 +13,88 @@ interface NavItem {
 
 interface AdminBottomNavProps {
   pendingCount?: number
+  pendingExamsCount?: number
+  role?: string
 }
 
-const ADMIN_PATHS = ['/admin', '/admin/alunos', '/admin/horarios', '/admin/avisos']
-
-export function AdminBottomNav({ pendingCount = 0 }: AdminBottomNavProps) {
+export function AdminBottomNav({
+  pendingCount = 0,
+  pendingExamsCount = 0,
+  role = 'instructor',
+}: AdminBottomNavProps) {
   const pathname = usePathname()
   const router = useRouter()
 
-  const navItems: NavItem[] = [
-    {
-      label: 'Painel',
-      path: '/admin',
-      icon: '🏠',
-      badge: pendingCount > 0 ? pendingCount : undefined,
-    },
-    {
-      label: 'Alunos',
-      path: '/admin/alunos',
-      icon: '👥',
-    },
-    {
-      label: 'Horários',
-      path: '/admin/horarios',
-      icon: '📅',
-    },
-    {
-      label: 'Avisos',
-      path: '/admin/avisos',
-      icon: '📢',
-    },
-  ]
+  const isSifu = role === 'super_admin'
+
+  const navItems: NavItem[] = useMemo(
+    () =>
+      isSifu
+        ? [
+            {
+              label: 'Painel',
+              path: '/admin',
+              icon: '🏠',
+              badge: pendingCount > 0 ? pendingCount : undefined,
+            },
+            {
+              label: 'Alunos',
+              path: '/admin/alunos',
+              icon: '👥',
+            },
+            {
+              label: 'Horários',
+              path: '/admin/horarios',
+              icon: '📅',
+            },
+            {
+              label: 'Avisos',
+              path: '/admin/avisos',
+              icon: '📢',
+            },
+            {
+              label: 'Exames',
+              path: '/admin/exames',
+              icon: '🥋',
+              badge: pendingExamsCount > 0 ? pendingExamsCount : undefined,
+            },
+          ]
+        : [
+            {
+              label: 'Painel',
+              path: '/admin',
+              icon: '🏠',
+            },
+            {
+              label: 'Alunos',
+              path: '/admin/alunos',
+              icon: '👥',
+            },
+            {
+              label: 'Aulas',
+              path: '/admin/horarios',
+              icon: '📅',
+            },
+            {
+              label: 'Exames',
+              path: '/admin/exames',
+              icon: '🥋',
+            },
+          ],
+    [isSifu, pendingCount, pendingExamsCount]
+  )
 
   useEffect(() => {
-    ADMIN_PATHS.forEach((path) => {
+    navItems.forEach((item) => {
       try {
-        router.prefetch(path)
+        router.prefetch(item.path)
       } catch {}
     })
-  }, [router])
+  }, [router, navItems])
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-bg)]/95 backdrop-blur-md border-t border-[var(--color-border)] px-4 py-2 flex justify-around items-center max-w-md mx-auto shadow-lg transition-all">
       {navItems.map((item) => {
-        // Verifica se a rota atual corresponde exatamente ou é sub-rota
         const isActive =
           item.path === '/admin'
             ? pathname === '/admin'
@@ -77,7 +115,7 @@ export function AdminBottomNav({ pendingCount = 0 }: AdminBottomNavProps) {
                 router.prefetch(item.path)
               } catch {}
             }}
-            className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-[var(--radius-sm)] transition-all min-w-[70px] ${
+            className={`relative flex flex-col items-center justify-center py-1 px-2.5 rounded-[var(--radius-sm)] transition-all min-w-[62px] ${
               isActive
                 ? 'text-[var(--color-gold)] font-bold scale-105'
                 : 'text-muted hover:text-main'

@@ -36,7 +36,7 @@ export default function LoginPage() {
       .eq('id', data.user.id)
       .single()
 
-    if (profile?.role === 'admin' || profile?.role === 'super_admin') {
+    if (profile?.role === 'admin' || profile?.role === 'super_admin' || profile?.role === 'instructor') {
       router.push('/admin')
     } else if (profile?.status === 'pending_approval') {
       router.push('/aguardando')

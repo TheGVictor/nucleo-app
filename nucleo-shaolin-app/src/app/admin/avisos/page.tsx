@@ -27,7 +27,7 @@ export default async function AdminAvisosPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
+  if (!profile || profile.role !== 'super_admin') {
     redirect('/admin')
   }
 
