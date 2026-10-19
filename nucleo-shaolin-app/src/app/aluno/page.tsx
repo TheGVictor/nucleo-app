@@ -6,6 +6,8 @@ import { AnnouncementsList } from '@/components/aluno/AnnouncementsList'
 import { Badge } from '@/components/ui/Badge'
 import { parseAnnouncementContent } from '@/lib/announcements'
 
+export const instant = false
+
 export default async function AlunoHomePage() {
   const supabase = await createClient()
 

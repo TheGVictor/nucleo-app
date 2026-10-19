@@ -6,6 +6,7 @@ import { getClassSchedulesAction } from '@/app/admin/horarios/actions'
 
 export const instant = false
 
+
 interface RawModality {
   id: string
   name: string
@@ -30,6 +31,8 @@ export default async function AdminHorariosPage() {
     redirect('/aluno')
   }
 
+  const isReadOnly = false
+
   const adminClient = createAdminClient()
 
   const [modalitiesRes, schedules] = await Promise.all([
@@ -43,9 +46,13 @@ export default async function AdminHorariosPage() {
     <main className="page-container py-5 sm:py-6 flex flex-col gap-5 sm:gap-6 animate-fade-in">
       <div className="section-header pb-2 border-b border-[var(--color-border)]">
         <div>
-          <h1 className="nkfs-h-m text-main font-bold">Grade Oficial de Aulas</h1>
+          <h1 className="nkfs-h-m text-main font-bold">
+            {isReadOnly ? 'Grade de Aulas e Horários' : 'Grade Oficial de Aulas'}
+          </h1>
           <p className="nkfs-p-m text-muted mt-0.5">
-            Configure os horários semanais, turmas por faixa etária/graduação e modalidades atendidas.
+            {isReadOnly
+              ? 'Verifique os horários semanais, turmas e modalidades da escola.'
+              : 'Configure os horários semanais, turmas por faixa etária/graduação e modalidades atendidas.'}
           </p>
         </div>
       </div>
@@ -53,6 +60,7 @@ export default async function AdminHorariosPage() {
       <ScheduleManager
         initialSchedules={schedules}
         modalities={modalities}
+        isReadOnly={isReadOnly}
       />
     </main>
   )

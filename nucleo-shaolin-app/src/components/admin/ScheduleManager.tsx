@@ -19,6 +19,7 @@ interface ModalityOption {
 interface ScheduleManagerProps {
   initialSchedules: ClassScheduleWithModality[]
   modalities: ModalityOption[]
+  isReadOnly?: boolean
 }
 
 const WEEKDAYS = [
@@ -33,6 +34,7 @@ const WEEKDAYS = [
 export function ScheduleManager({
   initialSchedules,
   modalities,
+  isReadOnly = false,
 }: ScheduleManagerProps) {
   const [schedules, setSchedules] = useState<ClassScheduleWithModality[]>(initialSchedules)
   const [selectedDay, setSelectedDay] = useState<number>(1) // Segunda por padrão
@@ -174,15 +176,17 @@ export function ScheduleManager({
           })}
         </div>
 
-        {/* Botão Adicionar Nova Aula */}
-        <button
-          type="button"
-          onClick={handleOpenCreate}
-          className="btn btn-gold btn-sm text-xs font-bold flex items-center gap-1.5 self-end sm:self-auto shrink-0 shadow-xs"
-        >
-          <span>＋</span>
-          <span>Nova Aula</span>
-        </button>
+        {/* Botão Adicionar Nova Aula (Apenas Sifu) */}
+        {!isReadOnly && (
+          <button
+            type="button"
+            onClick={handleOpenCreate}
+            className="btn btn-gold btn-sm text-xs font-bold flex items-center gap-1.5 self-end sm:self-auto shrink-0 shadow-xs"
+          >
+            <span>＋</span>
+            <span>Nova Aula</span>
+          </button>
+        )}
       </div>
 
       {/* ── GRADE DE AULAS DO DIA SELECIONADO ────────────────────── */}
@@ -223,25 +227,27 @@ export function ScheduleManager({
                   </div>
                 </div>
 
-                {/* Ações: Editar e Deletar */}
-                <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => handleOpenEdit(item)}
-                    className="btn btn-secondary btn-sm text-xs py-1 px-2.5"
-                    title="Editar aula"
-                  >
-                    ✏️ Editar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(item.id)}
-                    className="btn btn-ghost btn-sm text-xs text-red-500 hover:text-red-700 py-1 px-2"
-                    title="Remover aula"
-                  >
-                    🗑️
-                  </button>
-                </div>
+                {/* Ações: Editar e Deletar (Apenas Sifu) */}
+                {!isReadOnly && (
+                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(item)}
+                      className="btn btn-secondary btn-sm text-xs py-1 px-2.5"
+                      title="Editar aula"
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(item.id)}
+                      className="btn btn-ghost btn-sm text-xs text-red-500 hover:text-red-700 py-1 px-2"
+                      title="Remover aula"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -251,9 +257,11 @@ export function ScheduleManager({
             <p className="nkfs-p-m font-bold text-main">
               {selectedDay === 3 ? 'Escola fechada às quartas-feiras' : 'Nenhuma aula cadastrada para este dia'}
             </p>
-            <p className="text-xs text-muted mt-1 max-w-sm">
-              Clique em &ldquo;Nova Aula&rdquo; para adicionar horários e turmas a este dia da semana.
-            </p>
+            {!isReadOnly && (
+              <p className="text-xs text-muted mt-1 max-w-sm">
+                Clique em &ldquo;Nova Aula&rdquo; para adicionar horários e turmas a este dia da semana.
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -268,28 +276,28 @@ export function ScheduleManager({
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-lg bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-2xl p-6 flex flex-col gap-4 animate-fade-in"
           >
-            <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
-              <h3 className="nkfs-h-p text-main font-bold">
+            <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3.5">
+              <h3 className="text-xl sm:text-2xl text-main font-bold">
                 {editingItem ? 'Editar Horário de Aula' : 'Nova Aula na Grade'}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-muted hover:text-main text-xs font-bold"
+                className="text-muted hover:text-main text-sm font-bold px-2 py-1 rounded hover:bg-[var(--color-bg-elevated)]"
               >
                 ✕ Fechar
               </button>
             </div>
 
             {errorMsg && (
-              <div className="p-3 rounded bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-semibold">
+              <div className="p-3.5 rounded-[var(--radius-md)] bg-red-500/10 border border-red-500/30 text-red-500 text-sm font-semibold">
                 {errorMsg}
               </div>
             )}
 
-            <form onSubmit={handleSave} className="flex flex-col gap-3.5 text-xs">
+            <form onSubmit={handleSave} className="flex flex-col gap-4">
               <div>
-                <label className="font-bold text-main block mb-1">
+                <label className="text-sm font-bold text-main block mb-1.5">
                   Título da Turma / Faixas Atendidas:
                 </label>
                 <input
@@ -298,19 +306,19 @@ export function ScheduleManager({
                   placeholder="Ex: Iniciantes e Intermediário Adulto, Kids, Faixa Preta..."
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
-                  className="input text-xs py-2 w-full"
+                  className="input text-sm sm:text-base py-2.5 px-3.5 w-full rounded-[var(--radius-md)]"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="font-bold text-main block mb-1">
+                  <label className="text-sm font-bold text-main block mb-1.5">
                     Dia da Semana:
                   </label>
                   <select
                     value={formDay}
                     onChange={(e) => setFormDay(Number(e.target.value))}
-                    className="input text-xs py-2 w-full"
+                    className="input text-sm sm:text-base py-2.5 px-3.5 w-full rounded-[var(--radius-md)]"
                   >
                     {WEEKDAYS.map((w) => (
                       <option key={w.index} value={w.index}>
@@ -321,13 +329,13 @@ export function ScheduleManager({
                 </div>
 
                 <div>
-                  <label className="font-bold text-main block mb-1">
+                  <label className="text-sm font-bold text-main block mb-1.5">
                     Modalidade:
                   </label>
                   <select
                     value={formModalityId}
                     onChange={(e) => setFormModalityId(e.target.value)}
-                    className="input text-xs py-2 w-full"
+                    className="input text-sm sm:text-base py-2.5 px-3.5 w-full rounded-[var(--radius-md)]"
                   >
                     {modalities.map((m) => (
                       <option key={m.id} value={m.id}>
@@ -338,9 +346,9 @@ export function ScheduleManager({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="font-bold text-main block mb-1">
+                  <label className="text-sm font-bold text-main block mb-1.5">
                     Horário de Início:
                   </label>
                   <input
@@ -348,12 +356,12 @@ export function ScheduleManager({
                     required
                     value={formStartTime}
                     onChange={(e) => setFormStartTime(e.target.value)}
-                    className="input text-xs py-2 w-full"
+                    className="input text-sm sm:text-base py-2.5 px-3.5 w-full rounded-[var(--radius-md)]"
                   />
                 </div>
 
                 <div>
-                  <label className="font-bold text-main block mb-1">
+                  <label className="text-sm font-bold text-main block mb-1.5">
                     Horário de Término:
                   </label>
                   <input
@@ -361,16 +369,16 @@ export function ScheduleManager({
                     required
                     value={formEndTime}
                     onChange={(e) => setFormEndTime(e.target.value)}
-                    className="input text-xs py-2 w-full"
+                    className="input text-sm sm:text-base py-2.5 px-3.5 w-full rounded-[var(--radius-md)]"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-[var(--color-border)] mt-1">
+              <div className="flex justify-end gap-2.5 pt-3.5 border-t border-[var(--color-border)] mt-1">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="btn btn-secondary btn-sm"
+                  className="btn btn-secondary btn-sm text-sm px-4 py-2"
                 >
                   Cancelar
                 </button>

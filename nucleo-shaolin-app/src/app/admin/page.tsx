@@ -45,6 +45,8 @@ export default async function AdminPage() {
     .select(`
       id,
       full_name,
+      cpf,
+      phone,
       birth_date,
       created_at,
       student_modalities(
@@ -73,14 +75,21 @@ export default async function AdminPage() {
     return {
       id: p.id,
       full_name: p.full_name,
+      cpf: p.cpf,
+      phone: p.phone,
       birth_date: p.birth_date,
       created_at: p.created_at,
       student_modalities: mapped,
     }
   })
 
-  // 2. Contadores gerais
-  const [{ count: activeStudents }, { count: totalAnnouncements }, { count: totalClasses }] = await Promise.all([
+  // 2. Contadores gerais e Graduações para validação na aprovação
+  const [
+    { count: activeStudents },
+    { count: totalAnnouncements },
+    { count: totalClasses },
+    graduationsRes,
+  ] = await Promise.all([
     adminClient
       .from('profiles')
       .select('*', { count: 'exact', head: true })
@@ -93,7 +102,13 @@ export default async function AdminPage() {
       .from('class_schedules')
       .select('*', { count: 'exact', head: true })
       .eq('active', true),
+    supabase
+      .from('graduations')
+      .select('id, modality_id, level_name, level_order, color_hex')
+      .order('level_order', { ascending: true }),
   ])
+
+  const graduations = graduationsRes.data ?? []
 
   return (
     <main className="page-container py-5 sm:py-6 flex flex-col gap-5 sm:gap-6 animate-fade-in">
@@ -256,7 +271,7 @@ export default async function AdminPage() {
             </p>
           </div>
         </div>
-        <ApprovalQueue initialPending={pending} />
+        <ApprovalQueue initialPending={pending} graduations={graduations} />
       </section>
 
     </main>
