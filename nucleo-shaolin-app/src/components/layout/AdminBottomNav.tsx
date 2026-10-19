@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useMemo } from 'react'
+import { usePathname } from 'next/navigation'
+import { useMemo } from 'react'
 
 interface NavItem {
   label: string
@@ -23,7 +23,6 @@ export function AdminBottomNav({
   role = 'instructor',
 }: AdminBottomNavProps) {
   const pathname = usePathname()
-  const router = useRouter()
 
   const isSifu = role === 'super_admin'
 
@@ -84,14 +83,6 @@ export function AdminBottomNav({
     [isSifu, pendingCount, pendingExamsCount]
   )
 
-  useEffect(() => {
-    navItems.forEach((item) => {
-      try {
-        router.prefetch(item.path)
-      } catch {}
-    })
-  }, [router, navItems])
-
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-bg)]/95 backdrop-blur-md border-t border-[var(--color-border)] px-4 py-2 flex justify-around items-center max-w-md mx-auto shadow-lg transition-all">
       {navItems.map((item) => {
@@ -105,16 +96,6 @@ export function AdminBottomNav({
             key={item.path}
             href={item.path}
             prefetch={true}
-            onMouseEnter={() => {
-              try {
-                router.prefetch(item.path)
-              } catch {}
-            }}
-            onTouchStart={() => {
-              try {
-                router.prefetch(item.path)
-              } catch {}
-            }}
             className={`relative flex flex-col items-center justify-center py-1 px-2.5 rounded-[var(--radius-sm)] transition-all min-w-[62px] ${
               isActive
                 ? 'text-[var(--color-gold)] font-bold scale-105'

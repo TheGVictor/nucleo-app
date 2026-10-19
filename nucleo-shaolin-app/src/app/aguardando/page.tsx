@@ -32,6 +32,9 @@ export default function AguardandoPage() {
   }, [countdown, router])
 
   useEffect(() => {
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    let isMounted = true
+
     async function checkStatusAndSubscribe() {
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -46,7 +49,7 @@ export default function AguardandoPage() {
         .eq('id', user.id)
         .single()
 
-      if (profile) {
+      if (profile && isMounted) {
         setStudentName(profile.full_name)
       }
 
@@ -54,24 +57,26 @@ export default function AguardandoPage() {
         .from('student_modalities')
         .select('status')
         .eq('student_id', user.id)
-        .single()
+        .maybeSingle()
 
       const currentStatus = studentModality?.status ?? profile?.status ?? 'pending_approval'
-      if (currentStatus === 'active' || currentStatus === 'rejected') {
-        setStatus(currentStatus)
-      } else {
-        setStatus('pending_approval')
+      if (isMounted) {
+        if (currentStatus === 'active' || currentStatus === 'rejected') {
+          setStatus(currentStatus)
+        } else {
+          setStatus('pending_approval')
+        }
       }
 
       // Se já estiver ativo no carregamento inicial, inicia contagem
       if (currentStatus === 'active') {
-        setCountdown(3)
+        if (isMounted) setCountdown(3)
         return
       }
 
       // Escuta alterações em tempo real via Supabase Realtime
-      const channel = supabase
-        .channel('realtime_status_check')
+      channel = supabase
+        .channel(`realtime_status_${user.id}`)
         .on(
           'postgres_changes',
           {
@@ -82,22 +87,27 @@ export default function AguardandoPage() {
           },
           (payload: { new: { status: 'pending_approval' | 'active' | 'rejected' } }) => {
             const newStatus = payload.new.status
-            setStatus(newStatus)
-
-            if (newStatus === 'active') {
-              setCountdown(3)
+            if (isMounted) {
+              setStatus(newStatus)
+              if (newStatus === 'active') {
+                setCountdown(3)
+              }
             }
           }
         )
         .subscribe()
-
-      return () => {
-        supabase.removeChannel(channel)
-      }
     }
 
     checkStatusAndSubscribe()
-  }, [router, supabase])
+
+    return () => {
+      isMounted = false
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router])
 
   if (status === 'loading') {
     return (

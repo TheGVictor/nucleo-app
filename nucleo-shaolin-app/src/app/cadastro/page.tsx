@@ -102,7 +102,7 @@ export default function CadastroPage() {
       .in('slug', selectedModalities)
 
     if (modalitiesData) {
-      const inserts = modalitiesData.map(m => ({
+      const inserts = (modalitiesData as { id: string; slug: string }[]).map(m => ({
         student_id: userId,
         modality_id: m.id,
         self_reported_level: selfReported[m.slug] ?? null,

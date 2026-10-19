@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 
 interface NavItem {
   label: string
@@ -70,16 +69,6 @@ const ALUNO_NAV: NavItem[] = [
 
 export function BottomNav() {
   const pathname = usePathname()
-  const router = useRouter()
-
-  useEffect(() => {
-    // Pré-carrega ativamente todas as rotas do menu no navegador em segundo plano
-    ALUNO_NAV.forEach((item) => {
-      try {
-        router.prefetch(item.path)
-      } catch {}
-    })
-  }, [router])
 
   return (
     <nav className="bottom-nav">
@@ -90,16 +79,6 @@ export function BottomNav() {
             key={item.path}
             href={item.path}
             prefetch={true}
-            onMouseEnter={() => {
-              try {
-                router.prefetch(item.path)
-              } catch {}
-            }}
-            onTouchStart={() => {
-              try {
-                router.prefetch(item.path)
-              } catch {}
-            }}
             className={`bottom-nav-item ${active ? 'active' : ''}`}
           >
             {item.icon}
