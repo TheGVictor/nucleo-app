@@ -19,9 +19,17 @@ interface ModalityOption {
   slug: string
 }
 
+export interface StudentOption {
+  id: string
+  full_name: string
+  modality_name?: string
+  graduation_name?: string
+}
+
 interface AnnouncementsManagerProps {
   initialAnnouncements: AnnouncementWithModality[]
   modalities: ModalityOption[]
+  students?: StudentOption[]
 }
 
 const CATEGORIES = ['Aviso', 'Exame', 'Seminário', 'Feriado', 'Evento']
@@ -37,6 +45,7 @@ const CATEGORY_BADGE: Record<string, 'muted' | 'warning' | 'primary' | 'error' |
 export function AnnouncementsManager({
   initialAnnouncements,
   modalities,
+  students = [],
 }: AnnouncementsManagerProps) {
   const [announcements, setAnnouncements] = useState<AnnouncementWithModality[]>(initialAnnouncements)
   const [search, setSearch] = useState('')
@@ -48,6 +57,11 @@ export function AnnouncementsManager({
 
   // Modo de conteúdo: 'text' (só texto), 'image' (apenas imagem ao invés de descrição), 'both' (ambos)
   const [contentMode, setContentMode] = useState<'text' | 'image' | 'both'>('text')
+
+  // Destinatários: 'all' (Geral), 'modality' (Por Modalidade), 'group' (Grupo de Alunos)
+  const [audienceType, setAudienceType] = useState<'all' | 'modality' | 'group'>('all')
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
+  const [studentSearch, setStudentSearch] = useState('')
 
   // Formulário
   const [formTitle, setFormTitle] = useState('')
@@ -73,6 +87,9 @@ export function AnnouncementsManager({
     setFormContent('')
     setFormImageUrl('')
     setContentMode('text')
+    setAudienceType('all')
+    setSelectedStudentIds([])
+    setStudentSearch('')
     setFormCategory('Aviso')
     setFormEventDate('')
     setFormModalityId('')
@@ -82,14 +99,29 @@ export function AnnouncementsManager({
 
   function openEditModal(item: AnnouncementWithModality) {
     setEditingItem(item)
-    const { text, imageUrl } = parseAnnouncementContent(item.content)
+    const { text, imageUrl, targetStudentIds } = parseAnnouncementContent(item.content)
 
     setFormTitle(item.title)
     setFormContent(text)
     setFormImageUrl(imageUrl || '')
     setFormCategory(item.category || 'Aviso')
     setFormEventDate(item.event_date ? item.event_date.slice(0, 10) : '')
-    setFormModalityId(item.modality_id || '')
+
+    if (targetStudentIds && targetStudentIds.length > 0) {
+      setAudienceType('group')
+      setSelectedStudentIds(targetStudentIds)
+      setFormModalityId('')
+    } else if (item.modality_id) {
+      setAudienceType('modality')
+      setFormModalityId(item.modality_id)
+      setSelectedStudentIds([])
+    } else {
+      setAudienceType('all')
+      setFormModalityId('')
+      setSelectedStudentIds([])
+    }
+
+    setStudentSearch('')
 
     if (imageUrl && !text) {
       setContentMode('image')
@@ -107,6 +139,32 @@ export function AnnouncementsManager({
     setIsModalOpen(false)
     setEditingItem(null)
     setErrorMessage(null)
+  }
+
+  // Helpers para multi-seleção de alunos
+  const filteredStudents = (students || []).filter((s) => {
+    if (!studentSearch.trim()) return true
+    const q = studentSearch.toLowerCase()
+    return (
+      s.full_name.toLowerCase().includes(q) ||
+      (s.modality_name && s.modality_name.toLowerCase().includes(q)) ||
+      (s.graduation_name && s.graduation_name.toLowerCase().includes(q))
+    )
+  })
+
+  function toggleStudent(id: string) {
+    setSelectedStudentIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    )
+  }
+
+  function selectAllFilteredStudents() {
+    const visibleIds = filteredStudents.map((s) => s.id)
+    setSelectedStudentIds((prev) => Array.from(new Set([...prev, ...visibleIds])))
+  }
+
+  function clearSelectedStudents() {
+    setSelectedStudentIds([])
   }
 
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -135,21 +193,46 @@ export function AnnouncementsManager({
     setErrorMessage(null)
 
     try {
+      let targetStudentIds: string[] | undefined = undefined
+      let targetStudentNames: string[] | undefined = undefined
+      let modalityIdToSave: string | null = null
+
+      if (audienceType === 'group') {
+        if (selectedStudentIds.length === 0) {
+          setErrorMessage('Selecione ao menos 1 aluno para enviar este comunicado ao grupo.')
+          setIsSubmitting(false)
+          return
+        }
+        targetStudentIds = selectedStudentIds
+        targetStudentNames = selectedStudentIds.map(
+          (id) => students.find((s) => s.id === id)?.full_name || id
+        )
+      } else if (audienceType === 'modality') {
+        if (!formModalityId) {
+          setErrorMessage('Selecione a modalidade de destino para o comunicado.')
+          setIsSubmitting(false)
+          return
+        }
+        modalityIdToSave = formModalityId
+      }
+
       const payload = {
         title: formTitle,
         content: contentMode === 'image' ? '' : formContent,
         image_url: contentMode === 'text' ? null : formImageUrl,
         category: formCategory,
         event_date: formEventDate || null,
-        modality_id: formModalityId || null,
+        modality_id: modalityIdToSave,
+        target_student_ids: targetStudentIds,
+        target_student_names: targetStudentNames,
       }
 
       if (editingItem) {
         // Atualizar
         const res = await updateAnnouncementAction(editingItem.id, payload)
         if (res.success && res.announcement) {
-          setAnnouncements(prev =>
-            prev.map(a => (a.id === editingItem.id ? res.announcement : a))
+          setAnnouncements((prev) =>
+            prev.map((a) => (a.id === editingItem.id ? res.announcement : a))
           )
           setSuccessMessage('Aviso atualizado com sucesso!')
         }
@@ -157,7 +240,7 @@ export function AnnouncementsManager({
         // Criar
         const res = await createAnnouncementAction(payload)
         if (res.success && res.announcement) {
-          setAnnouncements(prev => [res.announcement, ...prev])
+          setAnnouncements((prev) => [res.announcement, ...prev])
           setSuccessMessage('Novo aviso publicado com sucesso!')
         }
       }
@@ -286,7 +369,8 @@ export function AnnouncementsManager({
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map(item => {
-            const { text, imageUrl } = parseAnnouncementContent(item.content)
+            const { text, imageUrl, targetStudentIds, targetStudentNames } = parseAnnouncementContent(item.content)
+            const isTargetedGroup = Boolean(targetStudentIds && targetStudentIds.length > 0)
 
             return (
               <div
@@ -294,15 +378,25 @@ export function AnnouncementsManager({
                 className="card-elevated p-4 flex flex-col justify-between hover:border-[var(--color-border-gold)] transition-all group"
               >
                 <div>
-                  {/* Metadados: Categoria, Modalidade e Data do Evento */}
+                  {/* Metadados: Categoria, Modalidade/Grupo e Data do Evento */}
                   <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Badge variant={CATEGORY_BADGE[item.category] ?? 'muted'}>
                         {item.category}
                       </Badge>
-                      <span className="nkfs-tag-p text-muted">
-                        {item.modality?.name ? `🥋 ${item.modality.name}` : '🌐 Geral'}
-                      </span>
+                      {isTargetedGroup ? (
+                        <Badge variant="gold">
+                          👥 Grupo ({targetStudentIds?.length} {targetStudentIds?.length === 1 ? 'aluno' : 'alunos'})
+                        </Badge>
+                      ) : item.modality?.name ? (
+                        <span className="nkfs-tag-p text-muted">
+                          🥋 {item.modality.name}
+                        </span>
+                      ) : (
+                        <span className="nkfs-tag-p text-muted">
+                          🌐 Geral
+                        </span>
+                      )}
                       {imageUrl && (
                         <Badge variant="gold">🖼️ Cartaz</Badge>
                       )}
@@ -320,6 +414,16 @@ export function AnnouncementsManager({
                   <h3 className="nkfs-h-p text-main font-bold leading-snug">
                     {item.title}
                   </h3>
+
+                  {/* Nomes dos Alunos Destinatários do Grupo */}
+                  {isTargetedGroup && targetStudentNames && targetStudentNames.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap my-2 p-2 rounded bg-[var(--color-bg-elevated)] border border-[var(--color-border)] text-xs text-muted">
+                      <span className="font-semibold text-main">🎯 Destinado a:</span>
+                      <span className="line-clamp-2">
+                        {targetStudentNames.join(', ')}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Data do Evento (se houver) */}
                   {item.event_date && (
@@ -578,37 +682,78 @@ export function AnnouncementsManager({
                 </div>
               )}
 
-              {/* Grid: Categoria e Modalidade */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="field">
-                  <label className="label nkfs-tag-p text-muted" htmlFor="announcement-category">
-                    Categoria *
-                  </label>
-                  <select
-                    id="announcement-category"
-                    value={formCategory}
-                    onChange={e => setFormCategory(e.target.value)}
-                    className="input text-sm"
+              {/* Destinatários do Comunicado */}
+              <div className="field">
+                <label className="label nkfs-tag-p text-muted">
+                  Público-Alvo / Destinatários do Comunicado *
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAudienceType('all')
+                      setFormModalityId('')
+                    }}
+                    className={`p-2.5 rounded-[var(--radius-md)] border text-center transition-all ${
+                      audienceType === 'all'
+                        ? 'border-[var(--color-primary)] bg-[var(--color-primary-muted)] text-[var(--color-primary)] font-bold'
+                        : 'border-[var(--color-border)] text-muted hover:text-main'
+                    }`}
                   >
-                    {CATEGORIES.map(c => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    <span className="block text-lg mb-0.5">🌐</span>
+                    <span className="nkfs-tag-p">Todos os Alunos</span>
+                  </button>
 
-                <div className="field">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAudienceType('modality')
+                      if (!formModalityId && modalities.length > 0) {
+                        setFormModalityId(modalities[0].id)
+                      }
+                    }}
+                    className={`p-2.5 rounded-[var(--radius-md)] border text-center transition-all ${
+                      audienceType === 'modality'
+                        ? 'border-[var(--color-gold)] bg-[var(--color-gold-muted)] text-gold font-bold shadow-sm'
+                        : 'border-[var(--color-border)] text-muted hover:text-main'
+                    }`}
+                  >
+                    <span className="block text-lg mb-0.5">🥋</span>
+                    <span className="nkfs-tag-p">Por Modalidade</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAudienceType('group')
+                      setFormModalityId('')
+                    }}
+                    className={`p-2.5 rounded-[var(--radius-md)] border text-center transition-all ${
+                      audienceType === 'group'
+                        ? 'border-[var(--color-success)] bg-[var(--color-success-bg)] text-success font-bold'
+                        : 'border-[var(--color-border)] text-muted hover:text-main'
+                    }`}
+                  >
+                    <span className="block text-lg mb-0.5">👥</span>
+                    <span className="nkfs-tag-p">Grupo de Alunos</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Seletor quando Por Modalidade */}
+              {audienceType === 'modality' && (
+                <div className="field animate-fade-in">
                   <label className="label nkfs-tag-p text-muted" htmlFor="announcement-modality">
-                    Modalidade Destino
+                    Selecione a Modalidade Destino *
                   </label>
                   <select
                     id="announcement-modality"
                     value={formModalityId}
                     onChange={e => setFormModalityId(e.target.value)}
+                    required
                     className="input text-sm"
                   >
-                    <option value="">🌐 Geral (Todas as Modalidades)</option>
+                    <option value="">Escolha uma modalidade...</option>
                     {modalities.map(m => (
                       <option key={m.id} value={m.id}>
                         🥋 {m.name}
@@ -616,6 +761,150 @@ export function AnnouncementsManager({
                     ))}
                   </select>
                 </div>
+              )}
+
+              {/* Seletor quando Grupo de Alunos com Search */}
+              {audienceType === 'group' && (
+                <div className="card-elevated p-4 flex flex-col gap-3 border border-[var(--color-border-gold)] animate-fade-in">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">👥</span>
+                      <span className="nkfs-tag-p text-gold uppercase font-bold tracking-wider">
+                        Alunos Destinatários ({selectedStudentIds.length})
+                      </span>
+                    </div>
+                    {selectedStudentIds.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={clearSelectedStudents}
+                        className="nkfs-tag-p text-error hover:underline cursor-pointer"
+                      >
+                        Limpar seleção
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Chips dos alunos selecionados */}
+                  {selectedStudentIds.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-[var(--color-bg)] rounded border border-[var(--color-border)]">
+                      {selectedStudentIds.map(id => {
+                        const student = (students || []).find(s => s.id === id)
+                        return (
+                          <span
+                            key={id}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--color-gold-muted)] text-gold text-xs font-semibold border border-[var(--color-border-gold)]"
+                          >
+                            <span>{student?.full_name || id}</span>
+                            <button
+                              type="button"
+                              onClick={() => toggleStudent(id)}
+                              className="hover:text-error transition-colors ml-0.5"
+                              title="Remover aluno"
+                            >
+                              ✕
+                            </button>
+                          </span>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <p className="nkfs-p-p text-muted italic">
+                      Nenhum aluno selecionado. Busque e marque os alunos abaixo que devem receber este aviso.
+                    </p>
+                  )}
+
+                  {/* Campo de Busca de Alunos */}
+                  <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        value={studentSearch}
+                        onChange={e => setStudentSearch(e.target.value)}
+                        placeholder="Buscar aluno por nome, modalidade ou faixa..."
+                        className="input text-xs py-2 px-3 w-full"
+                      />
+                      {studentSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setStudentSearch('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-main text-xs"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {filteredStudents.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={selectAllFilteredStudents}
+                        className="btn btn-outline btn-sm text-xs py-1.5 px-3 shrink-0"
+                      >
+                        + Selecionar visíveis ({filteredStudents.length})
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Lista de Alunos com Checkboxes */}
+                  <div className="max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-[var(--radius-md)] divide-y divide-[var(--color-border)] bg-[var(--color-bg)]">
+                    {filteredStudents.length > 0 ? (
+                      filteredStudents.map(student => {
+                        const isSelected = selectedStudentIds.includes(student.id)
+                        return (
+                          <label
+                            key={student.id}
+                            className={`flex items-center justify-between p-2.5 cursor-pointer text-xs transition-colors hover:bg-[var(--color-bg-elevated)] ${
+                              isSelected ? 'bg-[var(--color-gold-muted)]/20 font-medium' : ''
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => toggleStudent(student.id)}
+                                className="w-4 h-4 rounded text-gold accent-[var(--color-gold)] cursor-pointer"
+                              />
+                              <div>
+                                <span className="text-main block font-medium">{student.full_name}</span>
+                                {(student.modality_name || student.graduation_name) && (
+                                  <span className="text-muted text-[10px]">
+                                    {student.modality_name} {student.graduation_name ? `• ${student.graduation_name}` : ''}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <span className={`text-[11px] px-2 py-0.5 rounded font-mono ${isSelected ? 'text-gold font-bold' : 'text-muted'}`}>
+                              {isSelected ? '✓ Selecionado' : '+ Adicionar'}
+                            </span>
+                          </label>
+                        )
+                      })
+                    ) : (
+                      <div className="p-4 text-center text-xs text-muted">
+                        {studentSearch ? 'Nenhum aluno encontrado com este termo.' : 'Nenhum aluno cadastrado.'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Categoria */}
+              <div className="field">
+                <label className="label nkfs-tag-p text-muted" htmlFor="announcement-category">
+                  Categoria do Comunicado *
+                </label>
+                <select
+                  id="announcement-category"
+                  value={formCategory}
+                  onChange={e => setFormCategory(e.target.value)}
+                  className="input text-sm"
+                >
+                  {CATEGORIES.map(c => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Data do Evento */}

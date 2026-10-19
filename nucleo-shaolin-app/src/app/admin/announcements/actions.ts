@@ -13,6 +13,8 @@ export interface AnnouncementInput {
   category: string
   event_date?: string | null
   modality_id?: string | null
+  target_student_ids?: string[]
+  target_student_names?: string[]
 }
 
 export interface AnnouncementWithModality extends Announcement {
@@ -152,8 +154,13 @@ export async function createAnnouncementAction(input: AnnouncementInput) {
 
   const adminClient = createAdminClient()
 
-  // Constrói o conteúdo combinando a imagem (se houver) e o texto (se houver)
-  const unifiedContent = buildAnnouncementContent(input.content || '', input.image_url)
+  // Constrói o conteúdo combinando a imagem (se houver), texto e destinatários específicos
+  const unifiedContent = buildAnnouncementContent(
+    input.content || '',
+    input.image_url,
+    input.target_student_ids,
+    input.target_student_names
+  )
 
   const payload = {
     title: input.title.trim(),
@@ -203,7 +210,12 @@ export async function updateAnnouncementAction(id: string, input: AnnouncementIn
 
   const adminClient = createAdminClient()
 
-  const unifiedContent = buildAnnouncementContent(input.content || '', input.image_url)
+  const unifiedContent = buildAnnouncementContent(
+    input.content || '',
+    input.image_url,
+    input.target_student_ids,
+    input.target_student_names
+  )
 
   const payload = {
     title: input.title.trim(),

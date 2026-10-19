@@ -2,13 +2,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
-import { AttendanceCard } from '@/components/attendance/AttendanceCard'
-import { getStudentAttendanceCardDataAction } from '@/app/admin/attendance/actions'
-import type { TechnicalProgress } from '@/types/database'
-
-interface ProgressItem extends TechnicalProgress {
-  modality: { name: string } | null
-}
+import { TechnicalSheet } from '@/components/technical/TechnicalSheet'
+import { getStudentTechnicalSheetAction } from '@/app/admin/attendance/technicalActions'
 
 interface GraduationHistoryItem {
   id: string
@@ -21,23 +16,27 @@ interface GraduationHistoryItem {
 export default async function AlunoFichaPage() {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Executa todas as consultas em paralelo para máxima velocidade
-  const [profileRes, progressRes, gradHistoryRes, attendanceCardRes] = await Promise.all([
+  // Carrega Perfil, Histórico de Graduações e a Ficha Técnica
+  const [profileRes, gradHistoryRes, technicalSheetRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('technical_progress').select('*, modality:modalities(name)').eq('student_id', user.id).order('evaluation_date', { ascending: false }),
-    supabase.from('graduation_history').select('*, modality:modalities(name), graduation:graduations(level_name, color_hex)').eq('student_id', user.id).order('promoted_at', { ascending: false }),
-    getStudentAttendanceCardDataAction(user.id),
+    supabase
+      .from('graduation_history')
+      .select('*, modality:modalities(name), graduation:graduations(level_name, color_hex)')
+      .eq('student_id', user.id)
+      .order('promoted_at', { ascending: false }),
+    getStudentTechnicalSheetAction(user.id),
   ])
 
   const profile = profileRes.data
   if (!profile) redirect('/login')
 
-  const progress = progressRes.data
   const graduationHistory = gradHistoryRes.data
-  const attendanceCardData = attendanceCardRes.data
+  const technicalData = technicalSheetRes.data
 
   return (
     <main className="page-container py-5 flex flex-col gap-6 animate-fade-in">
@@ -45,224 +44,89 @@ export default async function AlunoFichaPage() {
       <div className="card-gold p-6 text-center flex flex-col items-center relative overflow-hidden shadow-gold">
         <Avatar name={profile.full_name} size="xl" gold />
         <h1 className="nkfs-h-m text-main font-extrabold mt-3">{profile.full_name}</h1>
-        <p className="nkfs-p-m text-muted mt-0.5">Registro Oficial do Aluno</p>
+        <p className="nkfs-p-m text-muted mt-0.5">Registro Oficial do Praticante</p>
 
         <div className="flex items-center gap-2 mt-3 flex-wrap justify-center">
           <Badge variant="gold">Aluno Oficial Shaolin</Badge>
           <Badge variant="success">Matrícula Ativa</Badge>
           <span className="nkfs-tag-p text-faint">
-            Membro desde {new Date(profile.created_at).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}
+            Membro desde{' '}
+            {new Date(profile.created_at).toLocaleDateString('pt-BR', {
+              month: 'short',
+              year: 'numeric',
+            })}
           </span>
         </div>
       </div>
 
-      {/* ── CARTÃO DE FREQUÊNCIA & FICHA DE PRESENÇA (FOTO + CHECKBOXES) ── */}
+      {/* ── FICHA DE ACOMPANHAMENTO TÉCNICO OFICIAL ─────────────── */}
       <section className="flex flex-col gap-3">
         <div className="section-header">
           <div className="flex items-center gap-2">
             <h2 className="section-title nkfs-tag-m text-gold">
-              Cartão de Presença & Frequência
+              Ficha de Acompanhamento Técnico
             </h2>
-            <Badge variant="gold">Ficha Oficial</Badge>
+            <Badge variant="gold">
+              {technicalData?.graduationName || 'Faixa Oficial'}
+            </Badge>
           </div>
-          <span className="nkfs-tag-p text-muted">Controle de Aulas</span>
+          <span className="nkfs-tag-p text-muted">Controle de Técnicas & Katis</span>
         </div>
 
-        {attendanceCardData ? (
-          <AttendanceCard
-            initialData={attendanceCardData}
+        {technicalData ? (
+          <TechnicalSheet
+            student={technicalData.student}
+            initialState={technicalData.sheetState}
             isInstructor={false}
+            modalityName={technicalData.modalityName}
+            graduationName={technicalData.graduationName}
+            graduationColor={technicalData.graduationColor}
           />
         ) : (
           <div className="card p-6 text-center">
-            <p className="nkfs-p-m text-muted">Carregando cartão de presença...</p>
+            <p className="nkfs-p-m text-muted">Carregando ficha técnica...</p>
           </div>
         )}
       </section>
 
-      {/* ── CRITÉRIOS DE AVALIAÇÃO SHAOLIN ─────────────────────── */}
-      <div className="card p-4.5 flex flex-col gap-2.5">
-        <span className="nkfs-tag-p text-gold uppercase tracking-wider font-bold">
-          Como funcionam as avaliações técnicas
-        </span>
-        <p className="nkfs-p-m text-muted leading-relaxed">
-          As notas são atribuídas periodicamente pelo Sifu Guilherme avaliando a precisão biomecânica dos Katis, o enraizamento postural e a atitude marcial (Wu De).
-        </p>
-        <div className="grid grid-cols-3 gap-2 pt-1 text-center">
-          <div className="p-2 rounded-[var(--radius-sm)] bg-[var(--color-bg-elevated)] border border-[var(--color-border)]">
-            <span className="nkfs-tag-p text-gold block font-bold">Postura</span>
-            <span className="text-xs text-muted">Bases firmes & equilíbrio</span>
+      {/* ── HISTÓRICO DE GRADUAÇÕES ─────────────────────────────── */}
+      {graduationHistory && graduationHistory.length > 0 && (
+        <section className="card p-5 flex flex-col gap-4">
+          <div className="section-header">
+            <h3 className="nkfs-h-p text-main font-bold">
+              Histórico de Graduações
+            </h3>
+            <Badge variant="gold">{graduationHistory.length} registros</Badge>
           </div>
-          <div className="p-2 rounded-[var(--radius-sm)] bg-[var(--color-bg-elevated)] border border-[var(--color-border)]">
-            <span className="nkfs-tag-p text-primary block font-bold">Técnica</span>
-            <span className="text-xs text-muted">Forma, ângulos & precisão</span>
-          </div>
-          <div className="p-2 rounded-[var(--radius-sm)] bg-[var(--color-bg-elevated)] border border-[var(--color-border)]">
-            <span className="nkfs-tag-p text-success block font-bold">Foco</span>
-            <span className="text-xs text-muted">Respiração & espírito</span>
-          </div>
-        </div>
-      </div>
 
-      {/* ── AVALIAÇÕES TÉCNICAS RECENTES ───────────────────────── */}
-      <section className="flex flex-col gap-3">
-        <div className="section-header">
-          <div className="flex items-center gap-2">
-            <h2 className="section-title nkfs-tag-m text-gold">
-              Últimas Avaliações Técnicas
-            </h2>
-            {progress && progress.length > 0 && (
-              <Badge variant="muted">{progress.length}</Badge>
-            )}
-          </div>
-          <span className="nkfs-tag-p text-muted">Homologado pelo Sifu</span>
-        </div>
-
-        {progress && progress.length > 0 ? (
-          <div className="flex flex-col gap-3">
-            {(progress as unknown as ProgressItem[]).map((p) => {
-              const posture = p.posture_score ?? 0
-              const technique = p.technique_score ?? 0
-              const focus = p.focus_score ?? 0
-              const average = ((posture + technique + focus) / 3).toFixed(1)
-
-              return (
-                <div key={p.id} className="card p-4.5 flex flex-col gap-3.5 shadow-sm">
-                  <div className="flex justify-between items-center border-b border-[var(--color-border)] pb-2.5">
-                    <div className="flex items-center gap-2">
-                      <span className="nkfs-tag-m text-primary font-bold">
-                        🥋 {p.modality?.name}
-                      </span>
-                      <Badge variant="gold">Média {average} / 5.0</Badge>
-                    </div>
-                    <span className="nkfs-tag-p text-faint font-mono">
-                      {new Date(p.evaluation_date).toLocaleDateString('pt-BR')}
-                    </span>
-                  </div>
-
-                  {/* Barras Visuais de Pontuação */}
-                  <div className="flex flex-col gap-2.5">
-                    {/* Postura */}
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="text-muted font-medium">Postura & Base (Ma Bu / Gong Bu)</span>
-                        <span className="font-bold text-gold font-mono">{posture}/5</span>
-                      </div>
-                      <div className="w-full h-2 rounded-full bg-[var(--color-bg-elevated)] overflow-hidden">
-                        <div
-                          className="h-full bg-[var(--color-gold)] rounded-full transition-all duration-500"
-                          style={{ width: `${(posture / 5) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Técnica */}
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="text-muted font-medium">Técnica & Execução do Kati</span>
-                        <span className="font-bold text-primary font-mono">{technique}/5</span>
-                      </div>
-                      <div className="w-full h-2 rounded-full bg-[var(--color-bg-elevated)] overflow-hidden">
-                        <div
-                          className="h-full bg-[var(--color-primary)] rounded-full transition-all duration-500"
-                          style={{ width: `${(technique / 5) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Foco */}
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="text-muted font-medium">Foco, Respiração & Espírito Marcial</span>
-                        <span className="font-bold text-success font-mono">{focus}/5</span>
-                      </div>
-                      <div className="w-full h-2 rounded-full bg-[var(--color-bg-elevated)] overflow-hidden">
-                        <div
-                          className="h-full bg-[var(--color-success)] rounded-full transition-all duration-500"
-                          style={{ width: `${(focus / 5) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Parecer do Sifu */}
-                  {p.notes && (
-                    <div className="card-elevated p-3 border-l-3 border-[var(--color-gold)] mt-1">
-                      <span className="nkfs-tag-p text-gold uppercase tracking-wider block mb-1">
-                        Observações do Mestre:
-                      </span>
-                      <p className="nkfs-p-m text-muted italic leading-relaxed">
-                        &ldquo;{p.notes}&rdquo;
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="card p-8 text-center flex flex-col items-center">
-            <span className="text-4xl mb-2">📋</span>
-            <p className="nkfs-p-m font-bold text-main">Nenhuma avaliação técnica registrada ainda</p>
-            <p className="nkfs-p-m text-muted mt-1 max-w-sm">
-              As avaliações de postura, técnica e foco realizadas pelo Sifu durante os treinos serão lançadas nesta seção.
-            </p>
-          </div>
-        )}
-      </section>
-
-      {/* ── HISTÓRICO DE GRADUAÇÕES & TROCA DE FAIXAS ─────────── */}
-      <section className="flex flex-col gap-3">
-        <div className="section-header">
-          <h2 className="section-title nkfs-tag-m text-gold">
-            Histórico de Graduações Oficiais
-          </h2>
-          <span className="nkfs-tag-p text-muted">Promoções Homologadas</span>
-        </div>
-
-        {graduationHistory && graduationHistory.length > 0 ? (
-          <div className="flex flex-col gap-2.5">
-            {(graduationHistory as unknown as GraduationHistoryItem[]).map((g) => (
-              <div key={g.id} className="card-elevated p-4 flex items-center justify-between shadow-sm">
+          <div className="flex flex-col gap-2">
+            {(graduationHistory as unknown as GraduationHistoryItem[]).map((h) => (
+              <div
+                key={h.id}
+                className="card-elevated p-3 flex justify-between items-center"
+              >
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-3.5 h-10 rounded-full shadow-sm shrink-0 border border-white/20"
-                    style={{ backgroundColor: g.graduation?.color_hex ?? '#FFC800' }}
+                    className="w-3 h-8 rounded-full shadow-xs"
+                    style={{ backgroundColor: h.graduation?.color_hex ?? '#ccc' }}
                   />
                   <div>
-                    <span className="nkfs-tag-p text-primary block">
-                      {g.modality?.name}
+                    <span className="nkfs-p-m font-bold text-main block">
+                      {h.graduation?.level_name}
                     </span>
-                    <span className="nkfs-p-m font-bold text-main">
-                      {g.graduation?.level_name}
+                    <span className="nkfs-tag-p text-muted">
+                      {h.modality?.name}
                     </span>
-                    {g.notes && (
-                      <p className="text-xs text-muted mt-0.5 italic">
-                        {g.notes}
-                      </p>
-                    )}
                   </div>
                 </div>
-
-                <div className="text-right">
-                  <Badge variant="gold">Homologado</Badge>
-                  <span className="nkfs-tag-p text-faint font-mono block mt-1">
-                    {new Date(g.promoted_at).toLocaleDateString('pt-BR')}
-                  </span>
-                </div>
+                <span className="nkfs-tag-p text-faint">
+                  {new Date(h.promoted_at).toLocaleDateString('pt-BR')}
+                </span>
               </div>
             ))}
           </div>
-        ) : (
-          <div className="card p-8 text-center flex flex-col items-center">
-            <span className="text-4xl mb-2">🥋</span>
-            <p className="nkfs-p-m font-bold text-main">Aguardando primeiro exame de graduação</p>
-            <p className="nkfs-p-m text-muted mt-1 max-w-sm">
-              Os certificados, notas e datas das suas trocas de faixa serão salvos e arquivados permanentemente aqui.
-            </p>
-          </div>
-        )}
-      </section>
+        </section>
+      )}
     </main>
   )
 }

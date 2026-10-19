@@ -23,12 +23,22 @@ export function TopBar({ profile, title: explicitTitle }: TopBarProps) {
   }
 
   const title = explicitTitle ?? (
-    pathname === '/aluno/ficha'
+    pathname === '/aluno/aulas'
+      ? 'Grade de Aulas'
+      : pathname === '/aluno/ficha'
       ? 'Ficha Técnica'
       : pathname === '/aluno/videos'
       ? 'Treino em Vídeo'
       : pathname === '/aluno/perfil'
       ? 'Meu Perfil'
+      : pathname === '/admin/alunos'
+      ? 'Gestão de Alunos'
+      : pathname === '/admin/horarios'
+      ? 'Grade de Horários'
+      : pathname === '/admin/avisos'
+      ? 'Mural de Avisos'
+      : pathname.startsWith('/admin')
+      ? 'Painel do Instrutor'
       : profile.full_name.split(' ')[0]
   )
 

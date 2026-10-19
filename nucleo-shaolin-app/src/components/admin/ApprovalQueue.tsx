@@ -38,11 +38,37 @@ export function ApprovalQueue({ initialPending }: { initialPending: PendingStude
       .update({ status: 'active' })
       .eq('id', student.id)
 
-    // Ativa todas as student_modalities do aluno
-    await supabase
-      .from('student_modalities')
-      .update({ status: 'active' })
-      .eq('student_id', student.id)
+    // Ativa todas as student_modalities do aluno e vincula a graduação autodeclarada
+    for (const sm of student.student_modalities) {
+      let gradId: string | null = null
+      if (sm.self_reported_level && sm.modality?.id) {
+        const { data: grads } = await supabase
+          .from('graduations')
+          .select('id, level_name')
+          .eq('modality_id', sm.modality.id)
+
+        if (grads && grads.length > 0) {
+          const norm = sm.self_reported_level.toLowerCase().trim()
+          const match =
+            grads.find((g) => g.level_name.toLowerCase().trim() === norm) ||
+            grads.find((g) => norm.startsWith(g.level_name.toLowerCase().trim())) ||
+            grads.find(
+              (g) =>
+                g.level_name.toLowerCase().includes(norm) ||
+                norm.includes(g.level_name.toLowerCase())
+            )
+          if (match) gradId = match.id
+        }
+      }
+
+      await supabase
+        .from('student_modalities')
+        .update({
+          status: 'active',
+          ...(gradId ? { approved_graduation_id: gradId } : {}),
+        })
+        .eq('id', sm.id)
+    }
 
     setPending(prev => prev.filter(p => p.id !== student.id))
     setLoading(null)

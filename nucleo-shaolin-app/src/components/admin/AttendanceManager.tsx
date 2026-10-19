@@ -5,10 +5,15 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
 import { AttendanceCard } from '@/components/attendance/AttendanceCard'
+import { TechnicalSheet } from '@/components/technical/TechnicalSheet'
 import {
   getStudentAttendanceCardDataAction,
   type StudentAttendanceCardData,
 } from '@/app/admin/attendance/actions'
+import {
+  getStudentTechnicalSheetAction,
+  type StudentTechnicalSheetResponse,
+} from '@/app/admin/attendance/technicalActions'
 
 export interface AttendanceStudentSummary {
   id: string
@@ -31,22 +36,36 @@ export function AttendanceManager({ initialStudents }: AttendanceManagerProps) {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
     initialStudents[0]?.id || null
   )
+  const [viewTab, setViewTab] = useState<'technical' | 'attendance'>('technical')
   const [cardData, setCardData] = useState<StudentAttendanceCardData | null>(null)
+  const [technicalData, setTechnicalData] = useState<
+    NonNullable<StudentTechnicalSheetResponse['data']> | null
+  >(null)
   const [loadingCard, setLoadingCard] = useState(!!initialStudents[0]?.id)
   const [search, setSearch] = useState('')
 
-  // Carrega dados da ficha do aluno selecionado
+  // Carrega dados da ficha técnica e presença do aluno selecionado
   useEffect(() => {
     let isMounted = true
 
     if (selectedStudentId) {
-      getStudentAttendanceCardDataAction(selectedStudentId).then((res) => {
+      Promise.all([
+        getStudentAttendanceCardDataAction(selectedStudentId),
+        getStudentTechnicalSheetAction(selectedStudentId),
+      ]).then(([attRes, techRes]) => {
         if (isMounted) {
-          if (res.success && res.data) {
-            setCardData(res.data)
+          if (attRes.success && attRes.data) {
+            setCardData(attRes.data)
           } else {
             setCardData(null)
           }
+
+          if (techRes.success && techRes.data) {
+            setTechnicalData(techRes.data)
+          } else {
+            setTechnicalData(null)
+          }
+
           setLoadingCard(false)
         }
       })
@@ -60,25 +79,33 @@ export function AttendanceManager({ initialStudents }: AttendanceManagerProps) {
   // Recarrega contadores do aluno após alterações
   function handleCardUpdated() {
     if (!selectedStudentId) return
-    getStudentAttendanceCardDataAction(selectedStudentId).then((res) => {
-      if (res.success && res.data) {
-        setCardData(res.data)
-        // Atualiza contagem na lista
+    Promise.all([
+      getStudentAttendanceCardDataAction(selectedStudentId),
+      getStudentTechnicalSheetAction(selectedStudentId),
+    ]).then(([attRes, techRes]) => {
+      if (attRes.success && attRes.data) {
+        setCardData(attRes.data)
         setStudents((prev) =>
           prev.map((s) =>
             s.id === selectedStudentId
-              ? { ...s, attendanceCount: res.data!.attendances.length }
+              ? { ...s, attendanceCount: attRes.data!.attendances.length }
               : s
           )
         )
       }
+      if (techRes.success && techRes.data) {
+        setTechnicalData(techRes.data)
+      }
     })
   }
 
-  const filteredStudents = students.filter((s) =>
-    s.full_name.toLowerCase().includes(search.toLowerCase()) ||
-    s.modalityName.toLowerCase().includes(search.toLowerCase())
+  const filteredStudents = students.filter(
+    (s) =>
+      s.full_name.toLowerCase().includes(search.toLowerCase()) ||
+      s.modalityName.toLowerCase().includes(search.toLowerCase())
   )
+
+  const selectedStudent = students.find((s) => s.id === selectedStudentId)
 
   return (
     <div className="flex flex-col lg:flex-row gap-5 items-start">
@@ -156,16 +183,75 @@ export function AttendanceManager({ initialStudents }: AttendanceManagerProps) {
         </div>
       </div>
 
-      {/* ── PAINEL PRINCIPAL: FICHA COM FOTO E CHECKBOXES ────────── */}
-      <div className="flex-1 w-full min-w-0">
+      {/* ── PAINEL PRINCIPAL: FICHA DO ALUNO SELECIONADO ─────────── */}
+      <div className="flex-1 w-full min-w-0 flex flex-col gap-4">
+        {selectedStudent && (
+          <div className="flex items-center justify-between bg-[var(--color-bg-card)] p-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-xs">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setViewTab('technical')}
+                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  viewTab === 'technical'
+                    ? 'bg-[var(--color-gold)] text-black shadow-xs'
+                    : 'text-muted hover:text-main'
+                }`}
+              >
+                <span>📜</span>
+                <span>Ficha Técnica</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewTab('attendance')}
+                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  viewTab === 'attendance'
+                    ? 'bg-[var(--color-primary)] text-white shadow-xs'
+                    : 'text-muted hover:text-main'
+                }`}
+              >
+                <span>🥋</span>
+                <span>Cartão de Presença</span>
+              </button>
+            </div>
+
+            <span className="text-xs text-muted hidden sm:inline-block pr-2">
+              Aluno: <strong className="text-main">{selectedStudent.full_name}</strong>
+            </span>
+          </div>
+        )}
+
         {loadingCard ? (
           <div className="card p-12 flex flex-col items-center justify-center text-center gap-3">
             <Spinner size="lg" />
-            <p className="nkfs-p-m text-muted">Carregando ficha de presença...</p>
+            <p className="nkfs-p-m text-muted">Carregando ficha e acompanhamento...</p>
           </div>
+        ) : viewTab === 'technical' ? (
+          technicalData ? (
+            <TechnicalSheet
+              key={`tech-${technicalData.student.id}`}
+              student={technicalData.student}
+              initialState={technicalData.sheetState}
+              isInstructor={true}
+              modalityName={technicalData.modalityName}
+              graduationName={technicalData.graduationName}
+              graduationColor={technicalData.graduationColor}
+              onSaved={handleCardUpdated}
+            />
+          ) : (
+            <div className="card p-12 text-center flex flex-col items-center justify-center border-dashed border-2 border-[var(--color-border)]">
+              <span className="text-4xl mb-2">📜</span>
+              <p className="nkfs-p-m font-bold text-main">
+                Selecione um aluno na lista ao lado
+              </p>
+              <p className="nkfs-p-p text-muted mt-1 max-w-sm">
+                Edite as técnicas, anotações e autorização de exame.
+              </p>
+            </div>
+          )
         ) : cardData ? (
           <AttendanceCard
-            key={cardData.student.id}
+            key={`att-${cardData.student.id}`}
             initialData={cardData}
             isInstructor={true}
             onUpdated={handleCardUpdated}
