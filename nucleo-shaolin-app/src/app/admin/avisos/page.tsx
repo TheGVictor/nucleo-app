@@ -6,6 +6,7 @@ import type { AnnouncementWithModality } from '@/app/admin/announcements/actions
 
 export const instant = false
 
+
 interface RawModality {
   id: string
   name: string
@@ -26,8 +27,8 @@ export default async function AdminAvisosPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    redirect('/aluno')
+  if (!profile || profile.role !== 'super_admin') {
+    redirect('/admin')
   }
 
   const adminClient = createAdminClient()

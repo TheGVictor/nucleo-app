@@ -402,23 +402,23 @@ export function TechnicalSheet({
                           {item.label}
                         </span>
 
-                        {/* Mini Toolbar de Correção Rápida para o Instrutor */}
+                        {/* Mini Toolbar de Correção Rápida para o Instrutor - Abaixo do elemento para não quebrar a linha */}
                         {isInstructor && count > 0 && (
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 ml-1 bg-white border border-neutral-400 rounded px-1 py-0.2 shadow-sm text-[9px]">
+                          <div className="absolute top-full left-0 mt-0.5 z-30 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all flex items-center gap-1 bg-white border border-neutral-400 rounded shadow-md px-1.5 py-0.5 text-[10px] whitespace-nowrap">
                             <button
                               type="button"
                               onClick={(e) => handleDecrement(item.id, e)}
-                              className="px-1 hover:text-red-600 font-bold text-neutral-700"
+                              className="w-4 h-4 flex items-center justify-center rounded hover:bg-neutral-200 font-bold text-neutral-800"
                               title="Subtrair 1 repetição (-1)"
                             >
                               -
                             </button>
-                            <span className="font-mono text-neutral-600 font-bold">{count}/6</span>
+                            <span className="font-mono font-bold text-neutral-700 px-0.5">{count}/6</span>
                             <button
                               type="button"
                               onClick={(e) => handleReset(item.id, e)}
-                              className="px-1 hover:text-red-600 text-neutral-500"
-                              title="Zerar técnica"
+                              className="w-4 h-4 flex items-center justify-center rounded hover:bg-red-100 text-red-600 font-bold"
+                              title="Zerar repetições"
                             >
                               ✕
                             </button>

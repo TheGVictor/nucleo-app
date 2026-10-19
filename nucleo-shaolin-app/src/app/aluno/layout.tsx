@@ -32,6 +32,11 @@ export default async function AlunoLayout({
   const profile = profileRes.data
   if (!profile) redirect('/login')
 
+  // O Sifu é exclusivamente o mestre da escola e não utiliza o painel de aluno
+  if (profile.role === 'super_admin') {
+    redirect('/admin')
+  }
+
   interface RawGrad {
     color_hex?: string
     level_name?: string

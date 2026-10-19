@@ -1,5 +1,6 @@
-export type UserRole = 'student' | 'admin' | 'super_admin'
+export type UserRole = 'student' | 'instructor' | 'admin' | 'super_admin'
 export type UserStatus = 'pending_approval' | 'active' | 'suspended' | 'rejected'
+export type ExamListStatus = 'pending' | 'approved' | 'reviewed' | 'completed'
 
 export interface Profile {
   id: string
@@ -98,5 +99,27 @@ export interface TechnicalProgress {
   focus_score: number | null
   notes: string | null
   instructor_id: string | null
+  created_at: string
+}
+
+export interface ExamList {
+  id: string
+  title: string
+  modality_id: string | null
+  instructor_id: string
+  notes: string | null
+  status: ExamListStatus
+  created_at: string
+  updated_at: string
+  reviewed_by: string | null
+  reviewed_at: string | null
+}
+
+export interface ExamListCandidate {
+  id: string
+  exam_list_id: string
+  student_id: string
+  target_graduation_id: string | null
+  instructor_notes: string | null
   created_at: string
 }

@@ -5,6 +5,7 @@ import { StudentHub, type DetailedStudent } from '@/components/admin/StudentHub'
 
 export const instant = false
 
+
 interface RawModalityObj {
   id: string
   name: string
@@ -37,7 +38,7 @@ export default async function AdminAlunosPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
+  if (!profile || !['instructor', 'admin', 'super_admin'].includes(profile.role)) {
     redirect('/aluno')
   }
 
@@ -67,12 +68,37 @@ export default async function AdminAlunosPage() {
       ),
       attendance:attendance!attendance_student_id_fkey(id)
     `)
-    .eq('role', 'student')
+    .neq('role', 'super_admin')
     .order('full_name', { ascending: true })
 
   const students: DetailedStudent[] = (rawStudents ?? []).map((s) => {
-    const rawModalities = s.student_modalities as unknown as RawStudentModObj[] | null
-    const activeMod = Array.isArray(rawModalities) ? rawModalities[0] : rawModalities
+    const rawModalities = (Array.isArray(s.student_modalities) ? s.student_modalities : []) as RawStudentModObj[]
+
+    const modalitiesList = rawModalities.map((sm) => {
+      const rawMod = sm.modality
+      const mod = Array.isArray(rawMod) ? rawMod[0] : rawMod
+      const rawGrad = sm.approved_graduation
+      const grad = Array.isArray(rawGrad) ? rawGrad[0] : rawGrad
+      const name = mod?.name ?? 'Kung Fu Shaolin'
+
+      let short = 'CLF'
+      const norm = name.toLowerCase()
+      if (norm.includes('tai')) short = 'Tai Chi'
+      else if (norm.includes('sanda')) short = 'Sanda'
+      else if (norm.includes('tang')) short = 'Tang Lang'
+      else if (norm.includes('choy') || norm.includes('kung')) short = 'CLF'
+      else short = name.slice(0, 7)
+
+      return {
+        id: sm.id,
+        modalityName: name,
+        shortName: short,
+        graduationName: grad?.level_name ?? sm.self_reported_level ?? 'Faixa Branca',
+        graduationColor: grad?.color_hex ?? '#FF8C00',
+      }
+    })
+
+    const activeMod = rawModalities[0]
     const rawModality = activeMod?.modality
     const modalityName = Array.isArray(rawModality) ? rawModality[0]?.name : rawModality?.name ?? 'Kung Fu Shaolin'
     const modalityId = Array.isArray(rawModality) ? rawModality[0]?.id : rawModality?.id ?? ''
@@ -101,6 +127,7 @@ export default async function AdminAlunosPage() {
       graduationName,
       graduationColor,
       attendanceCount: attList.length,
+      modalitiesList,
     }
   })
 
@@ -116,7 +143,7 @@ export default async function AdminAlunosPage() {
         </div>
       </div>
 
-      <StudentHub initialStudents={students} />
+      <StudentHub initialStudents={students} currentUserRole={profile.role} />
     </main>
   )
 }

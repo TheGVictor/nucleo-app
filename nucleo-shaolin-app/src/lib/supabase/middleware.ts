@@ -49,7 +49,7 @@ export async function updateSession(request: NextRequest) {
       .eq('id', user?.id)
       .single()
 
-    if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
+    if (!profile || !['instructor', 'admin', 'super_admin'].includes(profile.role)) {
       return NextResponse.redirect(new URL('/aluno', request.url))
     }
   }

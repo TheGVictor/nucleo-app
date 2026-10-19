@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
+import '@/lib/performance-patch'
 import './globals.css'
 
 const fontSans = Plus_Jakarta_Sans({
@@ -46,6 +47,23 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              // Suprime bug de timestamp negativo no performance.measure em dev
+              if (typeof window !== 'undefined' && window.Performance) {
+                try {
+                  var origMeasure = Performance.prototype.measure;
+                  Performance.prototype.measure = function(name, startOrOptions, end) {
+                    try {
+                      if (startOrOptions && typeof startOrOptions === 'object') {
+                        if (typeof startOrOptions.start === 'number' && startOrOptions.start < 0) startOrOptions.start = 0;
+                        if (typeof startOrOptions.end === 'number' && startOrOptions.end < 0) startOrOptions.end = 0;
+                      }
+                      return origMeasure.apply(this, arguments);
+                    } catch (e) {
+                      return;
+                    }
+                  };
+                } catch (e) {}
+              }
               try {
                 var theme = localStorage.getItem('theme');
                 if (theme === 'dark') {

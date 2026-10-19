@@ -5,6 +5,7 @@ import type { ClassSchedule } from '@/types/database'
 
 export const instant = false
 
+
 interface ScheduleWithModality extends ClassSchedule {
   modality?: {
     id: string

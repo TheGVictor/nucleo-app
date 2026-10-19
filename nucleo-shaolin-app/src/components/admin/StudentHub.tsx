@@ -15,6 +15,15 @@ import {
   type StudentTechnicalSheetResponse,
 } from '@/app/admin/attendance/technicalActions'
 import { sendPersonalNoticeAction } from '@/app/admin/alunos/actions'
+import { toggleInstructorRoleAction } from '@/app/admin/instrutores/actions'
+
+export interface StudentModalityIndicator {
+  id: string
+  modalityName: string
+  shortName: string
+  graduationName: string
+  graduationColor: string
+}
 
 export interface DetailedStudent {
   id: string
@@ -33,19 +42,20 @@ export interface DetailedStudent {
   graduationName: string
   graduationColor: string
   attendanceCount: number
+  modalitiesList?: StudentModalityIndicator[]
 }
 
 interface StudentHubProps {
   initialStudents: DetailedStudent[]
+  currentUserRole?: string
 }
 
-export function StudentHub({ initialStudents }: StudentHubProps) {
-  const [students] = useState<DetailedStudent[]>(initialStudents)
+export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: StudentHubProps) {
+  const [students, setStudents] = useState<DetailedStudent[]>(initialStudents)
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
     initialStudents[0]?.id || null
   )
   const [search, setSearch] = useState('')
-  const [filterModality, setFilterModality] = useState<string>('all')
   const [activeTab, setActiveTab] = useState<'technical' | 'attendance' | 'notice' | 'profile'>('technical')
   const [mobileListExpanded, setMobileListExpanded] = useState(false)
 
@@ -62,6 +72,30 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
   const [noticeSuccess, setNoticeSuccess] = useState(false)
   const [noticeError, setNoticeError] = useState<string | null>(null)
   const [isSendingNotice, startNoticeTransition] = useTransition()
+
+  // Promoção de Instrutor (Apenas Sifu)
+  const [isTogglingInstructor, startInstructorTransition] = useTransition()
+
+  function handleToggleInstructorRole(student: DetailedStudent) {
+    const isCurrentlyInstructor = student.role === 'instructor' || student.role === 'admin'
+    const newRole = isCurrentlyInstructor ? 'student' : 'instructor'
+    const confirmMsg = isCurrentlyInstructor
+      ? `Deseja remover as permissões de instrutor de ${student.full_name}?`
+      : `Deseja promover ${student.full_name} a Instrutor? Ele terá acesso ao painel de instrutores, anotações de fichas e envio de listas de exame ao Sifu.`
+
+    if (!confirm(confirmMsg)) return
+
+    startInstructorTransition(async () => {
+      const res = await toggleInstructorRoleAction(student.id, newRole)
+      if (res.success && res.newRole) {
+        setStudents((prev) =>
+          prev.map((s) => (s.id === student.id ? { ...s, role: res.newRole! } : s))
+        )
+      } else {
+        alert(res.error || 'Erro ao alterar permissão de instrutor')
+      }
+    })
+  }
 
   const selectedStudent = students.find((s) => s.id === selectedStudentId)
 
@@ -133,23 +167,27 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
     })
   }
 
-  // Filtros
+  // Filtros de busca ampla (nome, telefone, cpf, faixas e modalidades CLF, Tai Chi, Sanda)
   const filteredStudents = students.filter((s) => {
-    const matchesSearch =
-      s.full_name.toLowerCase().includes(search.toLowerCase()) ||
-      (s.cpf && s.cpf.includes(search)) ||
-      (s.phone && s.phone.includes(search)) ||
-      s.modalityName.toLowerCase().includes(search.toLowerCase()) ||
-      s.graduationName.toLowerCase().includes(search.toLowerCase())
+    const q = search.toLowerCase().trim()
+    if (!q) return true
 
-    const matchesModality =
-      filterModality === 'all' || s.modalityName.toLowerCase().includes(filterModality.toLowerCase())
+    const matchesBasic =
+      s.full_name.toLowerCase().includes(q) ||
+      (s.cpf && s.cpf.includes(q)) ||
+      (s.phone && s.phone.includes(q)) ||
+      s.modalityName.toLowerCase().includes(q) ||
+      s.graduationName.toLowerCase().includes(q)
 
-    return matchesSearch && matchesModality
+    const matchesModalities = s.modalitiesList?.some(
+      (m) =>
+        m.modalityName.toLowerCase().includes(q) ||
+        m.shortName.toLowerCase().includes(q) ||
+        m.graduationName.toLowerCase().includes(q)
+    )
+
+    return matchesBasic || Boolean(matchesModalities)
   })
-
-  // Lista de modalidades únicas para o filtro rápido
-  const uniqueModalities = Array.from(new Set(students.map((s) => s.modalityName)))
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
@@ -211,7 +249,7 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
           <div className="relative">
             <input
               type="text"
-              placeholder="Buscar por nome, faixa, telefone..."
+              placeholder="Buscar por nome, faixa, modalidade (CLF, Sanda, Tai Chi)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="input text-xs py-2.5 pl-8.5 w-full bg-[var(--color-bg-elevated)]"
@@ -228,35 +266,6 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
                 ✕
               </button>
             )}
-          </div>
-
-          {/* Filtros Rápidos por Modalidade */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none">
-            <button
-              type="button"
-              onClick={() => setFilterModality('all')}
-              className={`px-2.5 py-1 rounded-full whitespace-nowrap text-[11px] font-bold transition-all ${
-                filterModality === 'all'
-                  ? 'bg-[var(--color-gold)] text-black'
-                  : 'bg-[var(--color-bg-elevated)] text-muted hover:text-main'
-              }`}
-            >
-              Todas
-            </button>
-            {uniqueModalities.map((mod) => (
-              <button
-                key={mod}
-                type="button"
-                onClick={() => setFilterModality(mod)}
-                className={`px-2.5 py-1 rounded-full whitespace-nowrap text-[11px] font-bold transition-all ${
-                  filterModality === mod
-                    ? 'bg-[var(--color-gold)] text-black'
-                    : 'bg-[var(--color-bg-elevated)] text-muted hover:text-main'
-                }`}
-              >
-                {mod}
-              </button>
-            ))}
           </div>
 
           {/* Lista de Alunos Encontrados */}
@@ -281,19 +290,45 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
                         <p className="text-xs font-bold text-main truncate leading-tight">
                           {s.full_name}
                         </p>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span
-                            className="w-2 h-2 rounded-full shrink-0"
-                            style={{ backgroundColor: s.graduationColor }}
-                          />
-                          <span className="text-[11px] text-faint truncate">
+
+                        {/* Indicativos de Modalidades (CLF, Tai Chi, Sanda) sem distinção de categorias */}
+                        <div className="flex items-center gap-1 mt-1 flex-wrap">
+                          {s.modalitiesList && s.modalitiesList.length > 0 ? (
+                            s.modalitiesList.map((m) => (
+                              <span
+                                key={m.id || m.shortName}
+                                className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 ${
+                                  m.shortName === 'CLF'
+                                    ? 'bg-red-500/15 text-red-500 dark:text-red-400 border-red-500/30'
+                                    : m.shortName === 'Tai Chi'
+                                    ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30'
+                                    : m.shortName === 'Sanda'
+                                    ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                                    : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                                }`}
+                                title={`${m.modalityName} • ${m.graduationName}`}
+                              >
+                                {m.shortName}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded border bg-neutral-500/15 text-muted border-neutral-500/30 uppercase tracking-wider shrink-0">
+                              CLF
+                            </span>
+                          )}
+                          <span className="text-[11px] text-faint truncate ml-0.5">
                             {s.graduationName}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end shrink-0 pl-2">
+                    <div className="flex flex-col items-end shrink-0 pl-2 gap-1">
+                      {(s.role === 'instructor' || s.role === 'admin') && (
+                        <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-[var(--color-gold)] text-black shadow-xs">
+                          Instrutor
+                        </span>
+                      )}
                       <Badge variant={s.attendanceCount > 0 ? 'gold' : 'muted'}>
                         {s.attendanceCount} {s.attendanceCount === 1 ? 'aula' : 'aulas'}
                       </Badge>
@@ -387,18 +422,21 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
                 <span>Presenças & Frequência</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setActiveTab('notice')}
-                className={`px-3.5 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
-                  activeTab === 'notice'
-                    ? 'bg-amber-600 text-white shadow-xs'
-                    : 'text-muted hover:text-main'
-                }`}
-              >
-                <span>📢</span>
-                <span>Aviso Personalizado</span>
-              </button>
+              {/* Recado Personalizado (Exclusivo Sifu) */}
+              {currentUserRole === 'super_admin' && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('notice')}
+                  className={`px-3.5 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                    activeTab === 'notice'
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'text-muted hover:text-main'
+                  }`}
+                >
+                  <span>📢</span>
+                  <span>Aviso Personalizado</span>
+                </button>
+              )}
 
               <button
                 type="button"
@@ -592,6 +630,54 @@ export function StudentHub({ initialStudents }: StudentHubProps) {
                       {new Date(selectedStudent.created_at).toLocaleDateString('pt-BR', { dateStyle: 'long' })}
                     </strong>
                   </div>
+
+                  {/* Seção de Gestão de Instrutor (Apenas Sifu) */}
+                  {currentUserRole === 'super_admin' && (
+                    <div className="p-4 rounded-[var(--radius-md)] bg-[var(--color-bg-card)] border border-[var(--color-border)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:col-span-2 mt-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">🛡️</span>
+                          <span className="font-bold text-main text-xs">Acesso de Instrutor da Escola</span>
+                          {selectedStudent.role === 'instructor' || selectedStudent.role === 'admin' ? (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[var(--color-gold)] text-black">
+                              Instrutor Ativo
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-neutral-800 text-muted">
+                              Apenas Aluno
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-muted mt-1 leading-snug">
+                          {selectedStudent.role === 'instructor' || selectedStudent.role === 'admin'
+                            ? `${selectedStudent.full_name} tem acesso ao painel de instrutores para anotar fichas técnicas e submeter listas de exame ao Sifu.`
+                            : `Promova ${selectedStudent.full_name} a Instrutor para permitir anotações de fichas técnicas e envio de listas de exame.`}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={isTogglingInstructor}
+                        onClick={() => handleToggleInstructorRole(selectedStudent)}
+                        className={`btn btn-sm text-xs font-bold shrink-0 shadow-xs ${
+                          selectedStudent.role === 'instructor' || selectedStudent.role === 'admin'
+                            ? 'btn-secondary text-red-500 hover:text-red-400'
+                            : 'btn-gold'
+                        }`}
+                      >
+                        {isTogglingInstructor ? (
+                          <div className="flex items-center gap-1.5">
+                            <Spinner size="sm" />
+                            <span>Atualizando...</span>
+                          </div>
+                        ) : selectedStudent.role === 'instructor' || selectedStudent.role === 'admin' ? (
+                          'Remover Cargo de Instrutor'
+                        ) : (
+                          'Promover a Instrutor 🥋'
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
