@@ -2,15 +2,11 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { connection } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { TopBar } from '@/components/layout/TopBar'
-import { BottomNav } from '@/components/layout/BottomNav'
 import { StatsRow } from '@/components/aluno/StatsRow'
 import { AnnouncementsList } from '@/components/aluno/AnnouncementsList'
 import { ScheduleCard } from '@/components/aluno/ScheduleCard'
 import { Badge } from '@/components/ui/Badge'
 import type { ClassSchedule } from '@/types/database'
-
-export const instant = false
 
 const DAYS_OF_WEEK = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado']
 
@@ -112,10 +108,7 @@ export default async function AlunoHomePage() {
   const wisdom = SHAOLIN_WISDOM[todayIndex % SHAOLIN_WISDOM.length]
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-main pb-24">
-      <TopBar profile={profile} />
-
-      <main className="page-container py-5 flex flex-col gap-5 animate-fade-in">
+    <main className="page-container py-5 flex flex-col gap-5 animate-fade-in">
 
         {/* ── CARD DE BOAS-VINDAS & MODALIDADE ATIVA ─────────────── */}
         <section className="card-gold p-5 flex flex-col gap-4 shadow-gold relative overflow-hidden">
@@ -287,8 +280,5 @@ export default async function AlunoHomePage() {
         </section>
 
       </main>
-
-      <BottomNav />
-    </div>
   )
 }

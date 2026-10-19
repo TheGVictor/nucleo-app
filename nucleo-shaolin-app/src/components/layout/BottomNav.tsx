@@ -1,6 +1,7 @@
 'use client'
 
-import { usePathname, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 interface NavItem {
   label: string
@@ -56,21 +57,21 @@ const ALUNO_NAV: NavItem[] = [
 
 export function BottomNav() {
   const pathname = usePathname()
-  const router = useRouter()
 
   return (
     <nav className="bottom-nav">
       {ALUNO_NAV.map(item => {
         const active = pathname === item.path
         return (
-          <button
+          <Link
             key={item.path}
-            onClick={() => router.push(item.path)}
+            href={item.path}
+            prefetch={true}
             className={`bottom-nav-item ${active ? 'active' : ''}`}
           >
             {item.icon}
-            {item.label}
-          </button>
+            <span>{item.label}</span>
+          </Link>
         )
       })}
     </nav>

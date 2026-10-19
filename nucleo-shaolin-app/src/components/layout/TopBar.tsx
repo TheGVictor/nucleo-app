@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar } from '@/components/ui/Avatar'
 import { Logo } from '@/components/ui/Logo'
@@ -12,14 +12,25 @@ interface TopBarProps {
   title?: string
 }
 
-export function TopBar({ profile, title }: TopBarProps) {
+export function TopBar({ profile, title: explicitTitle }: TopBarProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const supabase = createClient()
 
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push('/login')
   }
+
+  const title = explicitTitle ?? (
+    pathname === '/aluno/ficha'
+      ? 'Ficha Técnica'
+      : pathname === '/aluno/videos'
+      ? 'Treino em Vídeo'
+      : pathname === '/aluno/perfil'
+      ? 'Meu Perfil'
+      : profile.full_name.split(' ')[0]
+  )
 
   return (
     <header className="top-bar">

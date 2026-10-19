@@ -5,11 +5,10 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { TopBar } from '@/components/layout/TopBar'
 import { ApprovalQueue } from '@/components/admin/ApprovalQueue'
 import { AnnouncementsManager } from '@/components/admin/AnnouncementsManager'
+import { AttendanceManager, type AttendanceStudentSummary } from '@/components/admin/AttendanceManager'
 import { Badge } from '@/components/ui/Badge'
 import { Logo } from '@/components/ui/Logo'
 import type { AnnouncementWithModality } from './announcements/actions'
-
-export const instant = false
 
 interface RawModality {
   id: string
@@ -31,6 +30,8 @@ interface TodayClassItem {
   end_time: string
   modality: { name: string } | null
 }
+
+export const instant = false
 
 export default async function AdminPage() {
   await connection()
@@ -111,6 +112,65 @@ export default async function AdminPage() {
 
   const modalities = modalitiesList ?? []
 
+  // 6. Alunos Ativos com Fichas de Presença e Checkboxes
+  const { data: rawActiveStudents } = await adminClient
+    .from('profiles')
+    .select(`
+      id,
+      full_name,
+      role,
+      status,
+      photo_url,
+      student_modalities(
+        id,
+        status,
+        modality:modalities(name),
+        approved_graduation:graduations(level_name, color_hex)
+      ),
+      attendance:attendance!attendance_student_id_fkey(id)
+    `)
+    .eq('role', 'student')
+    .eq('status', 'active')
+    .order('full_name', { ascending: true })
+
+  interface RawModalityObj {
+    name: string
+  }
+  interface RawGradObj {
+    level_name: string
+    color_hex: string | null
+  }
+  interface RawStudentModObj {
+    id: string
+    status: string
+    modality: RawModalityObj | RawModalityObj[] | null
+    approved_graduation: RawGradObj | RawGradObj[] | null
+  }
+
+  const attendanceStudents: AttendanceStudentSummary[] = (rawActiveStudents ?? []).map((s) => {
+    const rawModalities = s.student_modalities as unknown as RawStudentModObj[] | null
+    const activeMod = Array.isArray(rawModalities) ? rawModalities[0] : rawModalities
+    const rawModality = activeMod?.modality
+    const modalityName = Array.isArray(rawModality) ? rawModality[0]?.name : rawModality?.name ?? 'Kung Fu Shaolin'
+    const rawGrad = activeMod?.approved_graduation
+    const grad = Array.isArray(rawGrad) ? rawGrad[0] : rawGrad
+    const graduationName = grad?.level_name ?? 'Faixa Branca'
+    const graduationColor = grad?.color_hex ?? '#E2E8F0'
+    const attList = (s.attendance as unknown as { id: string }[]) ?? []
+
+    return {
+      id: s.id,
+      full_name: s.full_name,
+      role: s.role,
+      status: s.status,
+      photo_url: s.photo_url,
+      modalityName,
+      graduationName,
+      graduationColor,
+      attendanceCount: attList.length,
+    }
+  })
+
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-main pb-12">
       <TopBar profile={profile} title="Painel do Sifu" />
@@ -133,12 +193,15 @@ export default async function AdminPage() {
               </p>
             </div>
           </div>
-          <div className="flex gap-2 shrink-0">
-            <a href="#gestao-avisos" className="btn btn-outline btn-sm">
-              📢 Gerenciar Avisos
+          <div className="flex gap-2 shrink-0 flex-wrap">
+            <a href="#gestao-presencas" className="btn btn-gold btn-sm">
+              🥋 Fichas & Presenças
             </a>
-            <a href="#homologacao-alunos" className="btn btn-gold btn-sm">
-              🥋 Alunos Pendentes
+            <a href="#gestao-avisos" className="btn btn-outline btn-sm">
+              📢 Avisos
+            </a>
+            <a href="#homologacao-alunos" className="btn btn-outline btn-sm">
+              🥋 Homologação
             </a>
           </div>
         </div>
@@ -204,6 +267,24 @@ export default async function AdminPage() {
             initialAnnouncements={announcements}
             modalities={modalities}
           />
+        </section>
+
+        {/* Gestão de Presenças & Fichas Físicas (Foto + Checkboxes) */}
+        <section id="gestao-presencas" className="scroll-mt-6 flex flex-col gap-3">
+          <div className="section-header">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="nkfs-h-p text-main font-bold">
+                  Gestão de Presenças & Fichas dos Alunos
+                </h2>
+                <Badge variant="gold">Oficial Shaolin</Badge>
+              </div>
+              <p className="nkfs-p-m text-muted mt-0.5">
+                Fotografe a ficha de papel do aluno e marque as presenças nos checkboxes oficiais.
+              </p>
+            </div>
+          </div>
+          <AttendanceManager initialStudents={attendanceStudents} />
         </section>
 
         {/* Fila de Aprovações de Cadastros */}
