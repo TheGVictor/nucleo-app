@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { TopBar } from '@/components/layout/TopBar'
 import { AdminBottomNav } from '@/components/layout/AdminBottomNav'
+import { getRequestUserProfile } from '@/lib/user-cache'
 
 export const instant = false
 
@@ -17,11 +18,7 @@ export default async function AdminLayout({
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const profile = await getRequestUserProfile(user.id)
 
   if (!profile) redirect('/login')
   if (!['instructor', 'admin', 'super_admin'].includes(profile.role)) {

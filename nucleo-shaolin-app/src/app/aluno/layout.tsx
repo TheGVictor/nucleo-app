@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { TopBar } from '@/components/layout/TopBar'
 import { BottomNav } from '@/components/layout/BottomNav'
+import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
 
 export const instant = false
 
@@ -15,21 +16,11 @@ export default async function AlunoLayout({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [profileRes, modalityRes] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase
-      .from('student_modalities')
-      .select(`
-        self_reported_level,
-        approved_graduation:graduations(color_hex, level_name)
-      `)
-      .eq('student_id', user.id)
-      .eq('status', 'active')
-      .limit(1)
-      .maybeSingle(),
+  const [profile, modalities] = await Promise.all([
+    getRequestUserProfile(user.id),
+    getRequestStudentModalities(user.id),
   ])
 
-  const profile = profileRes.data
   if (!profile) redirect('/login')
 
   // O Sifu é exclusivamente o mestre da escola e não utiliza o painel de aluno
@@ -42,7 +33,7 @@ export default async function AlunoLayout({
     level_name?: string
   }
 
-  const modData = modalityRes.data
+  const modData = modalities.find(m => m.status === 'active') || modalities[0]
   const approvedGrad = modData?.approved_graduation as unknown as RawGrad | RawGrad[] | null
   const grad = Array.isArray(approvedGrad) ? approvedGrad[0] : approvedGrad
   const beltColor = grad?.color_hex || undefined

@@ -2,6 +2,15 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
+  // Ignora requisições de prefetch em segundo plano para não consumir cotas de Auth
+  const isPrefetch =
+    request.headers.get('next-router-prefetch') === '1' ||
+    request.headers.get('purpose') === 'prefetch'
+
+  if (isPrefetch) {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -41,18 +50,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(new URL('/aluno', request.url))
   }
 
-  // Protege /admin — só admin e super_admin
-  if (pathname.startsWith('/admin')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user?.id)
-      .single()
-
-    if (!profile || !['instructor', 'admin', 'super_admin'].includes(profile.role)) {
-      return NextResponse.redirect(new URL('/aluno', request.url))
-    }
-  }
+  // A verificação de papel (instructor/admin/super_admin) para /admin
+  // é realizada com segurança máxima e sem duplicação no layout raiz de /admin
 
   return supabaseResponse
 }

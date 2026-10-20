@@ -5,6 +5,8 @@ import { StatsRow } from '@/components/aluno/StatsRow'
 import { AnnouncementsList } from '@/components/aluno/AnnouncementsList'
 import { Badge } from '@/components/ui/Badge'
 import { parseAnnouncementContent } from '@/lib/announcements'
+import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
+import { getCachedAnnouncements, getCachedGraduations } from '@/lib/cached-queries'
 
 export const instant = false
 
@@ -16,62 +18,31 @@ export default async function AlunoHomePage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Carrega Perfil e Modalidades em paralelo
-  const [profileRes, modalitiesRes] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase
-      .from('student_modalities')
-      .select(`
-        *,
-        modality:modalities(id, name, slug),
-        approved_graduation:graduations(id, level_name, level_order, color_hex)
-      `)
-      .eq('student_id', user.id)
-      .eq('status', 'active'),
+  // Obtém Perfil e Modalidades (deduplicados em memória do request do Layout)
+  const [profile, modalities] = await Promise.all([
+    getRequestUserProfile(user.id),
+    getRequestStudentModalities(user.id),
   ])
 
-  const profile = profileRes.data
   if (!profile) redirect('/login')
   if (profile.status === 'pending_approval') redirect('/aguardando')
   if (profile.status !== 'active') redirect('/login')
 
-  const activeModality = modalitiesRes.data?.[0]
+  const activeModality = modalities.find(m => m.status === 'active') || modalities[0]
   const activeModalityId = activeModality?.modality?.id
 
-  // Executa em paralelo consultas de avisos, frequência e faixas
-  const [
-    announcementsRes,
-    attendanceCountRes,
-    totalCountRes,
-    graduationsRes,
-  ] = await Promise.all([
-    supabase
-      .from('announcements')
-      .select('*, modality:modalities(id, name, slug)')
-      .order('created_at', { ascending: false })
-      .limit(10),
-    supabase
-      .from('attendance')
-      .select('*', { count: 'exact', head: true })
-      .eq('student_id', user.id)
-      .eq('present', true),
-    supabase
-      .from('attendance')
-      .select('*', { count: 'exact', head: true })
-      .eq('student_id', user.id),
-    activeModalityId
-      ? supabase
-          .from('graduations')
-          .select('id, level_name, level_order, color_hex')
-          .eq('modality_id', activeModalityId)
-          .order('level_order', { ascending: true })
-      : Promise.resolve({ data: [] }),
+  // Executa consultas otimizadas:
+  // - Avisos e Faixas usam cache global compartilhado em memória (Next.js Data Cache)
+  // - Presenças consolidadas em 1 única query leve (em vez de 2 queries com contagem)
+  const [allAnnouncements, attendanceRes, allGraduations] = await Promise.all([
+    getCachedAnnouncements(),
+    supabase.from('attendance').select('present').eq('student_id', user.id),
+    activeModalityId ? getCachedGraduations(activeModalityId) : Promise.resolve([]),
   ])
 
-  const allAnnouncements = announcementsRes.data ?? []
-  const attendanceCount = attendanceCountRes.count ?? 0
-  const totalCount = totalCountRes.count ?? 0
-  const allGraduations = graduationsRes.data ?? []
+  const attendances = attendanceRes.data ?? []
+  const attendanceCount = attendances.filter((a) => a.present).length
+  const totalCount = attendances.length
 
   // Filtra avisos: gerais, da modalidade do aluno ou destinados especificamente a um grupo/ele
   const announcements = allAnnouncements.filter((a) => {

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/Avatar'
+import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
 
 interface StudentModalityItem {
   id: string
@@ -15,15 +16,12 @@ export default async function PerfilPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [profileRes, modalitiesRes] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('student_modalities').select('*, modality:modalities(name, slug)').eq('student_id', user.id),
+  const [profile, studentModalities] = await Promise.all([
+    getRequestUserProfile(user.id),
+    getRequestStudentModalities(user.id),
   ])
 
-  const profile = profileRes.data
   if (!profile) redirect('/login')
-
-  const studentModalities = modalitiesRes.data
 
   return (
     <main className="page-container py-5 flex flex-col gap-5 animate-fade-in">

@@ -44,20 +44,23 @@ export async function getStudentTechnicalSheetAction(
 
     const adminClient = createAdminClient()
 
-    // 1. Perfil do requisitante para saber se é instrutor
-    const { data: requesterProfile } = await adminClient
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+    let isInstructor = false
 
-    const isInstructor = ['admin', 'super_admin'].includes(
-      requesterProfile?.role || ''
-    )
+    // 1. Validação de permissão: se for outro usuário, precisa ser instrutor ou admin
+    if (user.id !== studentId) {
+      const { data: requesterProfile } = await adminClient
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
 
-    // Se não for instrutor, só pode acessar a sua própria ficha
-    if (!isInstructor && user.id !== studentId) {
-      return { success: false, error: 'Acesso não autorizado à ficha' }
+      isInstructor = ['instructor', 'admin', 'super_admin'].includes(
+        requesterProfile?.role || ''
+      )
+
+      if (!isInstructor) {
+        return { success: false, error: 'Acesso não autorizado à ficha' }
+      }
     }
 
     // 2. Perfil do aluno da ficha
@@ -193,7 +196,7 @@ export async function saveStudentTechnicalSheetAction(
       .eq('id', user.id)
       .single()
 
-    if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
+    if (!profile || !['instructor', 'admin', 'super_admin'].includes(profile.role)) {
       return {
         success: false,
         error: 'Apenas instrutores e administradores podem salvar a ficha técnica',

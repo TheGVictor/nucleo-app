@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ApprovalQueue } from '@/components/admin/ApprovalQueue'
 import { Logo } from '@/components/ui/Logo'
+import { getRequestUserProfile } from '@/lib/user-cache'
 
 interface RawModality {
   id: string
@@ -28,11 +29,7 @@ export default async function AdminPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const profile = await getRequestUserProfile(user.id)
 
   if (!profile) redirect('/login')
   if (!['instructor', 'admin', 'super_admin'].includes(profile.role)) redirect('/aluno')

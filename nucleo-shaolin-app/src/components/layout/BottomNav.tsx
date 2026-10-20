@@ -78,7 +78,7 @@ export function BottomNav() {
           <Link
             key={item.path}
             href={item.path}
-            prefetch={true}
+            prefetch={false}
             className={`bottom-nav-item ${active ? 'active' : ''}`}
           >
             {item.icon}

@@ -1,10 +1,11 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { StudentScheduleView } from '@/components/aluno/StudentScheduleView'
+import { getRequestUserProfile } from '@/lib/user-cache'
+import { getCachedClassSchedules } from '@/lib/cached-queries'
 import type { ClassSchedule } from '@/types/database'
 
 export const instant = false
-
 
 interface ScheduleWithModality extends ClassSchedule {
   modality?: {
@@ -22,22 +23,14 @@ export default async function AlunoAulasPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('status')
-    .eq('id', user.id)
-    .single()
+  const [profile, schedulesData] = await Promise.all([
+    getRequestUserProfile(user.id),
+    getCachedClassSchedules(),
+  ])
 
   if (!profile || profile.status !== 'active') {
     redirect('/login')
   }
-
-  const { data: schedulesData } = await supabase
-    .from('class_schedules')
-    .select('*, modality:modalities(id, name, slug)')
-    .eq('active', true)
-    .order('day_of_week', { ascending: true })
-    .order('start_time', { ascending: true })
 
   const schedules = (schedulesData as ScheduleWithModality[]) ?? []
 

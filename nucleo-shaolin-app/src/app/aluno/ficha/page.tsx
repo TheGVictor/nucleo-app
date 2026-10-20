@@ -4,6 +4,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { TechnicalSheet } from '@/components/technical/TechnicalSheet'
 import { getStudentTechnicalSheetAction } from '@/app/admin/attendance/technicalActions'
+import { getRequestUserProfile } from '@/lib/user-cache'
 
 interface GraduationHistoryItem {
   id: string
@@ -21,9 +22,9 @@ export default async function AlunoFichaPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Carrega Perfil, Histórico de Graduações e a Ficha Técnica
-  const [profileRes, gradHistoryRes, technicalSheetRes] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
+  // Carrega Perfil (deduplicado), Histórico de Graduações e a Ficha Técnica
+  const [profile, gradHistoryRes, technicalSheetRes] = await Promise.all([
+    getRequestUserProfile(user.id),
     supabase
       .from('graduation_history')
       .select('*, modality:modalities(name), graduation:graduations(level_name, color_hex)')
@@ -32,7 +33,6 @@ export default async function AlunoFichaPage() {
     getStudentTechnicalSheetAction(user.id),
   ])
 
-  const profile = profileRes.data
   if (!profile) redirect('/login')
 
   const graduationHistory = gradHistoryRes.data

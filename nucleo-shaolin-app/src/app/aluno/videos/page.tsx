@@ -1,16 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/Badge'
 import { VideosExplorer, type VideoItem } from '@/components/aluno/VideosExplorer'
+import { getCachedVideos } from '@/lib/cached-queries'
 
 export default async function VideosPage() {
-  const supabase = await createClient()
-
-  // Vídeos liberados para o aluno
-  const { data: videos } = await supabase
-    .from('videos')
-    .select('*, modality:modalities(name)')
-    .order('created_at', { ascending: false })
-
+  const videos = await getCachedVideos()
   const videoList = (videos as unknown as VideoItem[]) ?? []
 
   return (
