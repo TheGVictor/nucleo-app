@@ -239,40 +239,34 @@ export function TechnicalSheet({
         </div>
       )}
 
-      {/* Dica de rolagem suave no mobile */}
-      <div className="flex md:hidden items-center justify-between text-[11px] text-muted px-1">
-        <span>👆 Arraste para os lados para visualizar a folha completa</span>
-        <span className="font-mono text-[10px] uppercase font-bold text-gold">Folha Oficial A4</span>
-      </div>
-
-      {/* ── DOCUMENTO DA FICHA TÉCNICA (SEMPRE BRANCA COMO A FOLHA A4 FÍSICA) ── */}
-      <div className="w-full overflow-x-auto pb-3 no-scrollbar -mx-2 px-2 sm:mx-0 sm:px-0">
-        <div className="min-w-[640px] md:min-w-0 bg-white text-black border border-neutral-300 p-4 sm:p-8 rounded-sm shadow-xl font-sans relative select-none">
+      {/* ── DOCUMENTO DA FICHA TÉCNICA (100% RESPONSIVO, SEM SCROLL LATERAL) ── */}
+      <div className="w-full max-w-full pb-3 overflow-hidden">
+        <div className="w-full max-w-full bg-white text-black border border-neutral-300 p-3 sm:p-6 md:p-8 rounded-lg shadow-xl font-sans relative select-none">
         
         {/* ── 1. CABEÇALHO PRETO CONFORME DOCUMENTO ORIGINAL ────────── */}
-        <div className="bg-[#1C1C1C] text-white p-3 sm:p-4 rounded-t-sm flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="bg-[#1C1C1C] text-white p-2.5 sm:p-4 rounded-t-sm flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             {/* Brasão circular do Praticante de Kung Fu */}
-            <div className="w-12 h-12 rounded-full border-2 border-white bg-white flex items-center justify-center shrink-0 text-2xl shadow-sm">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full border-2 border-white bg-white flex items-center justify-center shrink-0 text-lg sm:text-2xl shadow-sm">
               🥋
             </div>
-            <div>
-              <h1 className="text-base sm:text-lg font-black tracking-wider uppercase font-serif leading-tight">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xs sm:text-lg font-black tracking-wider uppercase font-serif leading-tight truncate">
                 Núcleo de Kung Fu Shaolin
               </h1>
-              <p className="text-[11px] sm:text-xs font-bold tracking-widest uppercase text-neutral-300 mt-0.5">
+              <p className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-neutral-300 mt-0.5 truncate">
                 {schema.headerSubtitle}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="font-serif text-sm tracking-widest font-bold text-neutral-300 hidden sm:inline">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <span className="font-serif text-sm tracking-widest font-bold text-neutral-300 hidden md:inline">
               {schema.chineseTitle}
             </span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-serif font-bold text-neutral-300">Nº</span>
-              <div className="bg-white text-black px-3 py-1 rounded text-xs font-mono font-black border border-neutral-400 min-w-[70px] text-center shadow-inner">
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <span className="text-[10px] sm:text-xs font-serif font-bold text-neutral-300">Nº</span>
+              <div className="bg-white text-black px-2 sm:px-3 py-0.5 sm:py-1 rounded text-[11px] sm:text-xs font-mono font-black border border-neutral-400 min-w-[50px] sm:min-w-[70px] text-center shadow-inner">
                 {state.cardNumber || student.id.slice(0, 4).toUpperCase()}
               </div>
             </div>
@@ -281,45 +275,45 @@ export function TechnicalSheet({
 
         {/* ── 2. FAIXA CINZA CLARO COM DADOS DO PRATICANTE ─────────── */}
         <div className="bg-[#ECECEC] border-x border-b border-neutral-300 p-2 sm:p-3 text-xs flex flex-col gap-1.5 mb-4 font-sans text-neutral-900">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {/* PRATICANTE */}
-            <div className="flex items-center gap-2 flex-1">
-              <span className="bg-[#666] text-white font-black uppercase text-[10px] tracking-wider px-2 py-0.5 rounded-xs shrink-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="bg-[#666] text-white font-black uppercase text-[9px] sm:text-[10px] tracking-wider px-1.5 py-0.5 rounded-xs shrink-0">
                 Praticante
               </span>
-              <span className="font-bold text-sm tracking-tight text-black border-b border-neutral-400 flex-1 px-1">
+              <span className="font-bold text-xs sm:text-sm tracking-tight text-black border-b border-neutral-400 flex-1 px-1 truncate">
                 {student.full_name}
               </span>
             </div>
 
             {/* DATA INÍCIO */}
-            <div className="flex items-center gap-2">
-              <span className="bg-[#666] text-white font-black uppercase text-[10px] tracking-wider px-2 py-0.5 rounded-xs shrink-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="bg-[#666] text-white font-black uppercase text-[9px] sm:text-[10px] tracking-wider px-1.5 py-0.5 rounded-xs shrink-0">
                 Data Início
               </span>
-              <span className="font-mono font-semibold text-xs border-b border-neutral-400 px-1 min-w-[85px] text-center">
+              <span className="font-mono font-semibold text-xs border-b border-neutral-400 px-1 flex-1 sm:flex-initial sm:min-w-[85px] text-center">
                 {state.startDate || '—'}
               </span>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-neutral-300">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-neutral-300">
             {/* PROGRAMA */}
-            <div className="flex items-center gap-2 flex-1">
-              <span className="bg-[#666] text-white font-black uppercase text-[10px] tracking-wider px-2 py-0.5 rounded-xs shrink-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="bg-[#666] text-white font-black uppercase text-[9px] sm:text-[10px] tracking-wider px-1.5 py-0.5 rounded-xs shrink-0">
                 Programa
               </span>
-              <span className="font-bold text-xs tracking-tight text-neutral-800 border-b border-neutral-400 flex-1 px-1">
+              <span className="font-bold text-xs tracking-tight text-neutral-800 border-b border-neutral-400 flex-1 px-1 truncate">
                 {modalityName}
               </span>
             </div>
 
             {/* DATA VISTO */}
-            <div className="flex items-center gap-2">
-              <span className="bg-[#666] text-white font-black uppercase text-[10px] tracking-wider px-2 py-0.5 rounded-xs shrink-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="bg-[#666] text-white font-black uppercase text-[9px] sm:text-[10px] tracking-wider px-1.5 py-0.5 rounded-xs shrink-0">
                 Data Visto
               </span>
-              <span className="font-mono font-bold text-xs border-b border-neutral-400 px-1 min-w-[85px] text-center text-emerald-800">
+              <span className="font-mono font-bold text-xs border-b border-neutral-400 px-1 flex-1 sm:flex-initial sm:min-w-[85px] text-center text-emerald-800">
                 {state.vistoDate || '—'}
               </span>
             </div>
@@ -327,7 +321,7 @@ export function TechnicalSheet({
         </div>
 
         {/* ── 3. CORPO DA FICHA EM 2 COLUNAS CONFORME DOCUMENTO ORIGINAL ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start text-black">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-start text-black">
           
           {/* ════════ COLUNA ESQUERDA: TÉCNICAS E REPETIÇÕES ════════ */}
           <div className="flex flex-col gap-4">
@@ -528,7 +522,7 @@ export function TechnicalSheet({
                 Avaliação & Liberação
               </h3>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 {/* Avaliação EXAME */}
                 <button
                   type="button"

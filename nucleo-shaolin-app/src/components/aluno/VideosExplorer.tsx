@@ -14,62 +14,32 @@ export interface VideoItem {
 }
 
 export function VideosExplorer({ initialVideos }: { initialVideos: VideoItem[] }) {
-  const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos')
 
   // Categorias únicas dos vídeos
   const categories = ['Todos', ...Array.from(new Set(initialVideos.map(v => v.category).filter(Boolean)))]
 
   const filtered = initialVideos.filter(v => {
-    const matchesCat = selectedCategory === 'Todos' || v.category === selectedCategory
-    const q = search.toLowerCase()
-    const matchesSearch =
-      !search ||
-      v.title.toLowerCase().includes(q) ||
-      (v.description && v.description.toLowerCase().includes(q)) ||
-      (v.modality?.name && v.modality.name.toLowerCase().includes(q))
-    return matchesCat && matchesSearch
+    return selectedCategory === 'Todos' || v.category === selectedCategory
   })
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Barra de Filtro e Busca */}
-      <div className="card p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        {/* Chips de Categoria */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
-          {categories.map(cat => {
-            const isSelected = selectedCategory === cat
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={`modality-chip ${isSelected ? 'active' : ''} text-xs py-1.5 px-3`}
-              >
-                {cat}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Input de Busca */}
-        <div className="relative min-w-[200px]">
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar por nome do Kati..."
-            className="input text-xs py-1.5 px-3"
-          />
-          {search && (
+      {/* Barra de Filtro por Categoria */}
+      <div className="card p-2.5 sm:p-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        {categories.map(cat => {
+          const isSelected = selectedCategory === cat
+          return (
             <button
-              onClick={() => setSearch('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-main text-xs"
+              key={cat}
+              type="button"
+              onClick={() => setSelectedCategory(cat)}
+              className={`modality-chip ${isSelected ? 'active' : ''} text-xs py-1.5 px-3 shrink-0`}
             >
-              ✕
+              {cat}
             </button>
-          )}
-        </div>
+          )
+        })}
       </div>
 
       {/* Dica Pedagógica do Sifu */}
@@ -139,8 +109,8 @@ export function VideosExplorer({ initialVideos }: { initialVideos: VideoItem[] }
             Nenhum vídeo encontrado
           </p>
           <p className="nkfs-p-p text-muted mt-1 max-w-sm">
-            {search || selectedCategory !== 'Todos'
-              ? 'Tente limpar a busca ou selecionar outra categoria.'
+            {selectedCategory !== 'Todos'
+              ? 'Tente selecionar outra categoria de treino.'
               : 'Os vídeos gravados pelo Sifu Guilherme para o seu nível técnico serão liberados aqui.'}
           </p>
         </div>

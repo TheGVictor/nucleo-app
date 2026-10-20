@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { StatsRow } from '@/components/aluno/StatsRow'
@@ -103,9 +102,6 @@ export default async function AlunoHomePage() {
         )
       : null)
 
-  const currentLevelOrder = matchedGraduation?.level_order ?? 0
-  const nextGraduation =
-    allGraduations.find((g) => g.level_order > currentLevelOrder) ?? null
 
   const graduationName =
     matchedGraduation?.level_name ??
@@ -121,73 +117,32 @@ export default async function AlunoHomePage() {
 
   return (
     <main className="page-container py-5 sm:py-6 flex flex-col gap-5 sm:gap-6 animate-fade-in">
-      {/* ── CARD DE BOAS-VINDAS COM TEMA DA FAIXA DO PRATICANTE ── */}
-      <section
-        className="p-5 sm:p-6 rounded-[var(--radius-xl)] flex flex-col gap-4 relative overflow-hidden border transition-all"
-        style={{
-          background: `linear-gradient(135deg, ${graduationColor}18 0%, rgba(20, 24, 33, 0.7) 100%)`,
-          borderColor: `${graduationColor}40`,
-          boxShadow: `0 8px 30px ${graduationColor}12`,
-        }}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span
-                className="text-xs uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border"
-                style={{
-                  color: graduationColor,
-                  borderColor: `${graduationColor}50`,
-                  backgroundColor: `${graduationColor}15`,
-                }}
-              >
-                {greeting}, {profile.full_name.split(' ')[0]} 🙏
-              </span>
-            </div>
-            <h1 className="nkfs-h-m text-main tracking-tight font-extrabold">
-              {modalityName}
-            </h1>
-            <p className="text-xs sm:text-sm text-muted mt-0.5">
-              Praticante oficial • <strong className="text-main">{graduationName}</strong>
-            </p>
-          </div>
-
-          {/* Faixa Visual com nó marcial autêntico */}
-          <div className="flex items-center gap-3 self-start sm:self-auto bg-[var(--color-bg-card)]/90 backdrop-blur-sm px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-xs">
-            <div
-              className="w-3.5 h-10 rounded-full shadow-md shrink-0 border border-white/20"
-              style={{
-                backgroundColor: graduationColor,
-                boxShadow: `0 0 12px ${graduationColor}60`,
-              }}
-              title={`Graduação: ${graduationName}`}
-            />
-            <div className="min-w-0">
-              <span className="text-[10px] text-muted block uppercase tracking-wider font-semibold">
-                Graduação Atual
-              </span>
-              <span className="text-xs sm:text-sm font-bold text-main truncate block">
-                {graduationName}
-              </span>
-            </div>
-          </div>
+      {/* ── HEADER CLEAN DO ALUNO (SAUDAÇÃO, NOME E GRADUAÇÃO) ── */}
+      <section className="flex items-center justify-between gap-3 pt-1">
+        <div className="min-w-0">
+          <p className="text-xs sm:text-sm text-muted font-medium">
+            {greeting},
+          </p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-main truncate tracking-tight">
+            {profile.full_name}
+          </h1>
         </div>
 
-        {/* Trilha de Evolução / Próxima Faixa */}
-        {nextGraduation && (
-          <div className="pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-2 text-muted">
-              <span>🎯 Próxima Graduação:</span>
-              <strong className="text-main">{nextGraduation.level_name}</strong>
-            </div>
-            <Link
-              href="/aluno/ficha"
-              className="text-gold hover:underline font-bold self-start sm:self-auto text-xs"
-            >
-              Ver critérios na Ficha Técnica →
-            </Link>
-          </div>
-        )}
+        {/* Graduação com indicador de cor */}
+        <div
+          className="shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold backdrop-blur-xs shadow-xs"
+          style={{
+            borderColor: `${graduationColor}50`,
+            backgroundColor: `${graduationColor}15`,
+            color: graduationColor,
+          }}
+        >
+          <span
+            className="w-2.5 h-2.5 rounded-full shadow-xs shrink-0"
+            style={{ backgroundColor: graduationColor }}
+          />
+          <span className="text-main font-bold">{graduationName}</span>
+        </div>
       </section>
 
       {/* ── ESTATÍSTICAS RÁPIDAS (DS) ──────────────────────────── */}

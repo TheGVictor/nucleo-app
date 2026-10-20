@@ -84,7 +84,7 @@ export function AdminBottomNav({
   )
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-bg)]/95 backdrop-blur-md border-t border-[var(--color-border)] px-4 py-2 flex justify-around items-center max-w-md mx-auto shadow-lg transition-all">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-bg)]/95 backdrop-blur-md border-t border-[var(--color-border)] px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex justify-around items-center max-w-md mx-auto shadow-lg transition-all">
       {navItems.map((item) => {
         const isActive =
           item.path === '/admin'

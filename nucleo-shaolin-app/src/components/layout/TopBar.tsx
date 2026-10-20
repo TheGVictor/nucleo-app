@@ -59,13 +59,13 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
           : undefined
       }
     >
-      <div className="w-full max-w-[1216px] mx-auto flex items-center justify-between gap-3">
+      <div className="w-full max-w-[1216px] mx-auto flex items-center justify-between gap-2 sm:gap-3 flex-nowrap min-w-0">
         {/* Lado Esquerdo: Logo e Título com Indicador de Faixa */}
-        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
           <Logo size="sm" />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 min-w-0">
-              <p className="nkfs-p-m font-bold text-main leading-tight truncate">
+              <p className="text-sm sm:text-base font-bold text-main leading-tight truncate">
                 {title ?? profile.full_name.split(' ')[0]}
               </p>
               {beltColor && (
@@ -76,7 +76,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
                 />
               )}
             </div>
-            <p className="nkfs-tag-p text-faint truncate">
+            <p className="text-[11px] sm:text-xs text-faint truncate leading-tight">
               {profile.role === 'super_admin'
                 ? 'Sifu — Super Admin'
                 : (profile.role === 'admin' || profile.role === 'instructor')
@@ -87,7 +87,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
         </div>
 
         {/* Lado Direito: Ações Rápidas */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 flex-nowrap">
           {/* Alternar visão Aluno <-> Instrutor apenas para instrutores (que também são alunos) */}
           {(profile.role === 'instructor' || profile.role === 'admin') && (
             pathname.startsWith('/admin') ? (
@@ -96,11 +96,11 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
                   // eslint-disable-next-line @next/next/no-location-assign-relative-destination
                   window.location.href = '/aluno'
                 }}
-                className="btn btn-secondary btn-sm px-2.5 py-1 text-xs font-semibold flex items-center gap-1"
+                className="btn btn-secondary btn-sm px-2 py-1 text-xs font-semibold flex items-center gap-1 shrink-0"
                 title="Acessar minha área de aluno"
               >
                 <span>🥋</span>
-                <span className="hidden sm:inline">Ver como Aluno</span>
+                <span className="hidden sm:inline">Aluno</span>
               </button>
             ) : (
               <button
@@ -108,11 +108,11 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
                   // eslint-disable-next-line @next/next/no-location-assign-relative-destination
                   window.location.href = '/admin'
                 }}
-                className="btn btn-gold btn-sm px-2.5 py-1 text-xs font-semibold flex items-center gap-1"
+                className="btn btn-gold btn-sm px-2 py-1 text-xs font-semibold flex items-center gap-1 shrink-0"
                 title="Acessar painel do instrutor"
               >
                 <span>🛡️</span>
-                <span className="hidden sm:inline">Painel Instrutor</span>
+                <span className="hidden sm:inline">Instrutor</span>
               </button>
             )
           )}
@@ -121,10 +121,25 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
           <Avatar name={profile.full_name} size="sm" gold />
           <button
             onClick={handleLogout}
-            className="btn btn-ghost btn-sm px-2.5 py-1 text-xs text-muted hover:text-main"
+            className="p-1.5 rounded-lg text-muted hover:text-main hover:bg-[var(--color-bg-elevated)] transition-colors shrink-0 flex items-center justify-center"
             title="Sair da conta"
+            aria-label="Sair da conta"
           >
-            <span>Sair</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
           </button>
         </div>
       </div>

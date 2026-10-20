@@ -43,7 +43,7 @@ export default async function AlunoLayout({
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-main flex flex-col justify-between">
       <TopBar profile={profile} beltColor={beltColor} beltName={beltName} />
-      <div className="flex-1 pb-20">
+      <div className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))]">
         {children}
       </div>
       <BottomNav />

@@ -43,7 +43,7 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-main flex flex-col justify-between">
       <TopBar profile={profile} />
-      <div className="flex-1 pb-24">
+      <div className="flex-1 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]">
         {children}
       </div>
       <AdminBottomNav
