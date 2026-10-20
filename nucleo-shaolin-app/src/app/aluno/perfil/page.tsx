@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/Avatar'
 import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
+import { InstallAppButton } from '@/components/pwa/InstallPwa'
 
 interface StudentModalityItem {
   id: string
@@ -124,6 +125,18 @@ export default async function PerfilPage() {
             {profile.health_declaration_accepted ? '✓ Válida' : 'Pendente'}
           </span>
         </div>
+      </section>
+
+      {/* Opção PWA: Instalar Aplicativo no Celular */}
+      <section className="card p-5 flex flex-col gap-3">
+        <div className="flex items-center justify-between pb-1 border-b border-[var(--color-border)]">
+          <h2 className="nkfs-h-p text-main font-bold">Aplicativo no Celular</h2>
+          <span className="text-xs text-gold font-semibold">PWA Oficial</span>
+        </div>
+        <p className="text-xs text-muted leading-relaxed">
+          Instale o Núcleo Shaolin diretamente na tela inicial do seu iPhone ou Android para ter acesso com 1 toque e em tela cheia.
+        </p>
+        <InstallAppButton />
       </section>
     </main>
   )
