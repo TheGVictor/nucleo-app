@@ -1,0 +1,22 @@
+# Núcleo de Kung Fu Shaolin
+
+> Escola tradicional de Kung Fu Shaolin (estilo Choy Lay Fut), Tai Chi Chuan estilo Yang e Sanda (Boxe Chinês), sob a coordenação técnica do Sifu Guilherme. Acompanhamento pedagógico com ficha técnica oficial e portal digital para alunos.
+
+O Núcleo de Kung Fu Shaolin é uma instituição de ensino de artes marciais tradicionais chinesas. Oferece treinamento físico e marcial integral, cultivo de disciplina e saúde corporal, metodologia progressiva de faixas e portal online oficial para alunos e instrutores.
+
+## Páginas Canônicas e Navegação
+
+- [Página Inicial](https://nucleo-app-iota.vercel.app/): Apresentação institucional da escola, modalidades praticadas, linhagem marcial tradicional, depoimentos, fotos e perguntas frequentes.
+- [Solicitação de Matrícula e Cadastro](https://nucleo-app-iota.vercel.app/cadastro): Formulário oficial de pré-matrícula para novos alunos com agendamento de aula experimental e envio de dados para validação do Sifu.
+- [Portal e Área do Aluno](https://nucleo-app-iota.vercel.app/login): Acesso autenticado à plataforma do aluno com frequência de aulas, histórico de graduações, ficha técnica e vídeos técnicos de Katis.
+
+## Modalidades Ensinadas
+
+- [Kung Fu Shaolin (Choy Lay Fut)](https://nucleo-app-iota.vercel.app/#modalidades): Sistema clássico e dinâmico combinando técnicas do Norte e Sul da China. Treino de condicionamento, autodefesa instintiva, formas tradicionais (Katis) e armas clássicas (bastão, sabre, lança).
+- [Tai Chi Chuan (Estilo Yang)](https://nucleo-app-iota.vercel.app/#modalidades): Prática suave com sequências fluidas, respiração consciente e cultivo de energia interna (Qi Gong). Indicado para saúde articular, correção postural e alívio do estresse.
+- [Sanda / Boxe Chinês](https://nucleo-app-iota.vercel.app/#modalidades): Combate marcial esportivo com socos, chutes rápidos e projeções de quedas em ambiente controlado e com total segurança.
+
+## Documentação Técnica Completa
+
+- [Versão Completa para LLMs](https://nucleo-app-iota.vercel.app/llms-full.txt): Detalhamento do currículo de graduações, critérios de avaliação da Ficha Técnica e código de ética marcial.
+- [Agents JSON](https://nucleo-app-iota.vercel.app/.well-known/agents.json): Descritor estruturado de capacidades do agente para sistemas de IA autônomos.

@@ -1,0 +1,53 @@
+# Núcleo de Kung Fu Shaolin — Documentação Técnica Completa (LLMs Full)
+
+> Documento factual completo sobre o Núcleo de Kung Fu Shaolin, sua linhagem marcial, modalidades, sistema de avaliação de graduações e arquitetura da plataforma digital.
+
+## 1. Visão Geral da Instituição
+
+- **Nome Oficial:** Núcleo de Kung Fu Shaolin
+- **Nomes Alternativos:** Núcleo Shaolin, Escola Núcleo de Kung Fu Shaolin
+- **Website Oficial:** https://nucleo-app-iota.vercel.app
+- **Liderança Técnica:** Sifu Guilherme (Mestre Responsável)
+- **Modalidades Oferecidas:**
+  1. Kung Fu Shaolin Tradicional (Linhagem Choy Lay Fut)
+  2. Tai Chi Chuan (Estilo Yang & Práticas de Chi Kung / Qi Gong)
+  3. Sanda / Boxe Chinês (Combate Marcial Esportivo)
+
+## 2. Princípios Pedagógicos e Filosofia
+
+O Núcleo Shaolin adota uma abordagem pedagógica que integra:
+- **Respeito e Fraternidade:** Ambiente de Kwoon (academia marcial) acolhedor e inclusivo para crianças (a partir dos 5 anos), jovens, adultos e idosos.
+- **Biomedicina e Ergonomia Marcial:** Rigor na postura (postura do cavalo - Sei Ping Ma, postura do arco - Ding Bo, etc.) e na respiração diafragmática para preservação da saúde articular e prevenção de lesões.
+- **Progressão Gradual:** Evolução do praticante baseada em repetições consistentes e domínio técnico, e não em tempo de matrícula.
+
+## 3. Sistema de Ficha Técnica e Graduações
+
+A escola utiliza um sistema de Ficha Técnica Individual (disponível fisicamente e digitalmente no portal do aluno), onde os instrutores e o Sifu acompanham:
+- **Repetições Técnicas:** Contabilização de sequências (Katis), chutes fundamentais, defesas e socos.
+- **Preparação para Exame:** Exigências físicas de resistência, flexibilidade e memorização de formas.
+- **Homologação pelo Sifu:** Listas de exame são preparadas pelos instrutores e homologadas pessoalmente pelo Sifu Guilherme antes da cerimônia de troca de faixa.
+
+### Sequência de Graduações do Kung Fu:
+1. Faixa Branca (Iniciante / Fundamentos Básicos)
+2. Faixa Amarela (Posturas e Primeiros Katis)
+3. Faixa Laranja (Técnicas Intermediárias e Combinações de Ataque)
+4. Faixas Subsequentes (Verde, Azul, Vermelha, Marrom, Preta)
+
+## 4. Estrutura do Portal e Plataforma Digital
+
+- **Página Inicial (`/`):** Apresentação das modalidades, pilares da escola, depoimentos e agendamento de aula experimental gratuita.
+- **Cadastro de Novo Praticante (`/cadastro`):** Envio de dados cadastrais, escolha de modalidade, declaração de saúde e termos de imagem.
+- **Área do Aluno (`/aluno`):** Dashboard com saudação, frequência em aulas, avisos oficiais da escola, grade horária e graduação atual.
+- **Ficha Técnica Digital (`/aluno/ficha`):** Visualização responsiva da folha técnica com registros de repetições, notas do instrutor e status de liberação para exame.
+- **Treino em Vídeo (`/aluno/videos`):** Biblioteca exclusiva com demonstrações oficiais gravadas pelo Sifu Guilherme dos Katis e movimentos homologados para a faixa do aluno.
+- **Painel do Instrutor / Sifu (`/admin`):** Gestão de chamadas de presença, criação de listas de exame de faixa, aprovação de novas matrículas e publicação de avisos no mural.
+
+## 5. Endpoints Canônicos
+
+- Início: https://nucleo-app-iota.vercel.app/
+- Matrícula: https://nucleo-app-iota.vercel.app/cadastro
+- Login: https://nucleo-app-iota.vercel.app/login
+- Robôs: https://nucleo-app-iota.vercel.app/robots.txt
+- Sitemap: https://nucleo-app-iota.vercel.app/sitemap.xml
+- Manifesto PWA: https://nucleo-app-iota.vercel.app/manifest.webmanifest
+- Agents Schema: https://nucleo-app-iota.vercel.app/.well-known/agents.json

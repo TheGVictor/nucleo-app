@@ -83,6 +83,20 @@ const FAQS = [
   },
 ]
 
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  '@id': 'https://nucleo-app-iota.vercel.app/#faq',
+  mainEntity: FAQS.map((faq) => ({
+    '@type': 'Question',
+    name: faq.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.a,
+    },
+  })),
+}
+
 export default function HomePage() {
   const [expandedFaqIndex, setExpandedFaqIndex] = useState<number | null>(0)
 
@@ -125,8 +139,17 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ── HERO SECTION ENXUTA & ELEGANTE ─────────────────────── */}
-      <section className="relative overflow-hidden py-14 sm:py-20 border-b border-[var(--color-border)]">
+      {/* ── CONTEÚDO PRINCIPAL SEMÂNTICO (MAIN) ──────────────────── */}
+      <main id="main-content" className="flex-1 flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(faqJsonLd),
+          }}
+        />
+
+        {/* ── HERO SECTION ENXUTA & ELEGANTE ─────────────────────── */}
+        <section className="relative overflow-hidden py-14 sm:py-20 border-b border-[var(--color-border)]">
         {/* Glow decorativo sutil de fundo */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-[var(--color-primary)] opacity-8 blur-[120px] pointer-events-none rounded-full" />
         <div className="absolute top-1/4 right-1/4 w-[280px] h-[280px] bg-[var(--color-gold)] opacity-10 blur-[100px] pointer-events-none rounded-full" />
@@ -362,6 +385,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* ── FOOTER MINIMALISTA & RESPONSIVO ─────────────────────── */}
       <footer className="border-t border-[var(--color-border)] bg-[var(--color-bg-card)] py-8 text-muted">

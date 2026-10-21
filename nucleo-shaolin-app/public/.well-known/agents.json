@@ -1,0 +1,34 @@
+{
+  "$schema": "https://agents.json.org/schema.json",
+  "name": "Núcleo de Kung Fu Shaolin",
+  "description": "Portal oficial e escola tradicional de Kung Fu Shaolin (Choy Lay Fut), Tai Chi Chuan e Sanda sob coordenação técnica do Sifu Guilherme.",
+  "url": "https://nucleo-app-iota.vercel.app",
+  "version": "1.0.0",
+  "provider": {
+    "organization": "Núcleo de Kung Fu Shaolin",
+    "url": "https://nucleo-app-iota.vercel.app"
+  },
+  "capabilities": {
+    "llms_txt": "https://nucleo-app-iota.vercel.app/llms.txt",
+    "llms_full_txt": "https://nucleo-app-iota.vercel.app/llms-full.txt",
+    "sitemap": "https://nucleo-app-iota.vercel.app/sitemap.xml",
+    "robots": "https://nucleo-app-iota.vercel.app/robots.txt"
+  },
+  "canonical_pages": [
+    {
+      "name": "Início",
+      "url": "https://nucleo-app-iota.vercel.app/",
+      "description": "Página institucional com modalidades, metodologia e FAQ"
+    },
+    {
+      "name": "Matrícula",
+      "url": "https://nucleo-app-iota.vercel.app/cadastro",
+      "description": "Formulário oficial de solicitação de matrícula e aula experimental"
+    },
+    {
+      "name": "Área do Aluno",
+      "url": "https://nucleo-app-iota.vercel.app/login",
+      "description": "Portal de acesso autenticado para alunos matriculados"
+    }
+  ]
+}
