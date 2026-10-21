@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { TopBar } from '@/components/layout/TopBar'
 import { BottomNav } from '@/components/layout/BottomNav'
-import { InstallPwa } from '@/components/pwa/InstallPwa'
 import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
 
 export const instant = false
@@ -47,7 +46,6 @@ export default async function AlunoLayout({
         {children}
       </div>
       <BottomNav />
-      <InstallPwa />
     </div>
   )
 }

@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Núcleo de Kung Fu Shaolin',
+    name: 'Núcleo Shaolin',
     short_name: 'Núcleo Shaolin',
-    description: 'Portal e Área do Aluno do Núcleo de Kung Fu Shaolin',
+    description: 'Aplicativo oficial do Núcleo Shaolin',
     start_url: '/aluno',
     scope: '/',
     display: 'standalone',
