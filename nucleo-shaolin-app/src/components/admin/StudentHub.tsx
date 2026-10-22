@@ -25,14 +25,6 @@ export interface StudentModalityIndicator {
   graduationColor: string
 }
 
-export interface StudentModalityIndicator {
-  id: string
-  modalityName: string
-  shortName: string
-  graduationName: string
-  graduationColor: string
-}
-
 export interface DetailedStudent {
   id: string
   full_name: string

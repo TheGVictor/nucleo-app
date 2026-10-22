@@ -84,7 +84,7 @@ export function AdminBottomNav({
   )
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-bg)]/95 backdrop-blur-md border-t border-[var(--color-border)] px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex justify-around items-center max-w-md mx-auto shadow-lg transition-all">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-bg)]/95 backdrop-blur-md border-t border-[var(--color-border)] px-2 sm:px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex justify-around items-center max-w-md mx-auto shadow-lg transition-all">
       {navItems.map((item) => {
         const isActive =
           item.path === '/admin'
@@ -96,7 +96,7 @@ export function AdminBottomNav({
             key={item.path}
             href={item.path}
             prefetch={false}
-            className={`relative flex flex-col items-center justify-center py-1 px-2.5 rounded-[var(--radius-sm)] transition-all min-w-[62px] ${
+            className={`relative flex flex-col items-center justify-center py-1 px-1 sm:px-2 rounded-[var(--radius-sm)] transition-all min-w-0 flex-1 ${
               isActive
                 ? 'text-[var(--color-gold)] font-bold scale-105'
                 : 'text-muted hover:text-main'

@@ -103,35 +103,36 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-main flex flex-col justify-between selection:bg-[var(--color-primary)] selection:text-white">
       {/* ── HEADER MINIMALISTA & LIMPO (SEM MENU POLUÍDO) ──────── */}
-      <header className="sticky top-0 z-50 bg-[var(--color-bg-card)]/95 backdrop-blur-md border-b border-[var(--color-border)] shadow-sm transition-all">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-50 bg-[var(--color-bg-card)]/95 backdrop-blur-md border-b border-[var(--color-border)] shadow-sm transition-all pt-[env(safe-area-inset-top,0px)]">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4 flex-nowrap min-w-0">
           {/* Logo & Marca */}
-          <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <Logo size="sm" priority className="group-hover:scale-105 transition-transform" />
-            <div className="flex flex-col">
-              <span className="font-extrabold text-[var(--color-text)] tracking-tight text-sm sm:text-base leading-none">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0 min-w-0">
+            <Logo size="sm" priority className="group-hover:scale-105 transition-transform shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <span className="font-extrabold text-[var(--color-text)] tracking-tight text-sm sm:text-base leading-none truncate">
                 Núcleo Shaolin
               </span>
-              <span className="nkfs-tag-p text-gold mt-0.5 tracking-wider font-semibold">
+              <span className="nkfs-tag-p text-gold mt-0.5 tracking-wider font-semibold hidden sm:block">
                 Kung Fu Tradicional
               </span>
             </div>
           </Link>
 
           {/* Ações Rápidas Direitas */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 flex-nowrap">
             <ThemeToggle />
 
             <Link
               href="/login"
-              className="btn btn-outline btn-sm font-medium text-xs sm:text-sm px-3 sm:px-4"
+              className="btn btn-outline btn-sm font-semibold text-xs sm:text-sm px-2.5 sm:px-4 py-1.5 shrink-0"
             >
-              Área do Aluno
+              <span className="sm:hidden">Entrar</span>
+              <span className="hidden sm:inline">Área do Aluno</span>
             </Link>
 
             <Link
               href="/cadastro"
-              className="btn btn-gold btn-sm font-semibold shadow-sm text-xs sm:text-sm px-3.5 sm:px-4"
+              className="btn btn-gold btn-sm font-semibold shadow-sm text-xs sm:text-sm px-3 sm:px-4 py-1.5 shrink-0"
             >
               Matrícula
             </Link>

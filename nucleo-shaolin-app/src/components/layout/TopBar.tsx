@@ -61,9 +61,9 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
     >
       <div className="w-full max-w-[1216px] mx-auto flex items-center justify-between gap-2 sm:gap-3 flex-nowrap min-w-0">
         {/* Lado Esquerdo: Logo e Título com Indicador de Faixa */}
-        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 overflow-hidden">
           <Logo size="sm" />
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 overflow-hidden">
             <div className="flex items-center gap-1.5 min-w-0">
               <p className="text-sm sm:text-base font-bold text-main leading-tight truncate">
                 {title ?? profile.full_name.split(' ')[0]}
@@ -96,7 +96,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
                   // eslint-disable-next-line @next/next/no-location-assign-relative-destination
                   window.location.href = '/aluno'
                 }}
-                className="btn btn-secondary btn-sm px-2 py-1 text-xs font-semibold flex items-center gap-1 shrink-0"
+                className="btn btn-secondary btn-sm p-1.5 sm:px-2 sm:py-1 text-xs font-semibold flex items-center gap-1 shrink-0"
                 title="Acessar minha área de aluno"
               >
                 <span>🥋</span>
@@ -108,7 +108,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
                   // eslint-disable-next-line @next/next/no-location-assign-relative-destination
                   window.location.href = '/admin'
                 }}
-                className="btn btn-gold btn-sm px-2 py-1 text-xs font-semibold flex items-center gap-1 shrink-0"
+                className="btn btn-gold btn-sm p-1.5 sm:px-2 sm:py-1 text-xs font-semibold flex items-center gap-1 shrink-0"
                 title="Acessar painel do instrutor"
               >
                 <span>🛡️</span>
