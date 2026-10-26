@@ -295,9 +295,20 @@ export function AdminStoreManager({
                             })}
                           </span>
                           <span>•</span>
-                          <span className="text-muted">
-                            {isPix ? 'Pagamento via PIX' : 'Pagar na Recepção'}
+                          <span className={isPix && ord.status === 'paid' ? 'text-emerald-400 font-bold' : 'text-muted'}>
+                            {isPix
+                              ? ord.status === 'paid'
+                                ? '✓ Pago via PIX'
+                                : 'Aguardando PIX'
+                              : ord.status === 'paid'
+                              ? '✓ Pago na Recepção'
+                              : 'Pagar na Recepção'}
                           </span>
+                          {ord.notes?.includes('[PIX confirmado pelo aluno') && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                              📱 PIX Confirmado pelo Aluno
+                            </span>
+                          )}
                         </div>
 
                         {ord.notes && !ord.notes.startsWith('[Produto:') && (
@@ -344,7 +355,9 @@ export function AdminStoreManager({
 
                       {ord.status === 'paid' && (
                         <>
-                          <Badge variant="gold">Pago</Badge>
+                          <Badge variant={isPix ? 'success' : 'gold'}>
+                            {isPix ? '✓ Pago (PIX)' : '✓ Pago'}
+                          </Badge>
                           <button
                             type="button"
                             onClick={() => handleUpdateStatus(ord.id, 'delivered')}

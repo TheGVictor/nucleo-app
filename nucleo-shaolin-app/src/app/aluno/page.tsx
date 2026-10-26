@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { StatsRow } from '@/components/aluno/StatsRow'
 import { AnnouncementsList } from '@/components/aluno/AnnouncementsList'
 import { Badge } from '@/components/ui/Badge'
 import { parseAnnouncementContent } from '@/lib/announcements'
@@ -127,6 +126,23 @@ export default async function AlunoHomePage() {
           <h1 className="text-xl sm:text-2xl font-extrabold text-main truncate tracking-tight">
             {profile.full_name}
           </h1>
+          {modalities && modalities.length > 1 && (
+            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+              {modalities.map((m) => (
+                <span
+                  key={m.id}
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-gold"
+                >
+                  {m.modality?.slug === 'taichi'
+                    ? '☯️ '
+                    : m.modality?.slug === 'sanda'
+                    ? '🥊 '
+                    : '🥋 '}
+                  {m.modality?.name}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Graduação com indicador de cor */}
@@ -145,27 +161,6 @@ export default async function AlunoHomePage() {
           <span className="text-main font-bold">{graduationName}</span>
         </div>
       </section>
-
-      {/* ── ESTATÍSTICAS RÁPIDAS (DS) ──────────────────────────── */}
-      <StatsRow
-        stats={[
-          {
-            label: 'Frequência',
-            value: frequencia !== null ? `${frequencia}%` : '—',
-            sub: 'Aproveitamento',
-          },
-          {
-            label: 'Presenças',
-            value: attendanceCount,
-            sub: 'Aulas confirmadas',
-          },
-          {
-            label: 'Graduação',
-            value: graduationName !== '—' ? graduationName.replace('Faixa ', '') : '—',
-            sub: modalityName,
-          },
-        ]}
-      />
 
       {/* ── BANNER / ACESSO RÁPIDO À LOJA OFICIAL ─────────────── */}
       <Link

@@ -225,3 +225,59 @@ export async function deleteStudentOrderAction(orderId: string) {
     return { success: false, error: message }
   }
 }
+
+export async function confirmStudentPixPaymentAction(orderId: string) {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'Sessão expirada. Faça login novamente.' }
+    }
+
+    const adminClient = createAdminClient()
+
+    // 1. Busca o pedido para garantir que pertence ao aluno
+    const { data: order, error: fetchErr } = await adminClient
+      .from('product_orders')
+      .select('id, notes, status, product:products(name)')
+      .eq('id', orderId)
+      .eq('student_id', user.id)
+      .single()
+
+    if (fetchErr || !order) {
+      return { success: false, error: 'Pedido não encontrado.' }
+    }
+
+    const currentNotes = order.notes || ''
+    const nowStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    const updatedNotes = currentNotes.includes('[PIX confirmado pelo aluno')
+      ? currentNotes
+      : currentNotes
+      ? `${currentNotes} [PIX confirmado pelo aluno às ${nowStr}]`
+      : `[PIX confirmado pelo aluno às ${nowStr}]`
+
+    const { error: updateErr } = await adminClient
+      .from('product_orders')
+      .update({
+        status: 'paid',
+        payment_method: 'pix',
+        notes: updatedNotes,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', orderId)
+      .eq('student_id', user.id)
+
+    if (updateErr) throw updateErr
+
+    revalidatePath('/aluno/loja')
+    revalidatePath('/admin/loja')
+
+    return { success: true }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Erro ao confirmar pagamento PIX.'
+    return { success: false, error: message }
+  }
+}

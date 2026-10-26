@@ -331,7 +331,19 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                       </div>
 
                       {/* Botões de Ação: Editar e Excluir */}
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                        {isPix && ord.status === 'reserved' && (
+                          <button
+                            type="button"
+                            onClick={() => setEditingOrder(ord)}
+                            className="btn btn-sm py-1 px-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1 cursor-pointer shadow-xs"
+                            title="Abrir QR Code e pagar via PIX"
+                          >
+                            <span>💠</span>
+                            <span>Pagar PIX</span>
+                          </button>
+                        )}
+
                         {canEdit && (
                           <button
                             type="button"

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import type { Product } from '@/types/database'
-import { createProductOrderAction } from '@/app/aluno/loja/actions'
+import { createProductOrderAction, confirmStudentPixPaymentAction } from '@/app/aluno/loja/actions'
 import { Spinner } from '@/components/ui/Spinner'
 
 interface ProductModalProps {
@@ -14,7 +14,8 @@ interface ProductModalProps {
 export function ProductModal({ product, onClose, onOrderSuccess }: ProductModalProps) {
   const [quantity, setQuantity] = useState(1)
   const [notes, setNotes] = useState('')
-  const [step, setStep] = useState<'details' | 'success_reception' | 'pix_screen'>('details')
+  const [step, setStep] = useState<'details' | 'success_reception' | 'pix_screen' | 'paid_success'>('details')
+  const [createdOrderId, setCreatedOrderId] = useState<string | null>(null)
   const [copiedPix, setCopiedPix] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -35,6 +36,7 @@ export function ProductModal({ product, onClose, onOrderSuccess }: ProductModalP
       })
 
       if (res.success) {
+        setCreatedOrderId(res.orderId || null)
         onOrderSuccess()
         if (paymentMethod === 'reception') {
           setStep('success_reception')
@@ -43,6 +45,24 @@ export function ProductModal({ product, onClose, onOrderSuccess }: ProductModalP
         }
       } else {
         setErrorMsg(res.error || 'Não foi possível processar a reserva.')
+      }
+    })
+  }
+
+  function handleConfirmPixPayment() {
+    if (!createdOrderId) {
+      onOrderSuccess()
+      onClose()
+      return
+    }
+    setErrorMsg(null)
+    startTransition(async () => {
+      const res = await confirmStudentPixPaymentAction(createdOrderId)
+      if (res.success) {
+        onOrderSuccess()
+        setStep('paid_success')
+      } else {
+        setErrorMsg(res.error || 'Erro ao registrar pagamento PIX.')
       }
     })
   }
@@ -334,12 +354,71 @@ export function ProductModal({ product, onClose, onOrderSuccess }: ProductModalP
               💡 <strong>Instrução:</strong> Após a transferência, o seu produto ficará separado pelo Sifu/Instrutor e poderá ser retirado na recepção.
             </div>
 
+            {/* BOTÃO PROEMINENTE: JÁ FIZ O PAGAMENTO VIA PIX */}
+            <button
+              type="button"
+              onClick={handleConfirmPixPayment}
+              disabled={isPending}
+              className="btn btn-full min-h-[46px] bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-md mt-1"
+            >
+              {isPending ? (
+                <>
+                  <Spinner size="sm" />
+                  <span>Notificando administração...</span>
+                </>
+              ) : (
+                <>
+                  <span>✓</span>
+                  <span>Já fiz o pagamento via PIX</span>
+                </>
+              )}
+            </button>
+
             <button
               type="button"
               onClick={onClose}
-              className="btn btn-gold w-full min-h-[44px] font-bold text-xs sm:text-sm mt-1"
+              disabled={isPending}
+              className="text-xs text-muted hover:text-main hover:underline py-1 cursor-pointer"
             >
-              Entendido / Concluir
+              Pagar mais tarde / Fechar
+            </button>
+          </div>
+        )}
+
+        {/* ── ETAPA 2C: CONFIRMAÇÃO DE PAGAMENTO PIX CONCLUÍDO ─── */}
+        {step === 'paid_success' && (
+          <div className="flex flex-col items-center gap-3.5 text-center py-3 animate-fade-in">
+            <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-3xl flex items-center justify-center text-emerald-400">
+              ✓
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-main">Pagamento Informado!</h3>
+              <p className="text-xs text-muted mt-1 leading-relaxed">
+                Seu pagamento de <strong>{quantity}x {product.name}</strong> foi registrado com sucesso.
+              </p>
+            </div>
+
+            <div className="w-full bg-[var(--color-bg-elevated)] border border-emerald-500/30 rounded-xl p-3.5 text-left flex flex-col gap-2 text-xs">
+              <div className="flex justify-between items-center pb-2 border-b border-[var(--color-border)]">
+                <span className="text-muted">Status no Admin:</span>
+                <span className="text-emerald-400 font-extrabold flex items-center gap-1">
+                  <span>✓</span> Pago via PIX
+                </span>
+              </div>
+              <p className="text-muted leading-relaxed">
+                📍 O sistema já marcou seu pedido como <strong>Pago</strong> no painel de controle da escola. O item será preparado pelo seu Sifu ou Instrutor para entrega.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                onOrderSuccess()
+                onClose()
+              }}
+              className="btn btn-gold w-full min-h-[44px] font-bold text-xs sm:text-sm mt-2 cursor-pointer"
+            >
+              Concluir
             </button>
           </div>
         )}

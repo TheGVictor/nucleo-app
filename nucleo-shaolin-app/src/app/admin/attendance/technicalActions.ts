@@ -31,7 +31,8 @@ export interface StudentTechnicalSheetResponse {
 
 // ── CARREGA DADOS DA FICHA TÉCNICA DO ALUNO ───────────────────
 export async function getStudentTechnicalSheetAction(
-  studentId: string
+  studentId: string,
+  targetModalityId?: string
 ): Promise<StudentTechnicalSheetResponse> {
   try {
     const supabase = await createClient()
@@ -75,7 +76,7 @@ export async function getStudentTechnicalSheetAction(
     }
 
     // 3. Modalidade e Graduação do aluno
-    const { data: studentModalities } = await adminClient
+    let modQuery = adminClient
       .from('student_modalities')
       .select(`
         *,
@@ -84,7 +85,12 @@ export async function getStudentTechnicalSheetAction(
       `)
       .eq('student_id', studentId)
       .eq('status', 'active')
-      .limit(1)
+
+    if (targetModalityId) {
+      modQuery = modQuery.eq('modality_id', targetModalityId)
+    }
+
+    const { data: studentModalities } = await modQuery.limit(1)
 
     const activeMod = studentModalities?.[0]
     const modalityName = activeMod?.modality?.name ?? 'Kung Fu Shaolin'

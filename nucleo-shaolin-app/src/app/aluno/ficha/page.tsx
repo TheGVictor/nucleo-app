@@ -1,10 +1,11 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { TechnicalSheet } from '@/components/technical/TechnicalSheet'
 import { getStudentTechnicalSheetAction } from '@/app/admin/attendance/technicalActions'
-import { getRequestUserProfile } from '@/lib/user-cache'
+import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
 
 interface GraduationHistoryItem {
   id: string
@@ -14,7 +15,11 @@ interface GraduationHistoryItem {
   graduation: { level_name: string; color_hex: string | null } | null
 }
 
-export default async function AlunoFichaPage() {
+interface AlunoFichaPageProps {
+  searchParams?: Promise<{ modality?: string }>
+}
+
+export default async function AlunoFichaPage({ searchParams }: AlunoFichaPageProps) {
   const supabase = await createClient()
 
   const {
@@ -22,15 +27,19 @@ export default async function AlunoFichaPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Carrega Perfil (deduplicado), Histórico de Graduações e a Ficha Técnica
-  const [profile, gradHistoryRes, technicalSheetRes] = await Promise.all([
+  const resolvedParams = searchParams ? await searchParams : {}
+  const targetModalityId = resolvedParams.modality
+
+  // Carrega Perfil (deduplicado), Modalidades, Histórico de Graduações e a Ficha Técnica
+  const [profile, studentModalities, gradHistoryRes, technicalSheetRes] = await Promise.all([
     getRequestUserProfile(user.id),
+    getRequestStudentModalities(user.id),
     supabase
       .from('graduation_history')
       .select('*, modality:modalities(name), graduation:graduations(level_name, color_hex)')
       .eq('student_id', user.id)
       .order('promoted_at', { ascending: false }),
-    getStudentTechnicalSheetAction(user.id),
+    getStudentTechnicalSheetAction(user.id, targetModalityId),
   ])
 
   if (!profile) redirect('/login')
@@ -40,6 +49,55 @@ export default async function AlunoFichaPage() {
 
   return (
     <main className="page-container py-5 flex flex-col gap-6 animate-fade-in">
+      {/* ── SELETOR DE MODALIDADE (QUANDO O ALUNO TREINA MAIS DE UMA) ── */}
+      {studentModalities && studentModalities.length > 1 && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-muted uppercase tracking-wider">
+              Suas Modalidades Marciais:
+            </span>
+            <span className="text-[11px] text-gold font-bold">
+              {studentModalities.length} modalidades ativas
+            </span>
+          </div>
+          <div className="flex items-center gap-2 p-1.5 bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-2xl overflow-x-auto scrollbar-none">
+            {studentModalities.map((sm) => {
+              const isSelected =
+                (targetModalityId && sm.modality?.id === targetModalityId) ||
+                (!targetModalityId && sm.modality?.name === technicalData?.modalityName)
+              const icon =
+                sm.modality?.slug === 'taichi'
+                  ? '☯️'
+                  : sm.modality?.slug === 'sanda'
+                  ? '🥊'
+                  : '🥋'
+              return (
+                <Link
+                  key={sm.id}
+                  href={`/aluno/ficha?modality=${sm.modality?.id}`}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 ${
+                    isSelected
+                      ? 'bg-[var(--color-gold)] text-black shadow-xs font-extrabold'
+                      : 'text-muted hover:text-main hover:bg-white/5'
+                  }`}
+                >
+                  <span className="text-base">{icon}</span>
+                  <span>{sm.modality?.name}</span>
+                  {sm.approved_graduation?.level_name && (
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                        isSelected ? 'bg-black/20 text-black' : 'bg-white/10 text-muted'
+                      }`}
+                    >
+                      {sm.approved_graduation.level_name.replace('Faixa ', '')}
+                    </span>
+                  )}
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
       {/* ── CABEÇALHO DO ALUNO COM STATUS MARCIAL E TEMA DA FAIXA ── */}
       <div
         className="p-5 sm:p-6 rounded-[var(--radius-xl)] flex flex-col sm:flex-row items-center sm:items-start gap-4 relative overflow-hidden border transition-all text-center sm:text-left shadow-md"
