@@ -126,3 +126,102 @@ export async function createProductOrderAction(input: CreateOrderInput) {
     return { success: false, error: message }
   }
 }
+
+interface UpdateStudentOrderInput {
+  orderId: string
+  quantity: number
+  paymentMethod: OrderPaymentMethod
+  notes?: string
+}
+
+export async function updateStudentOrderAction(input: UpdateStudentOrderInput) {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'Sessão expirada. Faça login novamente.' }
+    }
+
+    const adminClient = createAdminClient()
+
+    // 1. Busca o pedido para garantir posse e recalcular total
+    const { data: order, error: orderErr } = await adminClient
+      .from('product_orders')
+      .select('*, product:products(id, name, price)')
+      .eq('id', input.orderId)
+      .eq('student_id', user.id)
+      .single()
+
+    if (orderErr || !order) {
+      return { success: false, error: 'Reserva não encontrada ou sem permissão.' }
+    }
+
+    if (order.status === 'delivered') {
+      return { success: false, error: 'Pedidos já entregues não podem ser alterados.' }
+    }
+
+    const unitPrice =
+      order.product?.price != null
+        ? Number(order.product.price)
+        : Number(order.total_price) / Math.max(1, order.quantity || 1)
+
+    const quantity = Math.max(1, input.quantity || 1)
+    const totalPrice = unitPrice * quantity
+
+    const { error: updateErr } = await adminClient
+      .from('product_orders')
+      .update({
+        quantity,
+        total_price: totalPrice,
+        payment_method: input.paymentMethod,
+        notes: input.notes?.trim() || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', input.orderId)
+      .eq('student_id', user.id)
+
+    if (updateErr) throw updateErr
+
+    revalidatePath('/aluno/loja')
+    revalidatePath('/admin/loja')
+
+    return { success: true }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Erro ao atualizar reserva.'
+    return { success: false, error: message }
+  }
+}
+
+export async function deleteStudentOrderAction(orderId: string) {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'Sessão expirada. Faça login novamente.' }
+    }
+
+    const adminClient = createAdminClient()
+
+    const { error } = await adminClient
+      .from('product_orders')
+      .delete()
+      .eq('id', orderId)
+      .eq('student_id', user.id)
+
+    if (error) throw error
+
+    revalidatePath('/aluno/loja')
+    revalidatePath('/admin/loja')
+
+    return { success: true }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Erro ao excluir reserva.'
+    return { success: false, error: message }
+  }
+}

@@ -63,9 +63,17 @@ CREATE POLICY "Alunos podem criar pedidos" ON public.product_orders
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role::text IN ('instructor', 'admin', 'super_admin'))
   );
 
-DROP POLICY IF EXISTS "Admins podem atualizar status dos pedidos" ON public.product_orders;
-CREATE POLICY "Admins podem atualizar status dos pedidos" ON public.product_orders
+DROP POLICY IF EXISTS "Alunos e admins podem atualizar pedidos" ON public.product_orders;
+CREATE POLICY "Alunos e admins podem atualizar pedidos" ON public.product_orders
   FOR UPDATE USING (
+    student_id = auth.uid() OR
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role::text IN ('instructor', 'admin', 'super_admin'))
+  );
+
+DROP POLICY IF EXISTS "Alunos e admins podem excluir pedidos" ON public.product_orders;
+CREATE POLICY "Alunos e admins podem excluir pedidos" ON public.product_orders
+  FOR DELETE USING (
+    student_id = auth.uid() OR
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role::text IN ('instructor', 'admin', 'super_admin'))
   );
 

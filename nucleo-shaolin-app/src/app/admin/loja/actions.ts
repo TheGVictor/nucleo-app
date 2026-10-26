@@ -146,3 +146,17 @@ export async function updateOrderStatusAction(orderId: string, status: OrderStat
     return { success: false, error: msg }
   }
 }
+
+export async function deleteOrderAction(orderId: string) {
+  try {
+    const adminClient = createAdminClient()
+    const { error } = await adminClient.from('product_orders').delete().eq('id', orderId)
+    if (error) throw error
+    revalidatePath('/admin/loja')
+    revalidatePath('/aluno/loja')
+    return { success: true }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Erro ao excluir pedido'
+    return { success: false, error: msg }
+  }
+}

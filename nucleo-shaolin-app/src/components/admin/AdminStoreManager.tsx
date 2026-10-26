@@ -9,6 +9,7 @@ import {
   updateOrderStatusAction,
   getAdminProductsAction,
   getAdminOrdersAction,
+  deleteOrderAction,
 } from '@/app/admin/loja/actions'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
@@ -119,6 +120,14 @@ export function AdminStoreManager({
   function handleUpdateStatus(orderId: string, status: OrderStatus) {
     startTransition(async () => {
       await updateOrderStatusAction(orderId, status)
+      await reloadAll()
+    })
+  }
+
+  function handleDeleteOrder(orderId: string, studentName: string) {
+    if (!confirm(`Deseja excluir permanentemente o pedido de "${studentName}"?`)) return
+    startTransition(async () => {
+      await deleteOrderAction(orderId)
       await reloadAll()
     })
   }
@@ -354,6 +363,21 @@ export function AdminStoreManager({
                       {ord.status === 'cancelled' && (
                         <Badge variant="error">Cancelado</Badge>
                       )}
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDeleteOrder(
+                            ord.id,
+                            ord.student?.full_name || ord.product?.name || 'este aluno'
+                          )
+                        }
+                        disabled={isPending}
+                        className="text-muted hover:text-red-400 p-1.5 rounded-md hover:bg-red-500/10 transition-colors text-xs ml-0.5 cursor-pointer"
+                        title="Excluir registro deste pedido"
+                      >
+                        🗑️
+                      </button>
                     </div>
                   </div>
                 )

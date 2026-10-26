@@ -3,8 +3,9 @@
 import { useState, useMemo } from 'react'
 import type { Product, ProductOrder } from '@/types/database'
 import { ProductModal } from './ProductModal'
+import { EditOrderModal } from './EditOrderModal'
 import { Badge } from '@/components/ui/Badge'
-import { getStudentOrdersAction } from '@/app/aluno/loja/actions'
+import { getStudentOrdersAction, deleteStudentOrderAction } from '@/app/aluno/loja/actions'
 
 interface StudentStoreProps {
   initialProducts: Product[]
@@ -15,6 +16,8 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
   const [products] = useState<Product[]>(initialProducts)
   const [orders, setOrders] = useState<ProductOrder[]>(initialOrders)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [editingOrder, setEditingOrder] = useState<ProductOrder | null>(null)
+  const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos')
   const [viewTab, setViewTab] = useState<'catalog' | 'orders'>('catalog')
@@ -44,6 +47,29 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
   async function refreshOrders() {
     const updated = await getStudentOrdersAction()
     setOrders(updated)
+  }
+
+  async function handleDeleteOrder(ord: ProductOrder) {
+    const productName = ord.product?.name || ord.notes || 'esta reserva'
+    if (
+      !window.confirm(
+        `Tem certeza que deseja cancelar e excluir sua reserva de "${productName}"?`
+      )
+    ) {
+      return
+    }
+
+    setDeletingOrderId(ord.id)
+    try {
+      const res = await deleteStudentOrderAction(ord.id)
+      if (res.success) {
+        await refreshOrders()
+      } else {
+        alert(res.error || 'Não foi possível excluir a reserva.')
+      }
+    } finally {
+      setDeletingOrderId(null)
+    }
   }
 
   return (
@@ -254,40 +280,87 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                   year: 'numeric',
                 })
 
+                const cleanNotes = (ord.notes || '')
+                  .replace(/\s*\[Produto:[^\]]+\]\s*/g, '')
+                  .trim()
+
+                const canEdit = ord.status !== 'delivered'
+
                 return (
                   <div
                     key={ord.id}
-                    className="card p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-[var(--color-border)] shadow-xs"
+                    className="card p-3.5 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 border border-[var(--color-border)] shadow-xs hover:border-[var(--color-border-gold)] transition-all"
                   >
-                    <div className="flex items-start sm:items-center gap-3 min-w-0">
+                    <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
                       <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl shrink-0">
                         {isPix ? '💠' : '🏢'}
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="text-xs sm:text-sm font-bold text-main truncate">
                             {ord.product?.name || ord.notes || 'Produto Reservado'}
                           </h4>
                           {statusBadge}
                         </div>
-                        <div className="flex items-center gap-2 text-[11px] text-muted mt-0.5">
+                        <div className="flex items-center gap-2 text-[11px] text-muted mt-0.5 flex-wrap">
                           <span>Qtd: <strong>{ord.quantity}</strong></span>
                           <span>•</span>
                           <span>{isPix ? 'Via PIX' : 'Pagamento na Recepção'}</span>
                           <span>•</span>
                           <span>{dateStr}</span>
                         </div>
+                        {cleanNotes && (
+                          <p className="text-[11px] text-amber-500/90 font-medium mt-1">
+                            💬 Obs: {cleanNotes}
+                          </p>
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-3 self-end sm:self-center border-t sm:border-t-0 pt-2 sm:pt-0 w-full sm:w-auto">
-                      <span className="text-xs text-muted sm:hidden">Total:</span>
-                      <span className="text-sm sm:text-base font-black text-gold">
-                        {ord.total_price.toLocaleString('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL',
-                        })}
-                      </span>
+                    <div className="flex items-center justify-between md:justify-end gap-3 border-t md:border-t-0 pt-2.5 md:pt-0 w-full md:w-auto">
+                      <div className="text-left md:text-right">
+                        <span className="text-[10px] text-muted uppercase font-bold block leading-none md:hidden">
+                          Total
+                        </span>
+                        <span className="text-sm sm:text-base font-black text-gold">
+                          {ord.total_price.toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
+                          })}
+                        </span>
+                      </div>
+
+                      {/* Botões de Ação: Editar e Excluir */}
+                      <div className="flex items-center gap-1.5">
+                        {canEdit && (
+                          <button
+                            type="button"
+                            onClick={() => setEditingOrder(ord)}
+                            className="btn btn-secondary btn-sm py-1 px-2.5 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                            title="Editar quantidade, pagamento ou observações"
+                          >
+                            <span>✏️</span>
+                            <span>Editar</span>
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteOrder(ord)}
+                          disabled={deletingOrderId === ord.id}
+                          className="btn btn-secondary btn-sm py-1 px-2.5 text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-500/10 flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                          title="Cancelar e excluir reserva"
+                        >
+                          {deletingOrderId === ord.id ? (
+                            <span className="text-[10px]">...</span>
+                          ) : (
+                            <>
+                              <span>🗑️</span>
+                              <span>Excluir</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )
@@ -303,6 +376,17 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
           onOrderSuccess={() => {
+            refreshOrders()
+          }}
+        />
+      )}
+
+      {/* ── MODAL DE EDIÇÃO DE RESERVA ─────────────────────────── */}
+      {editingOrder && (
+        <EditOrderModal
+          order={editingOrder}
+          onClose={() => setEditingOrder(null)}
+          onSuccess={() => {
             refreshOrders()
           }}
         />
