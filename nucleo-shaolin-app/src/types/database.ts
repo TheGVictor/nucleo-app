@@ -123,3 +123,44 @@ export interface ExamListCandidate {
   instructor_notes: string | null
   created_at: string
 }
+
+export type OrderPaymentMethod = 'reception' | 'pix'
+export type OrderStatus = 'reserved' | 'paid' | 'delivered' | 'cancelled'
+
+export interface Product {
+  id: string
+  name: string
+  description: string | null
+  price: number
+  category: string
+  image_url: string | null
+  stock: number | null
+  active: boolean
+  created_at: string
+  updated_at?: string
+}
+
+export interface ProductOrder {
+  id: string
+  student_id: string
+  product_id: string
+  quantity: number
+  total_price: number
+  payment_method: OrderPaymentMethod
+  status: OrderStatus
+  notes: string | null
+  created_at: string
+  updated_at?: string
+  student?: {
+    id: string
+    full_name: string
+    phone: string | null
+  }
+  product?: {
+    id: string
+    name: string
+    price: number
+    image_url: string | null
+    category: string
+  }
+}

@@ -128,13 +128,18 @@ export default async function PerfilPage() {
       </section>
 
       {/* Opção PWA: Instalar Aplicativo no Celular */}
-      <section className="card p-5 flex flex-col gap-3">
-        <div className="flex items-center justify-between pb-1 border-b border-[var(--color-border)]">
-          <h2 className="nkfs-h-p text-main font-bold">Aplicativo no Celular</h2>
-          <span className="text-xs text-gold font-semibold">PWA Oficial</span>
+      <section className="card p-5 flex flex-col gap-3.5 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all">
+        <div className="flex items-center justify-between pb-2 border-b border-[var(--color-border)]">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xl">📲</span>
+            <h2 className="nkfs-h-p text-main font-bold">Aplicativo no Celular</h2>
+          </div>
+          <span className="text-xs text-gold font-bold px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30">
+            Acesso 1 Toque
+          </span>
         </div>
         <p className="text-xs text-muted leading-relaxed">
-          Instale o Núcleo Shaolin diretamente na tela inicial do seu iPhone ou Android para ter acesso com 1 toque e em tela cheia.
+          Adicione o <strong>Núcleo Shaolin</strong> à tela inicial do seu celular (iPhone ou Android) para usar como um aplicativo nativo em tela cheia, sem precisar digitar o endereço da web no navegador.
         </p>
         <InstallAppButton />
       </section>

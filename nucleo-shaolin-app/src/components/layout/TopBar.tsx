@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar } from '@/components/ui/Avatar'
@@ -34,6 +35,10 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
       ? 'Treino em Vídeo'
       : pathname === '/aluno/perfil'
       ? 'Meu Perfil'
+      : pathname === '/aluno/loja'
+      ? 'Loja Oficial'
+      : pathname === '/admin/loja'
+      ? 'Gestão da Loja'
       : pathname === '/admin/alunos'
       ? 'Gestão de Alunos'
       : pathname === '/admin/horarios'
@@ -46,6 +51,9 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
       ? (profile.role === 'super_admin' ? 'Painel do Sifu' : 'Painel do Instrutor')
       : profile.full_name.split(' ')[0]
   )
+
+  const isLojaPage = pathname.includes('/loja')
+  const lojaHref = pathname.startsWith('/admin') ? '/admin/loja' : '/aluno/loja'
 
   return (
     <header
@@ -116,6 +124,22 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
               </button>
             )
           )}
+
+          {/* Acesso Direto à Loja Oficial */}
+          <Link
+            href={lojaHref}
+            prefetch={true}
+            className={`px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg text-xs font-semibold flex items-center gap-1 sm:gap-1.5 transition-all shrink-0 ${
+              isLojaPage
+                ? 'bg-[var(--color-gold)] text-black font-bold shadow-xs'
+                : 'text-muted hover:text-main hover:bg-[var(--color-bg-elevated)] border border-transparent hover:border-[var(--color-border)]'
+            }`}
+            title="Loja Oficial do Dojô"
+            aria-label="Loja Oficial"
+          >
+            <span className="text-sm">🛍️</span>
+            <span className="hidden sm:inline">Loja</span>
+          </Link>
 
           <ThemeToggle />
           <Avatar name={profile.full_name} size="sm" gold />

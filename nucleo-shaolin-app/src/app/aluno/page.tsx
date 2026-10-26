@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { StatsRow } from '@/components/aluno/StatsRow'
@@ -165,6 +166,36 @@ export default async function AlunoHomePage() {
           },
         ]}
       />
+
+      {/* ── BANNER / ACESSO RÁPIDO À LOJA OFICIAL ─────────────── */}
+      <Link
+        href="/aluno/loja"
+        prefetch={true}
+        className="card p-4 sm:p-5 flex items-center justify-between gap-4 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group shadow-sm bg-gradient-to-r from-[var(--color-bg-card)] to-[var(--color-bg-elevated)]"
+      >
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
+            🛍️
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm sm:text-base font-bold text-main group-hover:text-gold transition-colors truncate">
+                Loja Oficial do Dojô
+              </h2>
+              <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-500 shrink-0">
+                Novo
+              </span>
+            </div>
+            <p className="text-xs text-muted truncate mt-0.5">
+              Uniformes, faixas, armas e equipamentos com reserva rápida ou PIX.
+            </p>
+          </div>
+        </div>
+        <div className="shrink-0 flex items-center gap-1 text-xs font-bold text-gold group-hover:translate-x-1 transition-transform">
+          <span className="hidden sm:inline">Ver Produtos</span>
+          <span>→</span>
+        </div>
+      </Link>
 
       {/* ── MURAL DE AVISOS INTERATIVO ─────────────────────────── */}
       <section className="flex flex-col gap-3">
