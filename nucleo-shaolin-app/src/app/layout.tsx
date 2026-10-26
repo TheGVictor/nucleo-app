@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from 'next/font/google'
 import '@/lib/performance-patch'
 import './globals.css'
 import { InstallPwa } from '@/components/pwa/InstallPwa'
+import { Analytics } from '@vercel/analytics/next'
 
 const fontSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -204,6 +205,7 @@ export default function RootLayout({
       >
         {children}
         <InstallPwa />
+        <Analytics />
       </body>
     </html>
   )
