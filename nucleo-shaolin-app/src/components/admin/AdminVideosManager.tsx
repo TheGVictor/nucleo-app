@@ -313,6 +313,9 @@ export function AdminVideosManager({
                 video.graduation ||
                 graduations.find((g) => g.id === video.min_graduation_id)
 
+              const embedUrl = formatEmbedUrl(video.video_url)
+              const isGoogleDrive = embedUrl.includes('drive.google.com')
+
               return (
                 <div
                   key={video.id}
@@ -320,11 +323,21 @@ export function AdminVideosManager({
                 >
                   <div>
                     {/* Player Preview */}
-                    <div className="aspect-video bg-black/90 relative border-b border-[var(--color-border)]">
+                    <div
+                      className={`relative bg-black overflow-hidden border-b border-[var(--color-border)] ${
+                        isGoogleDrive
+                          ? 'aspect-[4/3] sm:aspect-video min-h-[260px]'
+                          : 'aspect-video'
+                      }`}
+                    >
                       <iframe
-                        src={video.video_url}
-                        className="w-full h-full"
-                        allow="fullscreen; picture-in-picture"
+                        src={embedUrl}
+                        className={`w-full ${
+                          isGoogleDrive
+                            ? 'h-[calc(100%+48px)] -mt-[48px]'
+                            : 'h-full'
+                        }`}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                         allowFullScreen
                         title={video.title}
                         loading="lazy"

@@ -310,15 +310,26 @@ export function VideosExplorer({
 
 function CleanVideoCard({ video }: { video: VideoItem }) {
   const embedUrl = formatEmbedUrl(video.video_url)
+  const isGoogleDrive = embedUrl.includes('drive.google.com')
 
   return (
     <div className="card p-0 overflow-hidden shadow-sm flex flex-col justify-between border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all">
       {/* Player de Vídeo Responsivo */}
-      <div className="aspect-video bg-black relative">
+      <div
+        className={`relative bg-black overflow-hidden border-b border-[var(--color-border)] ${
+          isGoogleDrive
+            ? 'aspect-[4/3] sm:aspect-video min-h-[260px]'
+            : 'aspect-video'
+        }`}
+      >
         <iframe
           src={embedUrl}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          className={`w-full ${
+            isGoogleDrive
+              ? 'h-[calc(100%+48px)] -mt-[48px]'
+              : 'h-full'
+          }`}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
           allowFullScreen
           title={video.title}
           loading="lazy"
