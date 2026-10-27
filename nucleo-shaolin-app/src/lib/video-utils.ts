@@ -2,9 +2,31 @@
  * Utilitários para formatação e manipulação de URLs de vídeo (YouTube, Vimeo, Google Drive, etc.)
  * Configura parâmetros para embutir corretamente os players em web e mobile.
  */
+/**
+ * Verifica se a URL aponta para um arquivo de vídeo direto (.mp4, .webm, .mov, etc.)
+ * ou para um objeto do Supabase Storage.
+ */
+export function isDirectVideo(url: string | null | undefined): boolean {
+  if (!url) return false
+  const clean = url.trim().toLowerCase()
+  if (/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i.test(clean)) return true
+  if (
+    clean.includes('/storage/v1/object/public/videos/') ||
+    clean.includes('/storage/v1/object/sign/videos/')
+  ) {
+    return true
+  }
+  return false
+}
+
 export function formatEmbedUrl(rawUrl: string): string {
   if (!rawUrl) return ''
   const trimmed = rawUrl.trim()
+
+  // Se já for arquivo de vídeo direto ou Supabase Storage, mantém a URL original
+  if (isDirectVideo(trimmed)) {
+    return trimmed
+  }
 
   // ── GOOGLE DRIVE ──────────────────────────────────────────────
   // Transforma links de compartilhamento padrão /view em /preview (modo embed)

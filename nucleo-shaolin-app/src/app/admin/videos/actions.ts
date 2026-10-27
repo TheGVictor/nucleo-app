@@ -168,3 +168,58 @@ export async function deleteVideoAction(videoId: string) {
     return { success: false, error: message }
   }
 }
+
+// ── OBTER URL ASSINADA PARA UPLOAD DIRETO NO SUPABASE STORAGE ───
+export async function getSignedVideoUploadUrlAction(fileName: string, contentType?: string) {
+  try {
+    const { adminClient } = await verifyInstructorOrAdmin()
+
+    if (!fileName) {
+      return { success: false, error: 'Nome de arquivo inválido' }
+    }
+
+    const ext = fileName.split('.').pop()?.toLowerCase() || 'mp4'
+    const allowedExts = ['mp4', 'webm', 'mov', 'm4v']
+    if (!allowedExts.includes(ext)) {
+      return {
+        success: false,
+        error: 'Formato não suportado. Por favor, envie arquivos MP4, WebM ou MOV.',
+      }
+    }
+
+    const safeFileName = `treino_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`
+
+    // Garante que o bucket 'videos' exista
+    try {
+      await adminClient.storage.createBucket('videos', {
+        public: true,
+        fileSizeLimit: 52428800, // 50MB
+        allowedMimeTypes: ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v'],
+      })
+    } catch {}
+
+    const { data, error } = await adminClient.storage
+      .from('videos')
+      .createSignedUploadUrl(safeFileName)
+
+    if (error || !data) {
+      return { success: false, error: error?.message || 'Falha ao gerar link de upload' }
+    }
+
+    const { data: pubData } = adminClient.storage
+      .from('videos')
+      .getPublicUrl(safeFileName)
+
+    return {
+      success: true,
+      signedUrl: data.signedUrl,
+      token: data.token,
+      path: data.path,
+      publicUrl: pubData.publicUrl,
+    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Erro ao preparar upload de vídeo'
+    return { success: false, error: message }
+  }
+}
+

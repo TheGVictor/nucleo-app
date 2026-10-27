@@ -1,90 +1,132 @@
 import { describe, it, expect } from 'vitest'
-import { formatEmbedUrl } from '../video-utils'
+import { formatEmbedUrl, isDirectVideo } from '../video-utils'
 
-describe('video-utils: formatEmbedUrl', () => {
-  describe('Google Drive URLs', () => {
-    it('converts standard share /view URL to /preview', () => {
-      const input = 'https://drive.google.com/file/d/171gDdGH9G_lunOQ0N5-xIHhG4W3y5zox/view?usp=drive_link'
-      const output = formatEmbedUrl(input)
-      expect(output).toBe('https://drive.google.com/file/d/171gDdGH9G_lunOQ0N5-xIHhG4W3y5zox/preview')
+describe('video-utils', () => {
+  describe('formatEmbedUrl', () => {
+    describe('Google Drive URLs', () => {
+      it('converts standard share /view URL to /preview', () => {
+        const input = 'https://drive.google.com/file/d/171gDdGH9G_lunOQ0N5-xIHhG4W3y5zox/view?usp=drive_link'
+        const output = formatEmbedUrl(input)
+        expect(output).toBe('https://drive.google.com/file/d/171gDdGH9G_lunOQ0N5-xIHhG4W3y5zox/preview')
+      })
+
+      it('converts basic /view URL to /preview', () => {
+        const input = 'https://drive.google.com/file/d/abc123XYZ_file/view'
+        const output = formatEmbedUrl(input)
+        expect(output).toBe('https://drive.google.com/file/d/abc123XYZ_file/preview')
+      })
+
+      it('converts open?id= format to /preview', () => {
+        const input = 'https://drive.google.com/open?id=171gDdGH9G_lunOQ0N5-xIHhG4W3y5zox'
+        const output = formatEmbedUrl(input)
+        expect(output).toBe('https://drive.google.com/file/d/171gDdGH9G_lunOQ0N5-xIHhG4W3y5zox/preview')
+      })
+
+      it('maintains existing /preview URLs intact', () => {
+        const input = 'https://drive.google.com/file/d/171gDdGH9G_lunOQ0N5-xIHhG4W3y5zox/preview'
+        const output = formatEmbedUrl(input)
+        expect(output).toBe('https://drive.google.com/file/d/171gDdGH9G_lunOQ0N5-xIHhG4W3y5zox/preview')
+      })
     })
 
-    it('converts basic /view URL to /preview', () => {
-      const input = 'https://drive.google.com/file/d/abc123XYZ_file/view'
-      const output = formatEmbedUrl(input)
-      expect(output).toBe('https://drive.google.com/file/d/abc123XYZ_file/preview')
+    describe('YouTube URLs', () => {
+      it('converts youtube.com/watch?v=ID to embed URL with modest params', () => {
+        const input = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+        const output = formatEmbedUrl(input)
+        expect(output).toContain('https://www.youtube.com/embed/dQw4w9WgXcQ')
+        expect(output).toContain('modestbranding=1')
+        expect(output).toContain('rel=0')
+        expect(output).toContain('playsinline=1')
+      })
+
+      it('converts youtu.be/ID short link to embed URL', () => {
+        const input = 'https://youtu.be/dQw4w9WgXcQ'
+        const output = formatEmbedUrl(input)
+        expect(output).toContain('https://www.youtube.com/embed/dQw4w9WgXcQ')
+        expect(output).toContain('modestbranding=1')
+      })
+
+      it('converts youtube.com/shorts/ID to embed URL', () => {
+        const input = 'https://www.youtube.com/shorts/dQw4w9WgXcQ'
+        const output = formatEmbedUrl(input)
+        expect(output).toContain('https://www.youtube.com/embed/dQw4w9WgXcQ')
+        expect(output).toContain('modestbranding=1')
+      })
+
+      it('appends parameters to existing embed URL without duplicating', () => {
+        const input = 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+        const output = formatEmbedUrl(input)
+        expect(output).toContain('modestbranding=1')
+        const secondPass = formatEmbedUrl(output)
+        expect(secondPass.match(/modestbranding=1/g)?.length).toBe(1)
+      })
     })
 
-    it('converts open?id= format to /preview', () => {
-      const input = 'https://drive.google.com/open?id=171gDdGH9G_lunOQ0N5-xIHhG4W3y5zox'
-      const output = formatEmbedUrl(input)
-      expect(output).toBe('https://drive.google.com/file/d/171gDdGH9G_lunOQ0N5-xIHhG4W3y5zox/preview')
+    describe('Vimeo URLs', () => {
+      it('converts vimeo.com/ID to player.vimeo.com/video/ID', () => {
+        const input = 'https://vimeo.com/123456789'
+        const output = formatEmbedUrl(input)
+        expect(output).toBe('https://player.vimeo.com/video/123456789')
+      })
+
+      it('keeps existing player.vimeo.com URL intact', () => {
+        const input = 'https://player.vimeo.com/video/123456789'
+        const output = formatEmbedUrl(input)
+        expect(output).toBe('https://player.vimeo.com/video/123456789')
+      })
     })
 
-    it('maintains existing /preview URLs intact', () => {
-      const input = 'https://drive.google.com/file/d/171gDdGH9G_lunOQ0N5-xIHhG4W3y5zox/preview'
-      const output = formatEmbedUrl(input)
-      expect(output).toBe('https://drive.google.com/file/d/171gDdGH9G_lunOQ0N5-xIHhG4W3y5zox/preview')
+    describe('Direct video / Supabase Storage URLs', () => {
+      it('preserves direct .mp4 URLs without modifying', () => {
+        const input = 'https://my-domain.com/video.mp4'
+        expect(formatEmbedUrl(input)).toBe(input)
+      })
+
+      it('preserves Supabase Storage videos bucket URLs', () => {
+        const input = 'https://lgeaozzrgcqhkrfigvhp.supabase.co/storage/v1/object/public/videos/treino_123.mp4'
+        expect(formatEmbedUrl(input)).toBe(input)
+      })
+    })
+
+    describe('Edge cases', () => {
+      it('returns empty string for empty input', () => {
+        expect(formatEmbedUrl('')).toBe('')
+        expect(formatEmbedUrl('   ')).toBe('')
+      })
+
+      it('returns unrecognized URLs trimmed without alteration', () => {
+        const input = '  https://custom-server.com/my-video.avi  '
+        expect(formatEmbedUrl(input)).toBe('https://custom-server.com/my-video.avi')
+      })
     })
   })
 
-  describe('YouTube URLs', () => {
-    it('converts youtube.com/watch?v=ID to embed URL with modest params', () => {
-      const input = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-      const output = formatEmbedUrl(input)
-      expect(output).toContain('https://www.youtube.com/embed/dQw4w9WgXcQ')
-      expect(output).toContain('modestbranding=1')
-      expect(output).toContain('rel=0')
-      expect(output).toContain('playsinline=1')
+  describe('isDirectVideo', () => {
+    it('returns true for common video file extensions (.mp4, .webm, .mov, .m4v)', () => {
+      expect(isDirectVideo('https://example.com/video.mp4')).toBe(true)
+      expect(isDirectVideo('https://example.com/video.MP4')).toBe(true)
+      expect(isDirectVideo('https://example.com/clip.webm')).toBe(true)
+      expect(isDirectVideo('https://example.com/movie.mov')).toBe(true)
+      expect(isDirectVideo('https://example.com/file.m4v')).toBe(true)
+      expect(isDirectVideo('https://example.com/video.mp4?token=123')).toBe(true)
     })
 
-    it('converts youtu.be/ID short link to embed URL', () => {
-      const input = 'https://youtu.be/dQw4w9WgXcQ'
-      const output = formatEmbedUrl(input)
-      expect(output).toContain('https://www.youtube.com/embed/dQw4w9WgXcQ')
-      expect(output).toContain('modestbranding=1')
+    it('returns true for Supabase Storage videos bucket URLs', () => {
+      expect(
+        isDirectVideo('https://xyz.supabase.co/storage/v1/object/public/videos/kati-1.mp4')
+      ).toBe(true)
+      expect(
+        isDirectVideo('https://xyz.supabase.co/storage/v1/object/sign/videos/kati-1.mp4?token=abc')
+      ).toBe(true)
     })
 
-    it('converts youtube.com/shorts/ID to embed URL', () => {
-      const input = 'https://www.youtube.com/shorts/dQw4w9WgXcQ'
-      const output = formatEmbedUrl(input)
-      expect(output).toContain('https://www.youtube.com/embed/dQw4w9WgXcQ')
-      expect(output).toContain('modestbranding=1')
-    })
-
-    it('appends parameters to existing embed URL without duplicating', () => {
-      const input = 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-      const output = formatEmbedUrl(input)
-      expect(output).toContain('modestbranding=1')
-      // If already has modestbranding, it shouldn't add it twice
-      const secondPass = formatEmbedUrl(output)
-      expect(secondPass.match(/modestbranding=1/g)?.length).toBe(1)
-    })
-  })
-
-  describe('Vimeo URLs', () => {
-    it('converts vimeo.com/ID to player.vimeo.com/video/ID', () => {
-      const input = 'https://vimeo.com/123456789'
-      const output = formatEmbedUrl(input)
-      expect(output).toBe('https://player.vimeo.com/video/123456789')
-    })
-
-    it('keeps existing player.vimeo.com URL intact', () => {
-      const input = 'https://player.vimeo.com/video/123456789'
-      const output = formatEmbedUrl(input)
-      expect(output).toBe('https://player.vimeo.com/video/123456789')
-    })
-  })
-
-  describe('Edge cases', () => {
-    it('returns empty string for empty input', () => {
-      expect(formatEmbedUrl('')).toBe('')
-      expect(formatEmbedUrl('   ')).toBe('')
-    })
-
-    it('returns unrecognized URLs trimmed without alteration', () => {
-      const input = '  https://custom-server.com/my-video.mp4  '
-      expect(formatEmbedUrl(input)).toBe('https://custom-server.com/my-video.mp4')
+    it('returns false for YouTube, Google Drive, Vimeo and null/undefined', () => {
+      expect(isDirectVideo('https://www.youtube.com/watch?v=123')).toBe(false)
+      expect(isDirectVideo('https://drive.google.com/file/d/123/view')).toBe(false)
+      expect(isDirectVideo('https://vimeo.com/123')).toBe(false)
+      expect(isDirectVideo(null)).toBe(false)
+      expect(isDirectVideo(undefined)).toBe(false)
+      expect(isDirectVideo('')).toBe(false)
     })
   })
 })

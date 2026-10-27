@@ -3,11 +3,12 @@
 import { useState, useTransition } from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
-import { formatEmbedUrl } from '@/lib/video-utils'
+import { formatEmbedUrl, isDirectVideo } from '@/lib/video-utils'
 import {
   createVideoAction,
   updateVideoAction,
   deleteVideoAction,
+  getSignedVideoUploadUrlAction,
   type VideoFormData,
 } from '@/app/admin/videos/actions'
 
@@ -69,6 +70,10 @@ export function AdminVideosManager({
   const [formError, setFormError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
+  // Estado de Upload para Supabase Storage
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null)
+
   // Estado de Confirmação de Exclusão
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
@@ -113,6 +118,53 @@ export function AdminVideosManager({
     setIsModalOpen(false)
     setEditingVideo(null)
     setFormError(null)
+    setIsUploading(false)
+    setUploadProgress(null)
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 52428800) {
+      alert('O arquivo selecionado tem mais de 50MB. Por favor, envie um vídeo comprimido de até 50MB.')
+      return
+    }
+
+    setIsUploading(true)
+    setUploadProgress('Autorizando upload seguro...')
+
+    try {
+      const res = await getSignedVideoUploadUrlAction(file.name, file.type)
+      if (!res.success || !res.signedUrl) {
+        alert(res.error || 'Erro ao gerar autorização de upload')
+        setIsUploading(false)
+        setUploadProgress(null)
+        return
+      }
+
+      setUploadProgress('Enviando vídeo para o Supabase Storage...')
+      const uploadReq = await fetch(res.signedUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type || 'video/mp4',
+        },
+        body: file,
+      })
+
+      if (!uploadReq.ok) {
+        throw new Error(`Falha no upload do arquivo (HTTP ${uploadReq.status})`)
+      }
+
+      setFormUrl(res.publicUrl)
+      setUploadProgress(null)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro no envio do vídeo'
+      alert(msg)
+      setUploadProgress(null)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -314,7 +366,8 @@ export function AdminVideosManager({
                 graduations.find((g) => g.id === video.min_graduation_id)
 
               const embedUrl = formatEmbedUrl(video.video_url)
-              const isGoogleDrive = embedUrl.includes('drive.google.com')
+              const isDirect = isDirectVideo(embedUrl)
+              const isGoogleDrive = !isDirect && embedUrl.includes('drive.google.com')
 
               return (
                 <div
@@ -330,18 +383,30 @@ export function AdminVideosManager({
                           : 'aspect-video'
                       }`}
                     >
-                      <iframe
-                        src={embedUrl}
-                        className={`w-full ${
-                          isGoogleDrive
-                            ? 'h-[calc(100%+48px)] -mt-[48px]'
-                            : 'h-full'
-                        }`}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                        allowFullScreen
-                        title={video.title}
-                        loading="lazy"
-                      />
+                      {isDirect ? (
+                        <video
+                          src={embedUrl}
+                          controls
+                          controlsList="nodownload"
+                          playsInline
+                          className="w-full h-full object-contain bg-black"
+                          preload="metadata"
+                          onContextMenu={(e) => e.preventDefault()}
+                        />
+                      ) : (
+                        <iframe
+                          src={embedUrl}
+                          className={`w-full ${
+                            isGoogleDrive
+                              ? 'h-[calc(100%+48px)] -mt-[48px]'
+                              : 'h-full'
+                          }`}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                          allowFullScreen
+                          title={video.title}
+                          loading="lazy"
+                        />
+                      )}
                     </div>
 
                     {/* Metadados */}
@@ -460,21 +525,63 @@ export function AdminVideosManager({
                 />
               </div>
 
-              {/* URL do Vídeo */}
+              {/* Origem do Vídeo: Upload Direto no Supabase ou Link Externo */}
+              <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)]">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-main flex items-center gap-1.5">
+                    <span>☁️</span> Opção 1: Upload Direto no Supabase Storage
+                  </span>
+                  <span className="text-[10px] uppercase font-bold text-gold px-2 py-0.5 rounded bg-[var(--color-gold)]/10 border border-[var(--color-gold)]/30">
+                    Player Nativo HTML5
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted">
+                  Envie o vídeo (.mp4, .webm ou .mov) direto do celular ou computador. Ele toca no player nativo limpo do app, sem anúncios, sem logos e sem botão de download.
+                </p>
+
+                <label className="btn btn-outline btn-sm font-semibold flex items-center justify-center gap-2 cursor-pointer mt-1 border-[var(--color-gold)] text-gold hover:bg-[var(--color-gold)] hover:text-black transition-all">
+                  {isUploading ? (
+                    <>
+                      <Spinner size="sm" />
+                      <span>{uploadProgress || 'Enviando vídeo...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📁</span>
+                      <span>{formUrl && isDirectVideo(formUrl) ? 'Substituir Arquivo de Vídeo' : 'Selecionar Arquivo de Vídeo (.mp4)'}</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime,video/x-m4v"
+                    disabled={isUploading}
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* URL do Vídeo (Preenchida pelo upload ou digitada manualmente) */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-muted uppercase">
-                  Link do Vídeo (YouTube, Google Drive ou Vimeo) *
+                  URL do Vídeo (Supabase, YouTube, Google Drive ou Vimeo) *
                 </label>
                 <input
                   type="url"
                   required
-                  placeholder="Ex: Link do Google Drive ou YouTube..."
+                  placeholder="Ex: https://... ou use o botão de upload acima"
                   value={formUrl}
                   onChange={(e) => setFormUrl(e.target.value)}
-                  className="input w-full text-xs sm:text-sm"
+                  className="input w-full text-xs sm:text-sm font-mono"
                 />
                 <span className="text-[11px] text-faint">
-                  💡 O sistema converte automaticamente links do YouTube e do Google Drive para o formato correto de exibição.
+                  {formUrl && isDirectVideo(formUrl) ? (
+                    <span className="text-green-500 font-semibold">
+                      ✓ Vídeo direto / Supabase Storage configurado. Será reproduzido no player nativo HTML5.
+                    </span>
+                  ) : (
+                    '💡 O sistema suporta links do Supabase Storage, YouTube e Google Drive com conversão automática.'
+                  )}
                 </span>
               </div>
 

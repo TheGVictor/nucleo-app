@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Badge } from '@/components/ui/Badge'
-import { formatEmbedUrl } from '@/lib/video-utils'
+import { formatEmbedUrl, isDirectVideo } from '@/lib/video-utils'
 
 export interface VideoItem {
   id: string
@@ -310,7 +310,8 @@ export function VideosExplorer({
 
 function CleanVideoCard({ video }: { video: VideoItem }) {
   const embedUrl = formatEmbedUrl(video.video_url)
-  const isGoogleDrive = embedUrl.includes('drive.google.com')
+  const isDirect = isDirectVideo(embedUrl)
+  const isGoogleDrive = !isDirect && embedUrl.includes('drive.google.com')
 
   return (
     <div className="card p-0 overflow-hidden shadow-sm flex flex-col justify-between border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all">
@@ -322,18 +323,30 @@ function CleanVideoCard({ video }: { video: VideoItem }) {
             : 'aspect-video'
         }`}
       >
-        <iframe
-          src={embedUrl}
-          className={`w-full ${
-            isGoogleDrive
-              ? 'h-[calc(100%+48px)] -mt-[48px]'
-              : 'h-full'
-          }`}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-          allowFullScreen
-          title={video.title}
-          loading="lazy"
-        />
+        {isDirect ? (
+          <video
+            src={embedUrl}
+            controls
+            controlsList="nodownload"
+            playsInline
+            className="w-full h-full object-contain bg-black"
+            preload="metadata"
+            onContextMenu={(e) => e.preventDefault()}
+          />
+        ) : (
+          <iframe
+            src={embedUrl}
+            className={`w-full ${
+              isGoogleDrive
+                ? 'h-[calc(100%+48px)] -mt-[48px]'
+                : 'h-full'
+            }`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen
+            title={video.title}
+            loading="lazy"
+          />
+        )}
       </div>
 
       {/* Título e Metadados Essenciais (Sem poluição) */}

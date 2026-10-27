@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createVideoAction, updateVideoAction, deleteVideoAction } from '../actions'
+import {
+  createVideoAction,
+  updateVideoAction,
+  deleteVideoAction,
+  getSignedVideoUploadUrlAction,
+} from '../actions'
 
 // Mock next/cache
 vi.mock('next/cache', () => ({
@@ -14,6 +19,10 @@ const mockVideoInsert = vi.fn()
 const mockVideoUpdateEq = vi.fn()
 const mockVideoDeleteEq = vi.fn()
 
+const mockCreateBucket = vi.fn()
+const mockCreateSignedUploadUrl = vi.fn()
+const mockGetPublicUrl = vi.fn()
+
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({
     auth: {
@@ -24,6 +33,13 @@ vi.mock('@/lib/supabase/server', () => ({
 
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: vi.fn(() => ({
+    storage: {
+      createBucket: mockCreateBucket,
+      from: () => ({
+        createSignedUploadUrl: mockCreateSignedUploadUrl,
+        getPublicUrl: mockGetPublicUrl,
+      }),
+    },
     from: (table: string) => {
       if (table === 'profiles') {
         return {
@@ -212,6 +228,42 @@ describe('admin/videos actions', () => {
       const res = await deleteVideoAction('v-to-delete')
       expect(res.success).toBe(false)
       expect(res.error).toBe('Database constraint error')
+    })
+  })
+
+  describe('getSignedVideoUploadUrlAction', () => {
+    it('rejects unsupported file formats', async () => {
+      mockGetUser.mockResolvedValueOnce({ data: { user: { id: 'admin-id' } } })
+      mockProfileSelect.mockResolvedValueOnce({ data: { role: 'admin' } })
+
+      const res = await getSignedVideoUploadUrlAction('arquivo.exe')
+      expect(res.success).toBe(false)
+      expect(res.error).toContain('Formato não suportado')
+    })
+
+    it('generates signed upload URL and public URL for valid .mp4 video', async () => {
+      mockGetUser.mockResolvedValueOnce({ data: { user: { id: 'admin-id' } } })
+      mockProfileSelect.mockResolvedValueOnce({ data: { role: 'instructor' } })
+
+      mockCreateSignedUploadUrl.mockResolvedValueOnce({
+        data: {
+          signedUrl: 'https://supabase.co/upload/sign/videos/treino.mp4',
+          token: 'token-xyz',
+          path: 'treino.mp4',
+        },
+        error: null,
+      })
+
+      mockGetPublicUrl.mockReturnValueOnce({
+        data: {
+          publicUrl: 'https://supabase.co/storage/v1/object/public/videos/treino.mp4',
+        },
+      })
+
+      const res = await getSignedVideoUploadUrlAction('treino-kati.mp4')
+      expect(res.success).toBe(true)
+      expect(res.signedUrl).toBe('https://supabase.co/upload/sign/videos/treino.mp4')
+      expect(res.publicUrl).toBe('https://supabase.co/storage/v1/object/public/videos/treino.mp4')
     })
   })
 })
