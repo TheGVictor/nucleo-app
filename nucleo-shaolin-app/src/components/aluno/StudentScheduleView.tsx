@@ -108,7 +108,7 @@ export function StudentScheduleView({
           <span className="text-4xl mb-2">🔒</span>
           <h3 className="nkfs-h-p font-bold text-main">Escola Fechada na Quarta-feira</h3>
           <p className="nkfs-p-m text-muted mt-1 max-w-md">
-            Às quartas-feiras o dojô não tem aulas regulares, sendo dedicado ao descanso, manutenção do espaço e treinamento dos instrutores.
+            Às quartas-feiras a escola não tem aulas regulares, sendo dedicado ao descanso, manutenção do espaço e treinamento dos instrutores.
           </p>
         </div>
       )}

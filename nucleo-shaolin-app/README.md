@@ -1,6 +1,6 @@
 # 🥋 Núcleo de Kung Fu Shaolin — Portal & App do Aluno
 
-> Plataforma web oficial do **Núcleo de Kung Fu Shaolin**, sob supervisão técnica do **Sifu Guilherme**. Une a tradição marcial milenar chinesa à tecnologia moderna para acompanhamento técnico, graduações e gestão do dojô (*Kwoon*).
+> Plataforma web oficial do **Núcleo de Kung Fu Shaolin**, sob supervisão técnica do **Sifu Guilherme**. Une a tradição marcial milenar chinesa à tecnologia moderna para acompanhamento técnico, graduações e gestão da escola (*Kwoon*).
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.4.0-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
@@ -13,7 +13,7 @@
 ## 🌟 Visão Geral
 
 O sistema atende a três frentes principais:
-1. **Página Institucional**: Apresentação minimalista, elegante e de alto impacto das modalidades (Kung Fu Shaolin Choy Lay Fut, Tai Chi Chuan Yang e Sanda / Boxe Chinês), história do dojô e esclarecimento de dúvidas frequentes.
+1. **Página Institucional**: Apresentação minimalista, elegante e de alto impacto das modalidades (Kung Fu Shaolin Choy Lay Fut, Tai Chi Chuan Yang e Sanda / Boxe Chinês), história da escola e esclarecimento de dúvidas frequentes.
 2. **Área do Aluno**: Ambiente autenticado onde cada praticante acompanha sua trilha marcial, critérios de avaliação, vídeos técnicos autorizados pelo mestre e avisos da escola.
 3. **Painel do Sifu (Admin)**: Gestão operacional, fila de homologação de novas matrículas, métricas em tempo real e publicação de comunicados com suporte a cartazes e imagens.
 

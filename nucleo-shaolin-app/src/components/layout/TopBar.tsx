@@ -134,7 +134,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
                 ? 'bg-[var(--color-gold)] text-black font-bold shadow-xs'
                 : 'text-muted hover:text-main hover:bg-[var(--color-bg-elevated)] border border-transparent hover:border-[var(--color-border)]'
             }`}
-            title="Loja Oficial do Dojô"
+            title="Loja Oficial da Escola"
             aria-label="Loja Oficial"
           >
             <span className="text-sm">🛍️</span>

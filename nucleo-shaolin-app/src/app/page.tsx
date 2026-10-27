@@ -83,8 +83,8 @@ const SPLIT_SECTIONS: ModalitySplit[] = [
     tag: 'Comunidade & Família',
     tagVariant: 'gold',
     image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&q=80&w=900',
-    imageAlt: 'Ambiente do Dojô com praticantes em harmonia e respeito mútuo',
-    badgeOnImage: '🏯 Kwoon Tradicional · Dojô Acolhedor',
+    imageAlt: 'Ambiente da escola com praticantes em harmonia e respeito mútuo',
+    badgeOnImage: '🏯 Kwoon Tradicional · Escola Acolhedora',
     desc: 'No Núcleo de Kung Fu Shaolin, a arte marcial vai muito além dos golpes: é uma ferramenta de desenvolvimento moral, respeito aos mestres e amor à família. Um ambiente seguro, sem arrogância e com tecnologia de ponta para acompanhar o aprendizado de cada aluno.',
     highlights: [
       'Orientação técnica direta sob a linhagem do Sifu Guilherme',
@@ -105,7 +105,7 @@ const PILLARS = [
   {
     icon: '🤝',
     title: 'Ambiente Familiar e Seguro',
-    desc: 'Um Kwoon (dojô) acolhedor onde cultivamos a disciplina, o respeito mútuo e a fraternidade, sem arrogância ou agressividade.',
+    desc: 'Um Kwoon (escola) acolhedor onde cultivamos a disciplina, o respeito mútuo e a fraternidade, sem arrogância ou agressividade.',
   },
   {
     icon: '📱',
@@ -235,7 +235,7 @@ export default function HomePage() {
                 </p>
 
                 <p className="nkfs-p-m text-muted mt-2 max-w-xl leading-relaxed">
-                  Aprenda sob a tutela de instrutores formados na linhagem tradicional, com estrutura completa de dojô e um portal online exclusivo para acompanhar sua evolução marcial.
+                  Aprenda sob a tutela de instrutores formados na linhagem tradicional, com estrutura completa de treino e um portal online exclusivo para acompanhar sua evolução marcial.
                 </p>
 
                 {/* Botões de Ação Principais */}

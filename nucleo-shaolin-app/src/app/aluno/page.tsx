@@ -175,7 +175,7 @@ export default async function AlunoHomePage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h2 className="text-sm sm:text-base font-bold text-main group-hover:text-gold transition-colors truncate">
-                Loja Oficial do Dojô
+                Loja Oficial da Escola
               </h2>
               <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-500 shrink-0">
                 Novo

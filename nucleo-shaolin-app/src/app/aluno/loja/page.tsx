@@ -25,7 +25,7 @@ export default async function AlunoLojaPage() {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-2xl">🛍️</span>
-            <h1 className="nkfs-h-m text-main font-bold">Loja Oficial do Dojô</h1>
+            <h1 className="nkfs-h-m text-main font-bold">Loja Oficial da Escola</h1>
           </div>
           <p className="nkfs-p-m text-muted mt-0.5">
             Adquira uniformes oficiais, faixas de graduação, armas tradicionais e equipamentos com retirada no Núcleo Shaolin.

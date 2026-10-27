@@ -109,7 +109,7 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
         </div>
 
         <span className="text-xs text-muted hidden sm:inline">
-          Retirada oficial no dojô Núcleo Shaolin
+          Retirada oficial na escola Núcleo Shaolin
         </span>
       </div>
 

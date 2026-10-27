@@ -80,20 +80,13 @@ export default async function VideosPage() {
 
   return (
     <main className="page-container py-5 flex flex-col gap-5 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--color-border)] pb-3">
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="nkfs-h-m text-main font-bold">Biblioteca de Treino em Vídeo</h1>
-            <Badge variant="gold">Oficial NKFS</Badge>
-          </div>
-          <p className="nkfs-p-p text-muted">
-            Katis, formas clássicas, ataques e técnicas homologadas pelo Sifu para estudo pessoal.
+          <h1 className="nkfs-h-m text-main font-bold">Vídeos de Treino</h1>
+          <p className="text-xs text-muted mt-0.5">
+            Conteúdo para {studentBelt}
           </p>
         </div>
-
-        <span className="nkfs-tag-p text-gold self-start sm:self-auto font-bold">
-          🥋 Estudo Técnico Shaolin
-        </span>
       </div>
 
       <VideosExplorer
