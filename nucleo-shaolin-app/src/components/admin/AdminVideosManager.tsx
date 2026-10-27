@@ -450,18 +450,18 @@ export function AdminVideosManager({
               {/* URL do Vídeo */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-muted uppercase">
-                  Link do Vídeo (YouTube, Vimeo ou Embed) *
+                  Link do Vídeo (YouTube, Google Drive ou Vimeo) *
                 </label>
                 <input
                   type="url"
                   required
-                  placeholder="Ex: https://youtu.be/... ou https://www.youtube.com/watch?v=..."
+                  placeholder="Ex: Link do Google Drive ou YouTube..."
                   value={formUrl}
                   onChange={(e) => setFormUrl(e.target.value)}
                   className="input w-full text-xs sm:text-sm"
                 />
                 <span className="text-[11px] text-faint">
-                  💡 O sistema converte links do YouTube automaticamente para o formato de exibição.
+                  💡 O sistema converte automaticamente links do YouTube e do Google Drive para o formato correto de exibição.
                 </span>
               </div>
 

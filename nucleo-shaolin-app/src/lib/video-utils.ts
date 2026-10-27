@@ -1,11 +1,24 @@
 /**
- * Utilitários para formatação e manipulação de URLs de vídeo (YouTube, Vimeo, etc.)
- * Configura parâmetros para minimizar branding externo e bloquear links de recomendação.
+ * Utilitários para formatação e manipulação de URLs de vídeo (YouTube, Vimeo, Google Drive, etc.)
+ * Configura parâmetros para embutir corretamente os players em web e mobile.
  */
 export function formatEmbedUrl(rawUrl: string): string {
   if (!rawUrl) return ''
   const trimmed = rawUrl.trim()
 
+  // ── GOOGLE DRIVE ──────────────────────────────────────────────
+  // Transforma links de compartilhamento padrão /view em /preview (modo embed)
+  const driveFileMatch = trimmed.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/)
+  if (driveFileMatch && driveFileMatch[1]) {
+    return `https://drive.google.com/file/d/${driveFileMatch[1]}/preview`
+  }
+
+  const driveIdMatch = trimmed.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/)
+  if (driveIdMatch && driveIdMatch[1]) {
+    return `https://drive.google.com/file/d/${driveIdMatch[1]}/preview`
+  }
+
+  // ── YOUTUBE ───────────────────────────────────────────────────
   const ytParams = 'modestbranding=1&rel=0&iv_load_policy=3&playsinline=1'
 
   function withYtParams(url: string) {
@@ -17,11 +30,6 @@ export function formatEmbedUrl(rawUrl: string): string {
   // Se já for uma URL de embed do YouTube
   if (trimmed.includes('youtube.com/embed/')) {
     return withYtParams(trimmed)
-  }
-
-  // Se for Vimeo
-  if (trimmed.includes('player.vimeo.com/video/')) {
-    return trimmed
   }
 
   // YouTube Shorts: https://www.youtube.com/shorts/VIDEO_ID
@@ -42,7 +50,11 @@ export function formatEmbedUrl(rawUrl: string): string {
     return withYtParams(`https://www.youtube.com/embed/${ytShortMatch[1]}`)
   }
 
-  // Vimeo: https://vimeo.com/VIDEO_ID
+  // ── VIMEO ─────────────────────────────────────────────────────
+  if (trimmed.includes('player.vimeo.com/video/')) {
+    return trimmed
+  }
+
   const vimeoMatch = trimmed.match(/vimeo\.com\/([0-9]+)/)
   if (vimeoMatch && vimeoMatch[1]) {
     return `https://player.vimeo.com/video/${vimeoMatch[1]}`
