@@ -393,6 +393,31 @@ export default async function AdminPage() {
               <span className="group-hover:translate-x-1 transition-transform">→</span>
             </div>
           </Link>
+
+          {/* Card: Vídeos de Treino */}
+          <Link
+            href="/admin/videos"
+            prefetch={true}
+            className="card p-3.5 sm:p-4 flex flex-col justify-between gap-2.5 hover:border-[var(--color-gold)] transition-all group cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="text-xl sm:text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                🎬
+              </span>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-xs sm:text-sm font-bold text-main group-hover:text-gold transition-colors truncate">
+                  Vídeos de Treino
+                </h3>
+                <p className="text-[11px] text-muted truncate">
+                  Katis, chutes e básicos
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-gold font-semibold pt-1 border-t border-[var(--color-border)]/50">
+              <span>Gerenciar</span>
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+          </Link>
         </div>
       </section>
 
