@@ -245,7 +245,7 @@ export function AttendanceManager({ initialStudents }: AttendanceManagerProps) {
                 Selecione um aluno na lista ao lado
               </p>
               <p className="nkfs-p-p text-muted mt-1 max-w-sm">
-                Edite as técnicas, anotações e autorização de exame.
+                Edite as técnicas, repetições e anotações da ficha técnica.
               </p>
             </div>
           )

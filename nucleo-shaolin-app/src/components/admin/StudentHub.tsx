@@ -81,7 +81,7 @@ export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: 
     const newRole = isCurrentlyInstructor ? 'student' : 'instructor'
     const confirmMsg = isCurrentlyInstructor
       ? `Deseja remover as permissões de instrutor de ${student.full_name}?`
-      : `Deseja promover ${student.full_name} a Instrutor? Ele terá acesso ao painel de instrutores, anotações de fichas e envio de listas de exame ao Sifu.`
+      : `Deseja promover ${student.full_name} a Instrutor? Ele terá acesso ao painel de instrutores e anotações de fichas técnicas.`
 
     if (!confirm(confirmMsg)) return
 
@@ -650,8 +650,8 @@ export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: 
                         </div>
                         <p className="text-[11px] text-muted mt-1 leading-snug">
                           {selectedStudent.role === 'instructor' || selectedStudent.role === 'admin'
-                            ? `${selectedStudent.full_name} tem acesso ao painel de instrutores para anotar fichas técnicas e submeter listas de exame ao Sifu.`
-                            : `Promova ${selectedStudent.full_name} a Instrutor para permitir anotações de fichas técnicas e envio de listas de exame.`}
+                            ? `${selectedStudent.full_name} tem acesso ao painel de instrutores para registrar presenças e anotar fichas técnicas.`
+                            : `Promova ${selectedStudent.full_name} a Instrutor para permitir anotações de fichas técnicas e gerenciamento de turmas.`}
                         </p>
                       </div>
 

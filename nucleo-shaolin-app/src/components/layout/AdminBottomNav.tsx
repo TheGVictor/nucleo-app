@@ -13,13 +13,11 @@ interface NavItem {
 
 interface AdminBottomNavProps {
   pendingCount?: number
-  pendingExamsCount?: number
   role?: string
 }
 
 export function AdminBottomNav({
   pendingCount = 0,
-  pendingExamsCount = 0,
   role = 'instructor',
 }: AdminBottomNavProps) {
   const pathname = usePathname()
@@ -52,10 +50,9 @@ export function AdminBottomNav({
               icon: '📢',
             },
             {
-              label: 'Exames',
-              path: '/admin/exames',
-              icon: '🥋',
-              badge: pendingExamsCount > 0 ? pendingExamsCount : undefined,
+              label: 'Vídeos',
+              path: '/admin/videos',
+              icon: '🎬',
             },
           ]
         : [
@@ -75,12 +72,12 @@ export function AdminBottomNav({
               icon: '📅',
             },
             {
-              label: 'Exames',
-              path: '/admin/exames',
-              icon: '🥋',
+              label: 'Vídeos',
+              path: '/admin/videos',
+              icon: '🎬',
             },
           ],
-    [isSifu, pendingCount, pendingExamsCount]
+    [isSifu, pendingCount]
   )
 
   return (

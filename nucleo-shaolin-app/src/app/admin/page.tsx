@@ -85,7 +85,7 @@ export default async function AdminPage() {
     { count: activeStudents },
     { count: totalAnnouncements },
     { count: totalClasses },
-    { count: pendingExamsCount },
+    { count: totalVideos },
     graduationsRes,
   ] = await Promise.all([
     adminClient
@@ -101,9 +101,8 @@ export default async function AdminPage() {
       .select('*', { count: 'exact', head: true })
       .eq('active', true),
     adminClient
-      .from('exam_lists')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending'),
+      .from('videos')
+      .select('*', { count: 'exact', head: true }),
     supabase
       .from('graduations')
       .select('id, modality_id, level_name, level_order, color_hex')
@@ -148,42 +147,22 @@ export default async function AdminPage() {
       </section>
 
       {/* ── ALERTAS DE AÇÃO PRIORITÁRIA (APENAS QUANDO HOUVER PENDÊNCIAS) ── */}
-      {isSifu && (pending.length > 0 || (pendingExamsCount ?? 0) > 0) && (
+      {isSifu && pending.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-2.5">
-          {pending.length > 0 && (
-            <a
-              href="#homologacao-alunos"
-              className="flex-1 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/15 transition-all text-xs sm:text-sm group"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
-                <span className="font-semibold text-amber-500 truncate">
-                  {pending.length} {pending.length === 1 ? 'aluno aguarda' : 'alunos aguardam'} homologação
-                </span>
-              </div>
-              <span className="text-amber-500 font-bold shrink-0 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
-                Analisar <span className="text-xs">↓</span>
+          <a
+            href="#homologacao-alunos"
+            className="flex-1 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/15 transition-all text-xs sm:text-sm group"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+              <span className="font-semibold text-amber-500 truncate">
+                {pending.length} {pending.length === 1 ? 'aluno aguarda' : 'alunos aguardam'} homologação
               </span>
-            </a>
-          )}
-
-          {(pendingExamsCount ?? 0) > 0 && (
-            <Link
-              href="/admin/exames"
-              prefetch={true}
-              className="flex-1 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/15 transition-all text-xs sm:text-sm group"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse shrink-0" />
-                <span className="font-semibold text-red-400 truncate">
-                  {pendingExamsCount} {pendingExamsCount === 1 ? 'lista de exame aguarda' : 'listas de exame aguardam'} banca
-                </span>
-              </div>
-              <span className="text-red-400 font-bold shrink-0 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
-                Homologar <span className="text-xs">→</span>
-              </span>
-            </Link>
-          )}
+            </div>
+            <span className="text-amber-500 font-bold shrink-0 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+              Analisar <span className="text-xs">↓</span>
+            </span>
+          </a>
         </div>
       )}
 
@@ -212,26 +191,26 @@ export default async function AdminPage() {
           </a>
         ) : (
           <Link
-            href="/admin/exames"
+            href="/admin/horarios"
             prefetch={true}
             className="stat-box hover:border-[var(--color-gold)] transition-all group cursor-pointer"
           >
-            <span className="stat-label nkfs-tag-p text-gold">Exames</span>
-            <span className="stat-value nkfs-h-g text-gold mt-0.5">Banca</span>
-            <span className="stat-sub nkfs-p-p text-muted">Propostas ao Sifu</span>
+            <span className="stat-label nkfs-tag-p text-gold">Aulas</span>
+            <span className="stat-value nkfs-h-g text-gold mt-0.5">{totalClasses ?? 0}</span>
+            <span className="stat-sub nkfs-p-p text-muted">Grade semanal</span>
           </Link>
         )}
 
         <Link
-          href="/admin/exames"
+          href="/admin/videos"
           prefetch={true}
           className="stat-box hover:border-[var(--color-gold)] transition-all group cursor-pointer"
         >
           <span className="stat-label nkfs-tag-p text-primary group-hover:text-gold transition-colors">
-            {isSifu ? 'Exames Pendentes' : 'Listas de Exame'}
+            Vídeos de Treino
           </span>
-          <span className="stat-value nkfs-h-g text-primary mt-0.5">{pendingExamsCount ?? 0}</span>
-          <span className="stat-sub nkfs-p-p text-muted">{isSifu ? 'Aguardando Sifu' : 'Em análise'}</span>
+          <span className="stat-value nkfs-h-g text-primary mt-0.5">{totalVideos ?? 0}</span>
+          <span className="stat-sub nkfs-p-p text-muted">Material pedagógico</span>
         </Link>
 
         {isSifu ? (
@@ -292,30 +271,6 @@ export default async function AdminPage() {
             </div>
           </Link>
 
-          {/* Card: Listas de Exame */}
-          <Link
-            href="/admin/exames"
-            prefetch={true}
-            className="card p-3.5 sm:p-4 flex flex-col justify-between gap-2.5 hover:border-[var(--color-gold)] transition-all group cursor-pointer"
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="text-xl sm:text-2xl shrink-0 group-hover:scale-110 transition-transform">
-                🥋
-              </span>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-xs sm:text-sm font-bold text-main group-hover:text-gold transition-colors truncate">
-                  {isSifu ? 'Exames de Faixa' : 'Lista de Exame'}
-                </h3>
-                <p className="text-[11px] text-muted truncate">
-                  {isSifu ? 'Homologação e banca' : 'Indicar para banca'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between text-[11px] text-gold font-semibold pt-1 border-t border-[var(--color-border)]/50">
-              <span>{isSifu ? 'Homologar' : 'Submeter'}</span>
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
-            </div>
-          </Link>
 
           {/* Card: Grade de Horários */}
           <Link

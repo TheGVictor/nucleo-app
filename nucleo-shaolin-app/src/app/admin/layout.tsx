@@ -25,20 +25,11 @@ export default async function AdminLayout({
     redirect('/aluno')
   }
 
-  // Busca contagem de cadastros pendentes e contagem de listas de exame pendentes
-  const [pendingRes, examsRes] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending_approval'),
-    supabase
-      .from('exam_lists')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending'),
-  ])
-
-  const pendingCount = pendingRes.count ?? 0
-  const pendingExamsCount = examsRes.count ?? 0
+  // Busca contagem de cadastros pendentes
+  const { count: pendingCount } = await supabase
+    .from('profiles')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'pending_approval')
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-main flex flex-col justify-between">
@@ -47,8 +38,7 @@ export default async function AdminLayout({
         {children}
       </div>
       <AdminBottomNav
-        pendingCount={pendingCount}
-        pendingExamsCount={pendingExamsCount}
+        pendingCount={pendingCount ?? 0}
         role={profile.role}
       />
     </div>
