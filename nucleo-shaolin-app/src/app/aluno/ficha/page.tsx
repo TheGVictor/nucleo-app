@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { connection } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { TechnicalSheet } from '@/components/technical/TechnicalSheet'
+import { RefreshFichaButton } from '@/components/technical/RefreshFichaButton'
 import { getStudentTechnicalSheetAction } from '@/app/admin/attendance/technicalActions'
 import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
 
@@ -20,6 +22,7 @@ interface AlunoFichaPageProps {
 }
 
 export default async function AlunoFichaPage({ searchParams }: AlunoFichaPageProps) {
+  await connection()
   const supabase = await createClient()
 
   const {
@@ -120,13 +123,18 @@ export default async function AlunoFichaPage({ searchParams }: AlunoFichaPagePro
 
       {/* ── FICHA DE ACOMPANHAMENTO TÉCNICO OFICIAL ─────────────── */}
       <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between pb-1 border-b border-[var(--color-border)]">
-          <h2 className="nkfs-h-p text-main font-bold">
-            Ficha de Acompanhamento Técnico
-          </h2>
-          <span className="text-xs text-muted font-medium">
-            {technicalData?.graduationName || 'Faixa Oficial'}
-          </span>
+        <div className="flex items-center justify-between pb-1 border-b border-[var(--color-border)] gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <h2 className="nkfs-h-p text-main font-bold">
+              Ficha de Acompanhamento Técnico
+            </h2>
+            <span className="text-xs text-muted font-medium hidden sm:inline">
+              ({technicalData?.graduationName || 'Faixa Oficial'})
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <RefreshFichaButton />
+          </div>
         </div>
 
         {technicalData ? (

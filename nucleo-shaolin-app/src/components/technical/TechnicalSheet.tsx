@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import Image from 'next/image'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
@@ -40,6 +40,12 @@ export function TechnicalSheet({
   const schema: TechnicalSheetSchema = getTechnicalSheetSchema(initialState.beltSlug)
 
   const [state, setState] = useState<TechnicalCardState>(initialState)
+
+  // Sincroniza o estado interno sempre que os dados do servidor mudarem (ex: refresh do aluno)
+  useEffect(() => {
+    setState(initialState)
+  }, [initialState])
+
   const [history, setHistory] = useState<TechnicalCardState[]>([])
   const [isPending, startTransition] = useTransition()
   const [saveSuccess, setSaveSuccess] = useState(false)
