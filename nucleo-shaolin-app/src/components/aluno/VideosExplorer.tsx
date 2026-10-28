@@ -176,21 +176,28 @@ export function VideosExplorer({
   // Identifica a graduação do aluno
   const studentBeltObj =
     BELT_HIERARCHY.find((b) => b.name.toLowerCase() === studentCurrentBelt.toLowerCase()) ||
-    BELT_HIERARCHY[2] // Padrão: Faixa Laranja
+    (studentCurrentBelt.toLowerCase().includes('preta')
+      ? BELT_HIERARCHY[9]
+      : BELT_HIERARCHY[2]) // Padrão: Faixa Laranja
 
-  const isWhiteBelt = studentBeltObj.order === 1
+  const isBlackBeltOrHigher =
+    studentBeltObj.order >= 10 || studentCurrentBelt.toLowerCase().includes('preta')
+  const isWhiteBelt = studentBeltObj.order === 1 && !isBlackBeltOrHigher
 
   // ── CATEGORIAS POR FAIXA (DIRETRIZ DA ESCOLA) ──────────────────
   // Branca: Ataques, Bloqueios, Defesa Pessoal, Básicos
   // Coloridas: Básicos, Chutes, Aplicações, Katis
-  const categories = isWhiteBelt
-    ? (['Ataques', 'Bloqueios', 'Defesa Pessoal', 'Básicos'] as const)
-    : (['Básicos', 'Chutes', 'Aplicações', 'Katis'] as const)
+  // Faixa Preta em diante: Exclusivo Katis (sem Básicos, Chutes ou Aplicações)
+  const categories: readonly string[] = isBlackBeltOrHigher
+    ? ['Katis']
+    : isWhiteBelt
+    ? ['Ataques', 'Bloqueios', 'Defesa Pessoal', 'Básicos']
+    : ['Básicos', 'Chutes', 'Aplicações', 'Katis']
 
   const [selectedCategory, setSelectedCategory] = useState<string>(categories[0])
   const [selectedKatiBelt, setSelectedKatiBelt] = useState<string>('all')
 
-  const activeCategory = categories.includes(selectedCategory as any)
+  const activeCategory = categories.includes(selectedCategory)
     ? selectedCategory
     : categories[0]
 
@@ -198,9 +205,17 @@ export function VideosExplorer({
   const allVideos = initialVideos.length > 0 ? initialVideos : SAMPLE_VIDEOS
 
   // ── FILTRAGEM RIGOROSA ─────────────────────────────────────────
-  // 1. Se for Katis: mostra katis da faixa do aluno E de todas as faixas anteriores conquistadas (order >= 2 e <= studentBeltObj.order)
-  // 2. Se for outra categoria: mostra estritamente da faixa atual do aluno
+  // 1. Se for Faixa Preta em diante: mostra exclusivamente Katis de todas as faixas até a atual (sem básicos, chutes ou aplicações)
+  // 2. Se for Katis (Coloridas): mostra katis da faixa do aluno E de todas as faixas anteriores conquistadas
+  // 3. Se for Branca ou outra categoria: mostra estritamente da faixa atual do aluno
   const filteredVideos = allVideos.filter((v) => {
+    if (isBlackBeltOrHigher) {
+      if (v.category !== 'Katis') return false
+      if (v.beltOrder > studentBeltObj.order) return false
+      if (selectedKatiBelt !== 'all' && v.belt !== selectedKatiBelt) return false
+      return true
+    }
+
     if (isWhiteBelt) {
       return v.beltOrder === 1 && v.category === activeCategory
     }

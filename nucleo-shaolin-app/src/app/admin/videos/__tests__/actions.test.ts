@@ -175,6 +175,24 @@ describe('admin/videos actions', () => {
         })
       )
     })
+
+    it('rejects non-Katis categories for Faixa Preta graduations', async () => {
+      mockGetUser.mockResolvedValueOnce({ data: { user: { id: 'admin-id' } } })
+      mockProfileSelect.mockResolvedValueOnce({ data: { role: 'instructor' } })
+      mockGraduationSelect.mockResolvedValueOnce({
+        data: { modality_id: 'mod-clf', level_order: 10, level_name: 'Faixa Preta' },
+      })
+
+      const result = await createVideoAction({
+        title: 'Básico Não Permitido',
+        videoUrl: 'https://youtube.com/watch?v=123',
+        graduationId: 'grad-preta',
+        category: 'Básicos',
+      })
+
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('Faixas pretas em diante possuem exclusivamente vídeos da categoria Katis')
+    })
   })
 
   describe('updateVideoAction', () => {

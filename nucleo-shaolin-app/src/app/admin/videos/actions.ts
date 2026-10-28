@@ -58,15 +58,27 @@ export async function createVideoAction(formData: VideoFormData) {
       return { success: false, error: 'Selecione a categoria técnica' }
     }
 
-    // Se modalityId não for fornecido, busca o da faixa (CLF)
+    // Busca informações da graduação associada
     let modalityId = formData.modalityId
-    if (!modalityId) {
-      const { data: grad } = await adminClient
-        .from('graduations')
-        .select('modality_id')
-        .eq('id', formData.graduationId)
-        .single()
-      modalityId = grad?.modality_id
+    const gradRes = await adminClient
+      .from('graduations')
+      .select('modality_id, level_order, level_name')
+      .eq('id', formData.graduationId)
+      .single()
+    const grad = gradRes?.data
+
+    if (grad) {
+      if (!modalityId) modalityId = grad.modality_id
+      const isBlack = Boolean(
+        grad.level_name?.toLowerCase().includes('preta') ||
+          (grad.level_order && grad.level_order >= 10)
+      )
+      if (isBlack && formData.category.trim() !== 'Katis') {
+        return {
+          success: false,
+          error: 'Faixas pretas em diante possuem exclusivamente vídeos da categoria Katis.',
+        }
+      }
     }
 
     const embedUrl = formatEmbedUrl(formData.videoUrl)
@@ -112,6 +124,28 @@ export async function updateVideoAction(videoId: string, formData: VideoFormData
     }
     if (!formData.videoUrl?.trim()) {
       return { success: false, error: 'A URL do vídeo é obrigatória' }
+    }
+
+    if (formData.graduationId) {
+      const gradRes = await adminClient
+        .from('graduations')
+        .select('level_order, level_name')
+        .eq('id', formData.graduationId)
+        .single()
+      const grad = gradRes?.data
+
+      if (grad) {
+        const isBlack = Boolean(
+          grad.level_name?.toLowerCase().includes('preta') ||
+            (grad.level_order && grad.level_order >= 10)
+        )
+        if (isBlack && formData.category?.trim() !== 'Katis') {
+          return {
+            success: false,
+            error: 'Faixas pretas em diante possuem exclusivamente vídeos da categoria Katis.',
+          }
+        }
+      }
     }
 
     const embedUrl = formatEmbedUrl(formData.videoUrl)

@@ -79,11 +79,18 @@ export function AdminVideosManager({
 
   // Identifica a graduação selecionada no formulário para ajustar as categorias
   const selectedGraduation = graduations.find((g) => g.id === formGraduationId)
+  const isBlackBeltOrHigher = Boolean(
+    selectedGraduation?.level_name?.toLowerCase().includes('preta') ||
+      (selectedGraduation?.level_order && selectedGraduation.level_order >= 10)
+  )
   const isWhiteBelt =
-    selectedGraduation?.level_name?.toLowerCase().includes('branca') ||
-    selectedGraduation?.level_order === 1
+    !isBlackBeltOrHigher &&
+    (selectedGraduation?.level_name?.toLowerCase().includes('branca') ||
+      selectedGraduation?.level_order === 1)
 
-  const availableCategoriesForForm = isWhiteBelt
+  const availableCategoriesForForm = isBlackBeltOrHigher
+    ? ['Katis']
+    : isWhiteBelt
     ? ['Ataques', 'Bloqueios', 'Defesa Pessoal', 'Básicos']
     : ['Básicos', 'Chutes', 'Aplicações', 'Katis']
 
@@ -93,7 +100,16 @@ export function AdminVideosManager({
     setFormUrl('')
     const defaultGrad = graduations[0]?.id || ''
     setFormGraduationId(defaultGrad)
-    setFormCategory('Ataques')
+    const firstGrad = graduations[0]
+    const isFirstBlack = Boolean(
+      firstGrad?.level_name?.toLowerCase().includes('preta') ||
+        (firstGrad?.level_order && firstGrad.level_order >= 10)
+    )
+    const isFirstWhite =
+      !isFirstBlack &&
+      (firstGrad?.level_name?.toLowerCase().includes('branca') ||
+        firstGrad?.level_order === 1)
+    setFormCategory(isFirstBlack ? 'Katis' : isFirstWhite ? 'Ataques' : 'Básicos')
     setFormDescription('')
     setFormDuration('')
     setFormError(null)
@@ -597,10 +613,17 @@ export function AdminVideosManager({
                     const newGradId = e.target.value
                     setFormGraduationId(newGradId)
                     const grad = graduations.find((g) => g.id === newGradId)
+                    const isBlack = Boolean(
+                      grad?.level_name?.toLowerCase().includes('preta') ||
+                        (grad?.level_order && grad.level_order >= 10)
+                    )
                     const isWhite =
-                      grad?.level_name?.toLowerCase().includes('branca') ||
-                      grad?.level_order === 1
-                    if (isWhite) {
+                      !isBlack &&
+                      (grad?.level_name?.toLowerCase().includes('branca') ||
+                        grad?.level_order === 1)
+                    if (isBlack) {
+                      setFormCategory('Katis')
+                    } else if (isWhite) {
                       setFormCategory('Ataques')
                     } else if (['Ataques', 'Bloqueios', 'Defesa Pessoal'].includes(formCategory)) {
                       setFormCategory('Básicos')
@@ -634,7 +657,9 @@ export function AdminVideosManager({
                   ))}
                 </select>
                 <span className="text-[11px] text-muted">
-                  {isWhiteBelt
+                  {isBlackBeltOrHigher
+                    ? 'Faixa Preta em diante: Exclusivo para Katis.'
+                    : isWhiteBelt
                     ? 'Faixa Branca: Ataques, Bloqueios, Defesa Pessoal ou Básicos.'
                     : 'Faixas Coloridas: Básicos, Chutes, Aplicações ou Katis.'}
                 </span>

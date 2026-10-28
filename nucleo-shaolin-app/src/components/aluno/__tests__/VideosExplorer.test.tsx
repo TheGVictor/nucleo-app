@@ -111,5 +111,35 @@ describe('VideosExplorer & Belt Hierarchy', () => {
       // Roxa (order 6) must NOT be visible
       expect(screen.queryByText('Kati Roxa Avançada')).not.toBeInTheDocument()
     })
+
+    it('Black belt student (Faixa Preta em diante) receives ONLY Katis category (no Básicos, Chutes, Aplicações)', () => {
+      render(<VideosExplorer initialVideos={mockVideos} studentCurrentBelt="Faixa Preta" />)
+
+      expect(screen.getByRole('button', { name: 'Katis' })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Básicos' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Chutes' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Aplicações' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Ataques' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Bloqueios' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Defesa Pessoal' })).not.toBeInTheDocument()
+    })
+
+    it('Black belt student can see all historical Katis up to Faixa Preta', () => {
+      render(<VideosExplorer initialVideos={mockVideos} studentCurrentBelt="Faixa Preta" />)
+
+      // All Katis with beltOrder <= 10 should be visible
+      expect(screen.getByText('Kati Amarela (Ng Lun Choi)')).toBeInTheDocument()
+      expect(screen.getByText('Kati Laranja (Tuet Jin Kuen)')).toBeInTheDocument()
+      expect(screen.getByText('Kati Roxa Avançada')).toBeInTheDocument()
+    })
+
+    it('Graded black belt student (Faixa Preta 1º Grau) also only receives Katis', () => {
+      render(<VideosExplorer initialVideos={mockVideos} studentCurrentBelt="Faixa Preta 1º Grau" />)
+
+      expect(screen.getByRole('button', { name: 'Katis' })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Básicos' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Chutes' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Aplicações' })).not.toBeInTheDocument()
+    })
   })
 })
