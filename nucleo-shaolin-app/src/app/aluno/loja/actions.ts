@@ -16,11 +16,34 @@ export async function getStoreProductsAction(): Promise<Product[]> {
       .eq('active', true)
       .order('name', { ascending: true })
 
-    if (error || !data || data.length === 0) {
-      return DEFAULT_PRODUCTS
+    if (!error && data && data.length > 0) {
+      return data as Product[]
     }
 
-    return data as Product[]
+    if (!error && data && data.length === 0) {
+      try {
+        const toInsert = DEFAULT_PRODUCTS.map((p) => ({
+          name: p.name,
+          category: p.category,
+          price: p.price,
+          description: p.description,
+          stock: p.stock ?? 10,
+          active: true,
+        }))
+        const { data: inserted, error: insertErr } = await adminClient
+          .from('products')
+          .insert(toInsert)
+          .select('*')
+
+        if (!insertErr && inserted && inserted.length > 0) {
+          return inserted as Product[]
+        }
+      } catch {
+        // Fallback silencioso
+      }
+    }
+
+    return DEFAULT_PRODUCTS
   } catch {
     return DEFAULT_PRODUCTS
   }
@@ -71,27 +94,42 @@ export async function createProductOrderAction(input: CreateOrderInput) {
     // 1. Busca dados do produto (no banco ou no fallback)
     let productPrice = 0
     let productName = 'Produto'
+    let currentStock: number | null = null
 
     const { data: dbProduct } = await adminClient
       .from('products')
-      .select('name, price')
+      .select('id, name, price, stock')
       .eq('id', input.productId)
       .single()
 
     if (dbProduct) {
       productPrice = Number(dbProduct.price)
       productName = dbProduct.name
+      currentStock = dbProduct.stock != null ? Number(dbProduct.stock) : null
     } else {
       const fallback = DEFAULT_PRODUCTS.find((p) => p.id === input.productId)
       if (fallback) {
         productPrice = fallback.price
         productName = fallback.name
+        currentStock = fallback.stock != null ? Number(fallback.stock) : null
       } else {
         return { success: false, error: 'Produto não encontrado.' }
       }
     }
 
     const quantity = Math.max(1, input.quantity || 1)
+
+    // Validação de estoque disponível
+    if (currentStock !== null && currentStock < quantity) {
+      return {
+        success: false,
+        error:
+          currentStock === 0
+            ? 'Este produto está esgotado no momento.'
+            : `Restam apenas ${currentStock} unidade(s) deste produto em estoque.`,
+      }
+    }
+
     const totalPrice = productPrice * quantity
 
     // 2. Insere pedido
@@ -110,6 +148,17 @@ export async function createProductOrderAction(input: CreateOrderInput) {
       })
       .select('id')
       .single()
+
+    if (error) throw error
+
+    // 3. Deduz automaticamente o estoque a cada reserva concluída do aluno
+    if (dbProduct && currentStock !== null) {
+      const newStock = Math.max(0, currentStock - quantity)
+      await adminClient
+        .from('products')
+        .update({ stock: newStock, updated_at: new Date().toISOString() })
+        .eq('id', dbProduct.id)
+    }
 
     revalidatePath('/aluno/loja')
     revalidatePath('/admin/loja')
@@ -150,7 +199,7 @@ export async function updateStudentOrderAction(input: UpdateStudentOrderInput) {
     // 1. Busca o pedido para garantir posse e recalcular total
     const { data: order, error: orderErr } = await adminClient
       .from('product_orders')
-      .select('*, product:products(id, name, price)')
+      .select('*, product:products(id, name, price, stock)')
       .eq('id', input.orderId)
       .eq('student_id', user.id)
       .single()
@@ -168,8 +217,38 @@ export async function updateStudentOrderAction(input: UpdateStudentOrderInput) {
         ? Number(order.product.price)
         : Number(order.total_price) / Math.max(1, order.quantity || 1)
 
+    const oldQuantity = Number(order.quantity) || 1
     const quantity = Math.max(1, input.quantity || 1)
+    const delta = quantity - oldQuantity
     const totalPrice = unitPrice * quantity
+
+    // Ajusta o estoque automaticamente caso a quantidade tenha mudado
+    if (
+      delta !== 0 &&
+      order.product_id &&
+      !order.product_id.startsWith('prod-') &&
+      order.product_id !== '00000000-0000-0000-0000-000000000000'
+    ) {
+      const { data: prod } = await adminClient
+        .from('products')
+        .select('id, stock')
+        .eq('id', order.product_id)
+        .single()
+
+      if (prod && prod.stock !== null) {
+        if (delta > 0 && prod.stock < delta) {
+          return {
+            success: false,
+            error: `Não há estoque suficiente. Restam apenas ${prod.stock} unidade(s) adicionais.`,
+          }
+        }
+        const newStock = Math.max(0, prod.stock - delta)
+        await adminClient
+          .from('products')
+          .update({ stock: newStock, updated_at: new Date().toISOString() })
+          .eq('id', prod.id)
+      }
+    }
 
     const productName =
       order.product?.name ||
@@ -217,6 +296,36 @@ export async function deleteStudentOrderAction(orderId: string) {
     }
 
     const adminClient = createAdminClient()
+
+    // 1. Busca o pedido para repor o estoque se não estiver cancelado
+    const { data: order } = await adminClient
+      .from('product_orders')
+      .select('id, product_id, quantity, status')
+      .eq('id', orderId)
+      .eq('student_id', user.id)
+      .single()
+
+    if (
+      order &&
+      order.status !== 'cancelled' &&
+      order.product_id &&
+      !order.product_id.startsWith('prod-') &&
+      order.product_id !== '00000000-0000-0000-0000-000000000000'
+    ) {
+      const qty = Number(order.quantity) || 1
+      const { data: prod } = await adminClient
+        .from('products')
+        .select('id, stock')
+        .eq('id', order.product_id)
+        .single()
+
+      if (prod && prod.stock !== null) {
+        await adminClient
+          .from('products')
+          .update({ stock: prod.stock + qty, updated_at: new Date().toISOString() })
+          .eq('id', prod.id)
+      }
+    }
 
     const { error } = await adminClient
       .from('product_orders')

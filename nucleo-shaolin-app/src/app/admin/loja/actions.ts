@@ -13,10 +13,35 @@ export async function getAdminProductsAction(): Promise<Product[]> {
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (error || !data || data.length === 0) {
-      return DEFAULT_PRODUCTS
+    if (!error && data && data.length > 0) {
+      return data as Product[]
     }
-    return data as Product[]
+
+    // Se a tabela estiver vazia, tenta auto-popular com os produtos padrão para permitir estoque dinâmico
+    if (!error && data && data.length === 0) {
+      try {
+        const toInsert = DEFAULT_PRODUCTS.map((p) => ({
+          name: p.name,
+          category: p.category,
+          price: p.price,
+          description: p.description,
+          stock: p.stock ?? 10,
+          active: true,
+        }))
+        const { data: inserted, error: insertErr } = await adminClient
+          .from('products')
+          .insert(toInsert)
+          .select('*')
+
+        if (!insertErr && inserted && inserted.length > 0) {
+          return inserted as Product[]
+        }
+      } catch {
+        // Fallback silencioso
+      }
+    }
+
+    return DEFAULT_PRODUCTS
   } catch {
     return DEFAULT_PRODUCTS
   }
@@ -132,6 +157,49 @@ export async function deleteProductAction(id: string) {
 export async function updateOrderStatusAction(orderId: string, status: OrderStatus) {
   try {
     const adminClient = createAdminClient()
+
+    // Busca o pedido para verificar transição de status e repor/deduzir estoque
+    const { data: order } = await adminClient
+      .from('product_orders')
+      .select('id, product_id, quantity, status')
+      .eq('id', orderId)
+      .single()
+
+    if (order && order.product_id && !order.product_id.startsWith('prod-') && order.product_id !== '00000000-0000-0000-0000-000000000000') {
+      const qty = Number(order.quantity) || 1
+
+      // Se foi cancelado a partir de um estado ativo, devolve as unidades ao estoque
+      if (status === 'cancelled' && order.status !== 'cancelled') {
+        const { data: prod } = await adminClient
+          .from('products')
+          .select('id, stock')
+          .eq('id', order.product_id)
+          .single()
+
+        if (prod && prod.stock !== null) {
+          await adminClient
+            .from('products')
+            .update({ stock: prod.stock + qty, updated_at: new Date().toISOString() })
+            .eq('id', prod.id)
+        }
+      }
+      // Se foi reativado a partir de cancelado, deduz novamente do estoque
+      else if (order.status === 'cancelled' && status !== 'cancelled') {
+        const { data: prod } = await adminClient
+          .from('products')
+          .select('id, stock')
+          .eq('id', order.product_id)
+          .single()
+
+        if (prod && prod.stock !== null) {
+          await adminClient
+            .from('products')
+            .update({ stock: Math.max(0, prod.stock - qty), updated_at: new Date().toISOString() })
+            .eq('id', prod.id)
+        }
+      }
+    }
+
     const { error } = await adminClient
       .from('product_orders')
       .update({ status, updated_at: new Date().toISOString() })
@@ -150,6 +218,29 @@ export async function updateOrderStatusAction(orderId: string, status: OrderStat
 export async function deleteOrderAction(orderId: string) {
   try {
     const adminClient = createAdminClient()
+
+    const { data: order } = await adminClient
+      .from('product_orders')
+      .select('id, product_id, quantity, status')
+      .eq('id', orderId)
+      .single()
+
+    if (order && order.status !== 'cancelled' && order.product_id && !order.product_id.startsWith('prod-') && order.product_id !== '00000000-0000-0000-0000-000000000000') {
+      const qty = Number(order.quantity) || 1
+      const { data: prod } = await adminClient
+        .from('products')
+        .select('id, stock')
+        .eq('id', order.product_id)
+        .single()
+
+      if (prod && prod.stock !== null) {
+        await adminClient
+          .from('products')
+          .update({ stock: prod.stock + qty, updated_at: new Date().toISOString() })
+          .eq('id', prod.id)
+      }
+    }
+
     const { error } = await adminClient.from('product_orders').delete().eq('id', orderId)
     if (error) throw error
     revalidatePath('/admin/loja')
@@ -157,6 +248,26 @@ export async function deleteOrderAction(orderId: string) {
     return { success: true }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Erro ao excluir pedido'
+    return { success: false, error: msg }
+  }
+}
+
+export async function updateProductStockAction(productId: string, newStock: number) {
+  try {
+    const adminClient = createAdminClient()
+    const safeStock = Math.max(0, Math.floor(newStock))
+
+    const { error } = await adminClient
+      .from('products')
+      .update({ stock: safeStock, updated_at: new Date().toISOString() })
+      .eq('id', productId)
+
+    if (error) throw error
+    revalidatePath('/admin/loja')
+    revalidatePath('/aluno/loja')
+    return { success: true, stock: safeStock }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Erro ao atualizar estoque'
     return { success: false, error: msg }
   }
 }

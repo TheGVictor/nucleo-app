@@ -125,9 +125,24 @@ export function ProductModal({ product, onClose, onOrderSuccess }: ProductModalP
                 <h2 className="text-base sm:text-lg font-extrabold text-main leading-tight truncate">
                   {product.name}
                 </h2>
-                <p className="text-lg font-black text-gold mt-1">
-                  {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                </p>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <p className="text-lg font-black text-gold">
+                    {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </p>
+                  {product.stock !== null && product.stock <= 0 ? (
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 border border-red-500/30 text-red-400">
+                      🔴 Esgotado
+                    </span>
+                  ) : product.stock !== null && product.stock <= 3 ? (
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400">
+                      🟡 Restam {product.stock} un.
+                    </span>
+                  ) : product.stock !== null ? (
+                    <span className="text-[11px] font-semibold text-muted">
+                      • {product.stock} disponíveis
+                    </span>
+                  ) : null}
+                </div>
               </div>
             </div>
 
@@ -137,105 +152,119 @@ export function ProductModal({ product, onClose, onOrderSuccess }: ProductModalP
               </p>
             )}
 
-            {/* Quantidade e Tamanho/Observações */}
-            <div className="flex flex-col gap-3 pt-1">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-main" htmlFor="qtd">
-                  Quantidade:
-                </label>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    disabled={quantity <= 1 || isPending}
-                    className="w-8 h-8 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] text-main font-bold flex items-center justify-center hover:bg-[var(--color-surface-hover)] disabled:opacity-40 transition-colors"
-                  >
-                    -
-                  </button>
-                  <span id="qtd" className="w-8 text-center text-sm font-extrabold text-main">
-                    {quantity}
+            {product.stock !== null && product.stock <= 0 ? (
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/25 flex flex-col items-center justify-center text-center gap-2 my-2">
+                <span className="text-3xl">🚫</span>
+                <p className="text-xs sm:text-sm font-bold text-red-400">
+                  Este produto está temporariamente esgotado na escola.
+                </p>
+                <p className="text-[11px] text-muted">
+                  Por favor, converse com a recepção da escola para previsão de reposição ou escolha outro item.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Quantidade e Tamanho/Observações */}
+                <div className="flex flex-col gap-3 pt-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-main" htmlFor="qtd">
+                      Quantidade:
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        disabled={quantity <= 1 || isPending}
+                        className="w-8 h-8 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] text-main font-bold flex items-center justify-center hover:bg-[var(--color-surface-hover)] disabled:opacity-40 transition-colors"
+                      >
+                        -
+                      </button>
+                      <span id="qtd" className="w-8 text-center text-sm font-extrabold text-main">
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((q) => q + 1)}
+                        disabled={isPending || (product.stock !== null && quantity >= product.stock)}
+                        className="w-8 h-8 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] text-main font-bold flex items-center justify-center hover:bg-[var(--color-surface-hover)] disabled:opacity-40 transition-colors"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted" htmlFor="notes">
+                      Tamanho ou Observações (opcional):
+                    </label>
+                    <input
+                      id="notes"
+                      type="text"
+                      placeholder="Ex: Tamanho M, cor preta..."
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      disabled={isPending}
+                      className="input text-xs py-2"
+                    />
+                  </div>
+
+                  {/* Totalizador */}
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 mt-1">
+                    <span className="text-xs text-muted font-bold">Total da Reserva:</span>
+                    <span className="text-base font-black text-gold">
+                      {totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
+                  </div>
+                </div>
+
+                {errorMsg && (
+                  <div className="p-2.5 rounded-lg bg-red-500/15 border border-red-500/30 text-xs text-red-400 font-semibold">
+                    ⚠️ {errorMsg}
+                  </div>
+                )}
+
+                {/* Opções de Ação Direta */}
+                <div className="flex flex-col gap-2 pt-2">
+                  <span className="text-xs text-muted font-semibold text-center">
+                    Selecione como deseja retirar e pagar:
                   </span>
+
+                  {/* Opção 1: Reservar e Pagar na Recepção */}
                   <button
                     type="button"
-                    onClick={() => setQuantity((q) => q + 1)}
+                    onClick={() => handleOrder('reception')}
                     disabled={isPending}
-                    className="w-8 h-8 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] text-main font-bold flex items-center justify-center hover:bg-[var(--color-surface-hover)] transition-colors"
+                    className="min-h-[46px] px-4 py-2.5 rounded-xl border border-[var(--color-border-gold)] bg-[var(--color-bg-elevated)] hover:bg-gold/15 text-main hover:text-gold font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                   >
-                    +
+                    {isPending ? (
+                      <Spinner size="sm" />
+                    ) : (
+                      <>
+                        <span>🏢</span>
+                        <span>Reservar e pagar na recepção</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Opção 2: Pagar com PIX */}
+                  <button
+                    type="button"
+                    onClick={() => handleOrder('pix')}
+                    disabled={isPending}
+                    className="min-h-[46px] px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {isPending ? (
+                      <Spinner size="sm" />
+                    ) : (
+                      <>
+                        <span>💠</span>
+                        <span>Pagar com PIX (QR Code)</span>
+                      </>
+                    )}
                   </button>
                 </div>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-muted" htmlFor="notes">
-                  Tamanho ou Observações (opcional):
-                </label>
-                <input
-                  id="notes"
-                  type="text"
-                  placeholder="Ex: Tamanho M, cor preta..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  disabled={isPending}
-                  className="input text-xs py-2"
-                />
-              </div>
-
-              {/* Totalizador */}
-              <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 mt-1">
-                <span className="text-xs text-muted font-bold">Total da Reserva:</span>
-                <span className="text-base font-black text-gold">
-                  {totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                </span>
-              </div>
-            </div>
-
-            {errorMsg && (
-              <div className="p-2.5 rounded-lg bg-red-500/15 border border-red-500/30 text-xs text-red-400 font-semibold">
-                ⚠️ {errorMsg}
-              </div>
+              </>
             )}
-
-            {/* Opções de Ação Direta */}
-            <div className="flex flex-col gap-2 pt-2">
-              <span className="text-xs text-muted font-semibold text-center">
-                Selecione como deseja retirar e pagar:
-              </span>
-
-              {/* Opção 1: Reservar e Pagar na Recepção */}
-              <button
-                type="button"
-                onClick={() => handleOrder('reception')}
-                disabled={isPending}
-                className="min-h-[46px] px-4 py-2.5 rounded-xl border border-[var(--color-border-gold)] bg-[var(--color-bg-elevated)] hover:bg-gold/15 text-main hover:text-gold font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
-              >
-                {isPending ? (
-                  <Spinner size="sm" />
-                ) : (
-                  <>
-                    <span>🏢</span>
-                    <span>Reservar e pagar na recepção</span>
-                  </>
-                )}
-              </button>
-
-              {/* Opção 2: Pagar com PIX */}
-              <button
-                type="button"
-                onClick={() => handleOrder('pix')}
-                disabled={isPending}
-                className="min-h-[46px] px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                {isPending ? (
-                  <Spinner size="sm" />
-                ) : (
-                  <>
-                    <span>💠</span>
-                    <span>Pagar com PIX (QR Code)</span>
-                  </>
-                )}
-              </button>
-            </div>
           </>
         )}
 

@@ -182,11 +182,16 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                     ? '🥊'
                     : '🛍️'
 
+                const isOut = p.stock !== null && p.stock <= 0
+                const isLow = p.stock !== null && p.stock > 0 && p.stock <= 3
+
                 return (
                   <div
                     key={p.id}
                     onClick={() => setSelectedProduct(p)}
-                    className="card p-3.5 sm:p-4 flex flex-col justify-between gap-3 hover:border-[var(--color-gold)] transition-all group cursor-pointer shadow-sm hover:shadow-md"
+                    className={`card p-3.5 sm:p-4 flex flex-col justify-between gap-3 hover:border-[var(--color-gold)] transition-all group cursor-pointer shadow-sm hover:shadow-md ${
+                      isOut ? 'opacity-85' : ''
+                    }`}
                   >
                     <div>
                       {/* Imagem ou Ícone Temático */}
@@ -204,6 +209,17 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                         <span className="absolute top-2 left-2 nkfs-tag-p text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-xs">
                           {p.category}
                         </span>
+
+                        {isOut && (
+                          <span className="absolute inset-x-0 bottom-0 py-1 bg-red-600/90 text-white text-[11px] font-black uppercase text-center tracking-wider backdrop-blur-xs">
+                            Esgotado
+                          </span>
+                        )}
+                        {!isOut && isLow && (
+                          <span className="absolute top-2 right-2 text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500 text-black shadow-xs">
+                            Restam {p.stock}
+                          </span>
+                        )}
                       </div>
 
                       <h3 className="text-xs sm:text-sm font-bold text-main group-hover:text-gold transition-colors mt-2.5 leading-snug line-clamp-2">
@@ -227,9 +243,15 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                         </span>
                       </div>
 
-                      <span className="btn btn-gold btn-sm py-1 px-2.5 text-xs font-bold shrink-0 group-hover:shadow-xs">
-                        Comprar
-                      </span>
+                      {isOut ? (
+                        <span className="px-2.5 py-1 rounded-lg text-xs font-bold text-muted bg-[var(--color-bg-elevated)] border border-[var(--color-border)] shrink-0">
+                          Esgotado
+                        </span>
+                      ) : (
+                        <span className="btn btn-gold btn-sm py-1 px-2.5 text-xs font-bold shrink-0 group-hover:shadow-xs">
+                          Comprar
+                        </span>
+                      )}
                     </div>
                   </div>
                 )
