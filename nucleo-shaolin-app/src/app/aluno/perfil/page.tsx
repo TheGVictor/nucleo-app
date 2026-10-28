@@ -5,6 +5,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
 import { InstallAppButton } from '@/components/pwa/InstallPwa'
+import { getBeltTheme } from '@/lib/beltTheme'
 
 interface StudentModalityItem {
   id: string
@@ -91,6 +92,7 @@ export default async function PerfilPage() {
 
               const graduationColor =
                 sm.approved_graduation?.color_hex ?? '#D4AF37'
+              const beltTheme = getBeltTheme(graduationName, graduationColor)
 
               return (
                 <div
@@ -113,22 +115,25 @@ export default async function PerfilPage() {
                         </span>
                       </div>
 
-                      {/* Graduação da Modalidade */}
+                      {/* Graduação da Modalidade com contraste universal */}
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-xs text-muted">Graduação Atual:</span>
                         <span
                           className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border backdrop-blur-xs shadow-xs"
                           style={{
-                            borderColor: `${graduationColor}50`,
-                            backgroundColor: `${graduationColor}15`,
-                            color: graduationColor,
+                            borderColor: beltTheme.badgeBorder,
+                            backgroundColor: beltTheme.badgeBg,
+                            color: beltTheme.badgeText,
                           }}
                         >
                           <span
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: graduationColor }}
+                            className="w-2 h-2 rounded-full shadow-xs shrink-0"
+                            style={{
+                              backgroundColor: beltTheme.dotColor,
+                              border: beltTheme.dotBorder ? `1px solid ${beltTheme.dotBorder}` : undefined,
+                            }}
                           />
-                          <span>{graduationName}</span>
+                          <span>{beltTheme.label}</span>
                         </span>
                       </div>
                     </div>

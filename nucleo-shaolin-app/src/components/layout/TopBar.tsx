@@ -67,7 +67,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
           : undefined
       }
     >
-      <div className="w-full max-w-[1216px] mx-auto flex items-center justify-between gap-2 sm:gap-3 flex-nowrap min-w-0">
+      <div className="w-full max-w-[1216px] mx-auto min-h-[50px] py-1 flex items-center justify-between gap-2 sm:gap-3 flex-nowrap min-w-0">
         {/* Lado Esquerdo: Logo e Título com Indicador de Faixa */}
         <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 overflow-hidden">
           <Logo size="sm" />
@@ -79,7 +79,19 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
               {beltColor && (
                 <span
                   className="w-2 h-2 rounded-full shrink-0 shadow-xs"
-                  style={{ backgroundColor: beltColor }}
+                  style={{
+                    backgroundColor: beltColor,
+                    border:
+                      beltColor.toLowerCase() === '#e2e8f0' ||
+                      beltColor.toLowerCase() === '#ffffff'
+                        ? '1px solid #94A3B8'
+                        : undefined,
+                    boxShadow:
+                      beltColor.toLowerCase() === '#1a1a1a' ||
+                      beltColor.toLowerCase() === '#000000'
+                        ? '0 0 0 1px #D4AF37'
+                        : undefined,
+                  }}
                   title={beltName ? `Graduação: ${beltName}` : undefined}
                 />
               )}

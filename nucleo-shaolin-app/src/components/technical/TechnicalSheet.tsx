@@ -167,34 +167,28 @@ export function TechnicalSheet({
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-4xl mx-auto">
-      {/* ── BARRA DE FERRAMENTAS SUPERIOR (TOOLBAR) ──────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] p-3 rounded-[var(--radius-lg)] shadow-sm">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <Badge variant={isInstructor ? 'gold' : 'muted'}>
-            {isInstructor ? '🥋 Modo Edição do Instrutor' : '👤 Vista do Aluno'}
-          </Badge>
-          <span className="text-xs text-muted">
-            Progresso Geral:{' '}
-            <strong className="text-main font-bold">
-              {completedItems}/{totalItems} técnicas ({progressPercent}%)
-            </strong>
-          </span>
-        </div>
+      {/* ── BARRA DE FERRAMENTAS DO INSTRUTOR (OCULTA PARA O ALUNO) ────────── */}
+      {isInstructor && (
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] p-3 rounded-[var(--radius-lg)] shadow-sm">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <Badge variant="gold">
+              🥋 Modo Edição do Instrutor
+            </Badge>
+          </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Botão de Comparação / Ver Imagem Original */}
-          <button
-            type="button"
-            onClick={() => setShowOriginalModal(true)}
-            className="btn btn-secondary btn-sm text-xs flex items-center gap-1.5"
-            title="Ver a fotografia da ficha original de papel"
-          >
-            <span>📸</span>
-            <span>Ver Foto da Ficha</span>
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Botão de Comparação / Ver Imagem Original */}
+            <button
+              type="button"
+              onClick={() => setShowOriginalModal(true)}
+              className="btn btn-secondary btn-sm text-xs flex items-center gap-1.5"
+              title="Ver a fotografia da ficha original de papel"
+            >
+              <span>📸</span>
+              <span>Ver Foto da Ficha</span>
+            </button>
 
-          {/* Botão de Desfazer (Undo) para o instrutor */}
-          {isInstructor && (
+            {/* Botão de Desfazer (Undo) para o instrutor */}
             <button
               type="button"
               onClick={handleUndo}
@@ -205,10 +199,8 @@ export function TechnicalSheet({
               <span>↩</span>
               <span>Desfazer</span>
             </button>
-          )}
 
-          {/* Botão de Salvar para o instrutor */}
-          {isInstructor && (
+            {/* Botão de Salvar para o instrutor */}
             <button
               type="button"
               onClick={handleSave}
@@ -227,9 +219,9 @@ export function TechnicalSheet({
                 </>
               )}
             </button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Alertas de Sucesso / Erro */}
       {saveSuccess && (

@@ -1018,23 +1018,39 @@ html.dark, [data-theme="dark"] {
     position: sticky;
     top: 0;
     z-index: 40;
-    background-color: rgba(255, 255, 255, 0.92);
+    background-color: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--color-border);
-    min-height: calc(56px + env(safe-area-inset-top, 0px));
-    padding-top: env(safe-area-inset-top, 0px);
+    /* Safe Area robusto para iPhone com notch e Dynamic Island */
+    padding-top: calc(max(env(safe-area-inset-top, 0px), 0px) + 8px);
+    padding-bottom: 8px;
     padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
     padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
     transition: background-color var(--transition-base), border-color var(--transition-base);
+  }
+
+  /* Exclusivo iOS WebKit (Safari, PWAs e WebViews no iPhone/iPad) */
+  @supports (-webkit-touch-callout: none) {
+    .top-bar {
+      padding-top: calc(max(env(safe-area-inset-top, 0px), 14px) + 8px);
+      padding-bottom: 8px;
+    }
+    @media (display-mode: standalone) {
+      .top-bar {
+        padding-top: max(calc(env(safe-area-inset-top, 0px) + 12px), 54px);
+        padding-bottom: 10px;
+      }
+    }
   }
 
   html.dark .top-bar,
   [data-theme="dark"] .top-bar {
-    background-color: rgba(10, 17, 40, 0.92);
+    background-color: rgba(10, 17, 40, 0.95);
   }
 
   /* ── MODALITY CHIP ─────────────────────────────────────────── */

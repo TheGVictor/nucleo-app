@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge'
 import { parseAnnouncementContent } from '@/lib/announcements'
 import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
 import { getCachedAnnouncements, getCachedGraduations } from '@/lib/cached-queries'
+import { getBeltTheme } from '@/lib/beltTheme'
 
 export const instant = false
 
@@ -109,6 +110,7 @@ export default async function AlunoHomePage() {
     'Faixa Branca'
   const graduationColor = matchedGraduation?.color_hex ?? '#E2E8F0'
   const modalityName = activeModality?.modality?.name ?? 'Kung Fu Shaolin'
+  const beltTheme = getBeltTheme(graduationName, graduationColor)
 
   // Saudação de acordo com o horário
   const currentHour = new Date().getHours()
@@ -145,20 +147,23 @@ export default async function AlunoHomePage() {
           )}
         </div>
 
-        {/* Graduação com indicador de cor */}
+        {/* Graduação com indicador de cor e alto contraste */}
         <div
           className="shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold backdrop-blur-xs shadow-xs"
           style={{
-            borderColor: `${graduationColor}50`,
-            backgroundColor: `${graduationColor}15`,
-            color: graduationColor,
+            borderColor: beltTheme.badgeBorder,
+            backgroundColor: beltTheme.badgeBg,
+            color: beltTheme.badgeText,
           }}
         >
           <span
             className="w-2.5 h-2.5 rounded-full shadow-xs shrink-0"
-            style={{ backgroundColor: graduationColor }}
+            style={{
+              backgroundColor: beltTheme.dotColor,
+              border: beltTheme.dotBorder ? `1px solid ${beltTheme.dotBorder}` : undefined,
+            }}
           />
-          <span className="text-main font-bold">{graduationName}</span>
+          <span className="font-bold">{beltTheme.label}</span>
         </div>
       </section>
 

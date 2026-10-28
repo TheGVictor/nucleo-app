@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { TechnicalSheet } from '@/components/technical/TechnicalSheet'
-import { RefreshFichaButton } from '@/components/technical/RefreshFichaButton'
+import { getBeltTheme } from '@/lib/beltTheme'
 import { getStudentTechnicalSheetAction } from '@/app/admin/attendance/technicalActions'
 import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
 
@@ -49,6 +49,10 @@ export default async function AlunoFichaPage({ searchParams }: AlunoFichaPagePro
 
   const graduationHistory = gradHistoryRes.data
   const technicalData = technicalSheetRes.data
+  const beltTheme = getBeltTheme(
+    technicalData?.graduationName,
+    technicalData?.graduationColor
+  )
 
   return (
     <main className="page-container py-5 flex flex-col gap-6 animate-fade-in">
@@ -103,20 +107,52 @@ export default async function AlunoFichaPage({ searchParams }: AlunoFichaPagePro
       )}
       {/* ── CABEÇALHO DO ALUNO COM STATUS MARCIAL E TEMA DA FAIXA ── */}
       <div
-        className="p-5 sm:p-6 rounded-[var(--radius-xl)] flex flex-col sm:flex-row items-center sm:items-start gap-4 relative overflow-hidden border transition-all text-center sm:text-left shadow-md"
+        className="card p-5 sm:p-6 rounded-[var(--radius-xl)] flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 relative overflow-hidden border border-[var(--color-border)] shadow-md transition-all text-center sm:text-left"
         style={{
-          background: `linear-gradient(135deg, ${technicalData?.graduationColor || '#D4AF37'}18 0%, rgba(20, 24, 33, 0.8) 100%)`,
-          borderColor: `${technicalData?.graduationColor || '#D4AF37'}40`,
+          background: beltTheme.cardBg,
+          borderLeft: beltTheme.borderLeft,
+          borderColor: beltTheme.cardBorder,
         }}
       >
-        <Avatar name={profile.full_name} size="xl" gold />
+        <Avatar name={profile.full_name} size="xl" gold={beltTheme.isPreta} />
         <div className="flex-1 min-w-0">
-          <h1 className="nkfs-h-m text-main font-extrabold truncate">{profile.full_name}</h1>
-          <p className="text-xs sm:text-sm text-muted mt-0.5">
-            {technicalData?.modalityName || 'Kung Fu Shaolin'} • <strong className="text-main">{technicalData?.graduationName || 'Faixa Oficial'}</strong>
-          </p>
-          <p className="text-xs text-faint mt-1">
-            Praticante ativo desde {new Date(profile.created_at).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}
+          <h1 className="text-xl sm:text-2xl font-black text-main tracking-tight truncate leading-tight">
+            {profile.full_name}
+          </h1>
+
+          <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start mt-2">
+            {/* Badge da Faixa / Graduação com contraste universal */}
+            <div
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide shadow-xs"
+              style={{
+                backgroundColor: beltTheme.badgeBg,
+                color: beltTheme.badgeText,
+                borderColor: beltTheme.badgeBorder,
+                borderWidth: '1px',
+                borderStyle: 'solid',
+              }}
+            >
+              <span
+                className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                style={{
+                  backgroundColor: beltTheme.dotColor,
+                  border: beltTheme.dotBorder ? `1px solid ${beltTheme.dotBorder}` : undefined,
+                }}
+              />
+              <span>{beltTheme.label}</span>
+            </div>
+
+            {/* Modalidade */}
+            <span className="text-xs sm:text-sm font-semibold text-muted">
+              {technicalData?.modalityName || 'Kung Fu Shaolin'}
+            </span>
+          </div>
+
+          <p className="text-xs text-muted mt-2 flex items-center justify-center sm:justify-start gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+            <span>
+              Praticante ativo desde {new Date(profile.created_at).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}
+            </span>
           </p>
         </div>
       </div>
@@ -131,9 +167,6 @@ export default async function AlunoFichaPage({ searchParams }: AlunoFichaPagePro
             <span className="text-xs text-muted font-medium hidden sm:inline">
               ({technicalData?.graduationName || 'Faixa Oficial'})
             </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <RefreshFichaButton />
           </div>
         </div>
 
