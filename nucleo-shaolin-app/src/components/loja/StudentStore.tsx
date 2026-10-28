@@ -6,6 +6,11 @@ import { ProductModal } from './ProductModal'
 import { EditOrderModal } from './EditOrderModal'
 import { Badge } from '@/components/ui/Badge'
 import { getStudentOrdersAction, deleteStudentOrderAction } from '@/app/aluno/loja/actions'
+import {
+  STORE_SUBCATEGORIES,
+  getProductSubcategory,
+  getSubcategoryIcon,
+} from '@/lib/store-defaults'
 
 interface StudentStoreProps {
   initialProducts: Product[]
@@ -22,24 +27,22 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos')
   const [viewTab, setViewTab] = useState<'catalog' | 'orders'>('catalog')
 
-  // Categorias únicas existentes
+  // Menu de Subcategorias Oficiais: Todos, CLF, Sanda, Tai Chi, Equipamentos
   const categories = useMemo(() => {
-    const set = new Set<string>()
-    products.forEach((p) => {
-      if (p.category) set.add(p.category)
-    })
-    return ['Todos', ...Array.from(set)]
-  }, [products])
+    return ['Todos', ...STORE_SUBCATEGORIES]
+  }, [])
 
-  // Filtragem ultra-rápida no cliente (zero requisições ao servidor)
+  // Filtragem ultra-rápida no cliente por subcategoria e busca
   const filteredProducts = useMemo(() => {
     const q = search.toLowerCase().trim()
     return products.filter((p) => {
-      const matchCat = selectedCategory === 'Todos' || p.category === selectedCategory
+      const sub = getProductSubcategory(p)
+      const matchCat = selectedCategory === 'Todos' || sub === selectedCategory
       const matchSearch =
         !q ||
         p.name.toLowerCase().includes(q) ||
-        (p.description && p.description.toLowerCase().includes(q))
+        (p.description && p.description.toLowerCase().includes(q)) ||
+        sub.toLowerCase().includes(q)
       return matchCat && matchSearch
     })
   }, [products, search, selectedCategory])
@@ -171,16 +174,8 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
               {filteredProducts.map((p) => {
-                const icon =
-                  p.category === 'Uniformes'
-                    ? '🥋'
-                    : p.category === 'Faixas'
-                    ? '🎗️'
-                    : p.category === 'Vestuário'
-                    ? '👕'
-                    : p.category === 'Equipamentos'
-                    ? '🥊'
-                    : '🛍️'
+                const sub = getProductSubcategory(p)
+                const icon = getSubcategoryIcon(sub)
 
                 const isOut = p.stock !== null && p.stock <= 0
                 const isLow = p.stock !== null && p.stock > 0 && p.stock <= 3
@@ -207,7 +202,7 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                           <span>{icon}</span>
                         )}
                         <span className="absolute top-2 left-2 nkfs-tag-p text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-xs">
-                          {p.category}
+                          {sub}
                         </span>
 
                         {isOut && (

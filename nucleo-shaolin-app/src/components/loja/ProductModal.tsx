@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import type { Product } from '@/types/database'
 import { createProductOrderAction, confirmStudentPixPaymentAction } from '@/app/aluno/loja/actions'
 import { Spinner } from '@/components/ui/Spinner'
+import { getProductSubcategory, getSubcategoryIcon } from '@/lib/store-defaults'
 
 interface ProductModalProps {
   product: Product
@@ -108,19 +109,11 @@ export function ProductModal({ product, onClose, onOrderSuccess }: ProductModalP
           <>
             <div className="flex items-start gap-3.5 pr-6">
               <div className="w-14 h-14 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-3xl shrink-0 shadow-xs">
-                {product.category === 'Uniformes'
-                  ? '🥋'
-                  : product.category === 'Faixas'
-                  ? '🎗️'
-                  : product.category === 'Vestuário'
-                  ? '👕'
-                  : product.category === 'Equipamentos'
-                  ? '🥊'
-                  : '🛍️'}
+                {getSubcategoryIcon(getProductSubcategory(product))}
               </div>
               <div className="min-w-0 flex-1">
                 <span className="nkfs-tag-p text-gold uppercase tracking-wider font-bold block mb-0.5">
-                  {product.category}
+                  {getProductSubcategory(product)}
                 </span>
                 <h2 className="text-base sm:text-lg font-extrabold text-main leading-tight truncate">
                   {product.name}

@@ -13,6 +13,12 @@ import {
   uploadProductImageAction,
   updateProductStockAction,
 } from '@/app/admin/loja/actions'
+import {
+  STORE_SUBCATEGORIES,
+  type StoreSubcategory,
+  getProductSubcategory,
+  getSubcategoryIcon,
+} from '@/lib/store-defaults'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
 
@@ -31,8 +37,9 @@ export function AdminStoreManager({
   const [orderFilter, setOrderFilter] = useState<'all' | 'reserved' | 'paid' | 'delivered' | 'cancelled'>('all')
   const [orderSearch, setOrderSearch] = useState('')
 
-  // Estado da Aba de Estoque
+  // Estado da Aba de Estoque & Menu de Subcategorias
   const [inventorySearch, setInventorySearch] = useState('')
+  const [selectedSubcategory, setSelectedSubcategory] = useState<'Todos' | StoreSubcategory>('Todos')
   const [stockDrafts, setStockDrafts] = useState<Record<string, number>>({})
   const [savingStockId, setSavingStockId] = useState<string | null>(null)
   const [stockFeedback, setStockFeedback] = useState<Record<string, string>>({})
@@ -40,7 +47,7 @@ export function AdminStoreManager({
   // Estado do Modal de Produto (Novo / Edição)
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null)
   const [formName, setFormName] = useState('')
-  const [formCategory, setFormCategory] = useState('Uniformes')
+  const [formCategory, setFormCategory] = useState<string>('CLF')
   const [formPrice, setFormPrice] = useState('')
   const [formStock, setFormStock] = useState('10')
   const [formDescription, setFormDescription] = useState('')
@@ -62,7 +69,7 @@ export function AdminStoreManager({
   function handleOpenNewProduct() {
     setEditingProduct({})
     setFormName('')
-    setFormCategory('Uniformes')
+    setFormCategory('CLF')
     setFormPrice('')
     setFormStock('10')
     setFormDescription('')
@@ -73,7 +80,7 @@ export function AdminStoreManager({
   function handleOpenEditProduct(p: Product) {
     setEditingProduct(p)
     setFormName(p.name)
-    setFormCategory(p.category || 'Uniformes')
+    setFormCategory(getProductSubcategory(p))
     setFormPrice(p.price.toString())
     setFormStock(p.stock !== null ? p.stock.toString() : '10')
     setFormDescription(p.description || '')
@@ -224,17 +231,29 @@ export function AdminStoreManager({
     }
   }, [products, orders])
 
-  // Filtragem e busca de itens do estoque
+  // Contagem de itens por subcategoria (CLF, Sanda, Tai Chi, Equipamentos)
+  const subcategoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { CLF: 0, Sanda: 0, 'Tai Chi': 0, Equipamentos: 0 }
+    products.forEach((p) => {
+      const sub = getProductSubcategory(p)
+      counts[sub] = (counts[sub] || 0) + 1
+    })
+    return counts
+  }, [products])
+
+  // Filtragem e busca de itens do estoque por subcategoria e texto
   const filteredInventory = useMemo(() => {
     const q = inventorySearch.toLowerCase().trim()
-    if (!q) return products
     return products.filter((p) => {
-      return (
+      const sub = getProductSubcategory(p)
+      const matchSub = selectedSubcategory === 'Todos' || sub === selectedSubcategory
+      const matchSearch =
+        !q ||
         p.name.toLowerCase().includes(q) ||
         (p.category && p.category.toLowerCase().includes(q))
-      )
+      return matchSub && matchSearch
     })
-  }, [products, inventorySearch])
+  }, [products, inventorySearch, selectedSubcategory])
 
   function handleStockChange(productId: string, newValue: number) {
     const safe = Math.max(0, Math.floor(newValue))
@@ -535,14 +554,14 @@ export function AdminStoreManager({
         </div>
       )}
 
-      {/* ── ABA 2: CONTAGEM DE ESTOQUE (LIMPO & COMPACTO) ── */}
+      {/* ── ABA 2: CONTAGEM DE ESTOQUE (LIMPO, COMPACTO E COM SUBCATEGORIAS) ── */}
       {tab === 'inventory' && (
         <div className="flex flex-col gap-3">
-          {/* Barra Superior Compacta: Total + Busca */}
+          {/* Barra Superior Compacta: Resumo + Busca */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
             <div className="flex items-center gap-2.5">
               <span className="text-lg">📦</span>
-              <div className="flex items-baseline gap-2">
+              <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-xs sm:text-sm font-bold text-main">
                   Contagem de Estoque
                 </span>
@@ -580,10 +599,41 @@ export function AdminStoreManager({
             </div>
           </div>
 
+          {/* Menu de Subcategorias: CLF | Sanda | Tai Chi | Equipamentos */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar shrink-0">
+            {(['Todos', 'CLF', 'Sanda', 'Tai Chi', 'Equipamentos'] as const).map((sub) => {
+              const isSelected = selectedSubcategory === sub
+              const count = sub === 'Todos' ? products.length : subcategoryCounts[sub] || 0
+
+              return (
+                <button
+                  key={sub}
+                  type="button"
+                  onClick={() => setSelectedSubcategory(sub)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                    isSelected
+                      ? 'bg-[var(--color-gold)] text-black shadow-xs font-black'
+                      : 'bg-[var(--color-bg-card)] border border-[var(--color-border)] text-muted hover:text-main'
+                  }`}
+                >
+                  <span>{sub === 'Todos' ? '🏷️' : getSubcategoryIcon(sub)}</span>
+                  <span>{sub}</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      isSelected ? 'bg-black/80 text-gold' : 'bg-[var(--color-bg-elevated)] text-muted'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
           {/* Lista Compacta de Cada Item */}
           {filteredInventory.length === 0 ? (
             <div className="card p-6 text-center text-xs text-muted">
-              Nenhum produto encontrado.
+              Nenhum produto encontrado nesta subcategoria.
             </div>
           ) : (
             <div className="flex flex-col divide-y divide-[var(--color-border)] rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] overflow-hidden shadow-xs">
@@ -595,24 +645,15 @@ export function AdminStoreManager({
 
                 const isOut = (p.stock ?? 0) === 0
                 const isLow = (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 3
-
-                const icon =
-                  p.category === 'Uniformes'
-                    ? '🥋'
-                    : p.category === 'Faixas'
-                    ? '🎗️'
-                    : p.category === 'Vestuário'
-                    ? '👕'
-                    : p.category === 'Equipamentos'
-                    ? '🥊'
-                    : '🛍️'
+                const sub = getProductSubcategory(p)
+                const icon = getSubcategoryIcon(sub)
 
                 return (
                   <div
                     key={p.id}
                     className="p-3 sm:px-4 flex items-center justify-between gap-3 hover:bg-[var(--color-bg-elevated)]/50 transition-colors"
                   >
-                    {/* Item: Foto/Ícone + Nome + Categoria / Preço */}
+                    {/* Item: Foto/Ícone + Nome + Subcategoria / Preço */}
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] overflow-hidden flex items-center justify-center text-lg shrink-0">
                         {p.image_url ? (
@@ -643,7 +684,7 @@ export function AdminStoreManager({
                           ) : null}
                         </div>
                         <p className="text-[11px] text-muted truncate">
-                          {p.category} • <span className="text-gold font-semibold">{p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                          <span className="text-gold font-bold">{sub}</span> • <span className="text-main font-semibold">{p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                         </p>
                       </div>
                     </div>
@@ -719,7 +760,7 @@ export function AdminStoreManager({
               <div>
                 <div className="flex items-start justify-between gap-2">
                   <span className="nkfs-tag-p text-gold font-bold uppercase">
-                    {p.category}
+                    {getProductSubcategory(p)}
                   </span>
                   <Badge variant={p.active ? 'success' : 'error'}>
                     {p.active ? 'Ativo' : 'Pausado'}
@@ -811,17 +852,16 @@ export function AdminStoreManager({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="field">
-                  <label className="label text-xs font-bold text-muted">Categoria</label>
+                  <label className="label text-xs font-bold text-muted">Subcategoria</label>
                   <select
                     value={formCategory}
                     onChange={(e) => setFormCategory(e.target.value)}
                     className="select text-xs"
                   >
-                    <option value="Uniformes">Uniformes</option>
-                    <option value="Faixas">Faixas</option>
-                    <option value="Equipamentos">Equipamentos</option>
-                    <option value="Vestuário">Vestuário</option>
-                    <option value="Acessórios">Acessórios</option>
+                    <option value="CLF">🥋 CLF (Choy Lay Fut)</option>
+                    <option value="Sanda">🥊 Sanda (Boxe Chinês)</option>
+                    <option value="Tai Chi">☯️ Tai Chi</option>
+                    <option value="Equipamentos">🛡️ Equipamentos</option>
                   </select>
                 </div>
 
