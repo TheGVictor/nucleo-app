@@ -33,7 +33,6 @@ export function AdminStoreManager({
 
   // Estado da Aba de Estoque
   const [inventorySearch, setInventorySearch] = useState('')
-  const [inventoryFilter, setInventoryFilter] = useState<'all' | 'out' | 'low' | 'ok'>('all')
   const [stockDrafts, setStockDrafts] = useState<Record<string, number>>({})
   const [savingStockId, setSavingStockId] = useState<string | null>(null)
   const [stockFeedback, setStockFeedback] = useState<Record<string, string>>({})
@@ -228,22 +227,14 @@ export function AdminStoreManager({
   // Filtragem e busca de itens do estoque
   const filteredInventory = useMemo(() => {
     const q = inventorySearch.toLowerCase().trim()
+    if (!q) return products
     return products.filter((p) => {
-      const s = p.stock ?? 0
-      const matchFilter =
-        inventoryFilter === 'all' ||
-        (inventoryFilter === 'out' && s === 0) ||
-        (inventoryFilter === 'low' && s > 0 && s <= 3) ||
-        (inventoryFilter === 'ok' && s > 3)
-
-      const matchSearch =
-        !q ||
+      return (
         p.name.toLowerCase().includes(q) ||
         (p.category && p.category.toLowerCase().includes(q))
-
-      return matchFilter && matchSearch
+      )
     })
-  }, [products, inventorySearch, inventoryFilter])
+  }, [products, inventorySearch])
 
   function handleStockChange(productId: string, newValue: number) {
     const safe = Math.max(0, Math.floor(newValue))
@@ -262,7 +253,7 @@ export function AdminStoreManager({
             delete next[productId]
             return next
           })
-        }, 2500)
+        }, 2000)
         await reloadAll()
       } else {
         alert(res.error || 'Erro ao atualizar estoque')
@@ -296,22 +287,16 @@ export function AdminStoreManager({
           <button
             type="button"
             onClick={() => setTab('inventory')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
               tab === 'inventory'
                 ? 'bg-[var(--color-gold)] text-black shadow-xs'
                 : 'text-muted hover:text-main'
             }`}
           >
             <span>📦</span>
-            <span>Contagem de Estoque</span>
-            {stockStats.outOfStockCount + stockStats.lowStockCount > 0 ? (
-              <span className="px-1.5 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center min-w-5">
-                {stockStats.outOfStockCount + stockStats.lowStockCount}
-              </span>
-            ) : (
-              <span className="w-5 h-5 rounded-full bg-black/80 text-gold text-[10px] font-black flex items-center justify-center">
-                {products.length}
-              </span>
+            <span>Estoque ({products.length})</span>
+            {stockStats.outOfStockCount > 0 && (
+              <span className="w-2 h-2 rounded-full bg-red-500" title="Itens esgotados" />
             )}
           </button>
 
@@ -550,160 +535,66 @@ export function AdminStoreManager({
         </div>
       )}
 
-      {/* ── ABA 2: CONTAGEM DE ESTOQUE (GESTÃO DE INVENTÁRIO ADMIN) ── */}
+      {/* ── ABA 2: CONTAGEM DE ESTOQUE (LIMPO & COMPACTO) ── */}
       {tab === 'inventory' && (
-        <div className="flex flex-col gap-4">
-          {/* Métricas Principais de Estoque (KPIs) */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Total de Produtos */}
-            <div className="card p-3.5 sm:p-4 bg-[var(--color-bg-card)] border border-[var(--color-border)] flex flex-col justify-between gap-1 shadow-xs">
-              <div className="flex items-center justify-between text-muted text-xs font-bold">
-                <span>SKUs / Produtos</span>
-                <span className="text-base">🏷️</span>
-              </div>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-black text-main">{products.length}</span>
-                <span className="text-[11px] text-muted">cadastrados</span>
-              </div>
-              <span className="text-[10px] text-muted">Itens no catálogo oficial</span>
-            </div>
-
-            {/* Total Unidades Físicas */}
-            <div className="card p-3.5 sm:p-4 bg-[var(--color-bg-card)] border border-[var(--color-border)] flex flex-col justify-between gap-1 shadow-xs">
-              <div className="flex items-center justify-between text-muted text-xs font-bold">
-                <span>Estoque Físico</span>
-                <span className="text-base">📦</span>
-              </div>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-black text-gold">{stockStats.totalStockUnits}</span>
-                <span className="text-[11px] text-muted">unidades</span>
-              </div>
-              <span className="text-[10px] text-muted">Disponíveis para venda imediata</span>
-            </div>
-
-            {/* Total Reservadas Alunos */}
-            <div className="card p-3.5 sm:p-4 bg-[var(--color-bg-card)] border border-[var(--color-border)] flex flex-col justify-between gap-1 shadow-xs">
-              <div className="flex items-center justify-between text-muted text-xs font-bold">
-                <span>Reservas Pendentes</span>
-                <span className="text-base">⏳</span>
-              </div>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-black text-amber-400">{stockStats.totalReservedUnits}</span>
-                <span className="text-[11px] text-muted">unidades</span>
-              </div>
-              <span className="text-[10px] text-muted">Aguardando retirada/pagamento</span>
-            </div>
-
-            {/* Alertas de Estoque */}
-            <div
-              className={`card p-3.5 sm:p-4 border flex flex-col justify-between gap-1 shadow-xs transition-colors ${
-                stockStats.outOfStockCount > 0
-                  ? 'bg-red-500/10 border-red-500/30'
-                  : stockStats.lowStockCount > 0
-                  ? 'bg-amber-500/10 border-amber-500/30'
-                  : 'bg-[var(--color-bg-card)] border-[var(--color-border)]'
-              }`}
-            >
-              <div className="flex items-center justify-between text-xs font-bold">
-                <span className={stockStats.outOfStockCount > 0 ? 'text-red-400' : 'text-muted'}>
-                  Alertas de Reposição
+        <div className="flex flex-col gap-3">
+          {/* Barra Superior Compacta: Total + Busca */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
+            <div className="flex items-center gap-2.5">
+              <span className="text-lg">📦</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-xs sm:text-sm font-bold text-main">
+                  Contagem de Estoque
                 </span>
-                <span className="text-base">⚠️</span>
-              </div>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span
-                  className={`text-2xl font-black ${
-                    stockStats.outOfStockCount > 0
-                      ? 'text-red-400'
-                      : stockStats.lowStockCount > 0
-                      ? 'text-amber-400'
-                      : 'text-emerald-400'
-                  }`}
-                >
-                  {stockStats.outOfStockCount + stockStats.lowStockCount}
-                </span>
-                <span className="text-[11px] text-muted">
-                  ({stockStats.outOfStockCount} esgotado{stockStats.outOfStockCount === 1 ? '' : 's'})
+                <span className="text-xs text-muted">
+                  • <strong className="text-gold font-bold">{stockStats.totalStockUnits}</strong> unidades no total
+                  {stockStats.outOfStockCount > 0 && (
+                    <span className="text-red-400 font-semibold ml-1.5">
+                      ({stockStats.outOfStockCount} esgotado{stockStats.outOfStockCount > 1 ? 's' : ''})
+                    </span>
+                  )}
                 </span>
               </div>
-              <span className="text-[10px] text-muted">
-                {stockStats.outOfStockCount > 0
-                  ? 'Itens necessitam de reposição urgente'
-                  : stockStats.lowStockCount > 0
-                  ? 'Itens com estoque baixo (≤ 3)'
-                  : 'Todos os itens com estoque saudável'}
-              </span>
             </div>
-          </div>
 
-          {/* Barra de Pesquisa e Filtros de Estoque */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
+            <div className="relative w-full sm:w-64">
               <input
                 type="text"
-                placeholder="Buscar item por nome ou categoria..."
+                placeholder="Buscar item..."
                 value={inventorySearch}
                 onChange={(e) => setInventorySearch(e.target.value)}
-                className="input text-xs py-2.5 pl-9 w-full bg-[var(--color-bg-card)]"
+                className="input text-xs py-1.5 pl-8 pr-7 w-full bg-[var(--color-bg-elevated)]"
               />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted">
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted">
                 🔍
               </span>
               {inventorySearch && (
                 <button
                   type="button"
                   onClick={() => setInventorySearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-main"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-main"
                 >
                   ✕
                 </button>
               )}
             </div>
-
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar shrink-0">
-              {[
-                { id: 'all', label: `Todos (${products.length})` },
-                { id: 'out', label: `🔴 Esgotados (${stockStats.outOfStockCount})` },
-                { id: 'low', label: `🟡 Baixo (≤3) (${stockStats.lowStockCount})` },
-                { id: 'ok', label: `🟢 Disponíveis (${stockStats.okCount})` },
-              ].map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => setInventoryFilter(f.id as typeof inventoryFilter)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${
-                    inventoryFilter === f.id
-                      ? 'border-[var(--color-gold)] bg-gold/15 text-gold font-bold'
-                      : 'border-[var(--color-border)] bg-[var(--color-bg-card)] text-muted hover:text-main'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
           </div>
 
-          {/* Lista de Contagem de Cada Item */}
+          {/* Lista Compacta de Cada Item */}
           {filteredInventory.length === 0 ? (
-            <div className="card p-8 text-center flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">📦</span>
-              <p className="nkfs-h-p font-bold text-main">Nenhum item encontrado no estoque</p>
-              <p className="text-xs text-muted">
-                Verifique o filtro selecionado ou adicione novos produtos ao catálogo.
-              </p>
+            <div className="card p-6 text-center text-xs text-muted">
+              Nenhum produto encontrado.
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col divide-y divide-[var(--color-border)] rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] overflow-hidden shadow-xs">
               {filteredInventory.map((p) => {
                 const stockVal = stockDrafts[p.id] !== undefined ? stockDrafts[p.id] : (p.stock ?? 0)
                 const isDifferent = stockDrafts[p.id] !== undefined && stockDrafts[p.id] !== (p.stock ?? 0)
                 const isSaving = savingStockId === p.id
                 const feedback = stockFeedback[p.id]
-                const stats = stockStats.ordersByProduct[p.id] || { reserved: 0, delivered: 0 }
 
                 const isOut = (p.stock ?? 0) === 0
-                const isCritical = (p.stock ?? 0) === 1
-                const isLow = (p.stock ?? 0) > 1 && (p.stock ?? 0) <= 3
+                const isLow = (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 3
 
                 const icon =
                   p.category === 'Uniformes'
@@ -719,17 +610,11 @@ export function AdminStoreManager({
                 return (
                   <div
                     key={p.id}
-                    className={`card p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border transition-all ${
-                      isOut
-                        ? 'border-red-500/30 bg-red-500/5'
-                        : isLow || isCritical
-                        ? 'border-amber-500/30 bg-amber-500/5'
-                        : 'border-[var(--color-border)] hover:border-[var(--color-border-gold)]'
-                    }`}
+                    className="p-3 sm:px-4 flex items-center justify-between gap-3 hover:bg-[var(--color-bg-elevated)]/50 transition-colors"
                   >
-                    {/* Informações do Item */}
-                    <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                      <div className="w-14 h-14 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] overflow-hidden flex items-center justify-center text-3xl shrink-0 shadow-xs relative">
+                    {/* Item: Foto/Ícone + Nome + Categoria / Preço */}
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] overflow-hidden flex items-center justify-center text-lg shrink-0">
                         {p.image_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -740,156 +625,76 @@ export function AdminStoreManager({
                         ) : (
                           <span>{icon}</span>
                         )}
-                        {!p.active && (
-                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[10px] text-white font-bold">
-                            Pausado
-                          </div>
-                        )}
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="nkfs-tag-p text-gold font-bold uppercase text-[10px]">
-                            {p.category}
-                          </span>
-                          <span className="text-muted text-xs">•</span>
-                          <span className="text-xs font-black text-gold">
-                            {p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                          </span>
-
-                          {/* Status Badge */}
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-xs sm:text-sm font-bold text-main truncate">
+                            {p.name}
+                          </h4>
                           {isOut ? (
-                            <Badge variant="error">🔴 Esgotado</Badge>
-                          ) : isCritical ? (
-                            <Badge variant="warning">🟠 Crítico (1 un.)</Badge>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-500/15 border border-red-500/30 text-red-400 shrink-0">
+                              Esgotado
+                            </span>
                           ) : isLow ? (
-                            <Badge variant="warning">🟡 Baixo ({p.stock} un.)</Badge>
-                          ) : (
-                            <Badge variant="success">🟢 Disponível ({p.stock} un.)</Badge>
-                          )}
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-400 shrink-0">
+                              Baixo ({p.stock})
+                            </span>
+                          ) : null}
                         </div>
-
-                        <h3 className="text-sm font-extrabold text-main mt-0.5 truncate">
-                          {p.name}
-                        </h3>
-
-                        {/* Dados de Fluxo / Movimentação */}
-                        <div className="flex items-center gap-3 mt-1.5 text-xs text-muted flex-wrap">
-                          <span className="flex items-center gap-1 font-semibold">
-                            <span>📦 Estoque disponível:</span>
-                            <strong className="text-main">{p.stock ?? 0} un.</strong>
-                          </span>
-                          <span>•</span>
-                          <span className="flex items-center gap-1 text-amber-400 font-semibold">
-                            <span>⏳ Reservados:</span>
-                            <strong>{stats.reserved} un.</strong>
-                          </span>
-                          <span>•</span>
-                          <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-                            <span>✓ Entregues:</span>
-                            <strong>{stats.delivered} un.</strong>
-                          </span>
-                        </div>
+                        <p className="text-[11px] text-muted truncate">
+                          {p.category} • <span className="text-gold font-semibold">{p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                        </p>
                       </div>
                     </div>
 
-                    {/* Controles de Contagem Rápida / Edição Inline */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-3 lg:pt-0 border-t lg:border-t-0 border-[var(--color-border)] shrink-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-muted hidden sm:inline">
-                          Nova Contagem:
+                    {/* Controle Direto de Estoque: [-] [ QTD ] [+] [Salvar] */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center border border-[var(--color-border)] rounded-lg bg-[var(--color-bg-elevated)] overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => handleStockChange(p.id, stockVal - 1)}
+                          disabled={stockVal <= 0 || isSaving}
+                          className="w-7 h-7 flex items-center justify-center text-main font-bold hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-colors"
+                          title="Diminuir"
+                        >
+                          -
+                        </button>
+
+                        <input
+                          type="number"
+                          min="0"
+                          value={stockVal}
+                          onChange={(e) => handleStockChange(p.id, parseInt(e.target.value, 10) || 0)}
+                          disabled={isSaving}
+                          className="w-12 text-center text-xs font-bold text-main bg-transparent py-1 border-0 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => handleStockChange(p.id, stockVal + 1)}
+                          disabled={isSaving}
+                          className="w-7 h-7 flex items-center justify-center text-main font-bold hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-colors"
+                          title="Aumentar"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      {feedback ? (
+                        <span className="text-[11px] font-bold text-emerald-400 px-2 py-1">
+                          {feedback}
                         </span>
-
-                        <div className="flex items-center gap-1 bg-[var(--color-bg-elevated)] p-1 rounded-xl border border-[var(--color-border)]">
-                          <button
-                            type="button"
-                            onClick={() => handleStockChange(p.id, stockVal - 1)}
-                            disabled={stockVal <= 0 || isSaving}
-                            className="w-8 h-8 rounded-lg bg-[var(--color-bg-card)] border border-[var(--color-border)] text-main font-bold flex items-center justify-center hover:bg-[var(--color-surface-hover)] disabled:opacity-40 transition-colors"
-                            title="Diminuir 1 unidade"
-                          >
-                            -
-                          </button>
-
-                          <input
-                            type="number"
-                            min="0"
-                            value={stockVal}
-                            onChange={(e) => handleStockChange(p.id, parseInt(e.target.value, 10) || 0)}
-                            disabled={isSaving}
-                            className="w-16 text-center text-sm font-extrabold text-main bg-transparent py-1 border-0 focus:outline-none focus:ring-1 focus:ring-gold rounded"
-                          />
-
-                          <button
-                            type="button"
-                            onClick={() => handleStockChange(p.id, stockVal + 1)}
-                            disabled={isSaving}
-                            className="w-8 h-8 rounded-lg bg-[var(--color-bg-card)] border border-[var(--color-border)] text-main font-bold flex items-center justify-center hover:bg-[var(--color-surface-hover)] disabled:opacity-40 transition-colors"
-                            title="Aumentar 1 unidade"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Atalhos Rápidos & Botão Salvar */}
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => handleStockChange(p.id, stockVal + 5)}
-                            disabled={isSaving}
-                            className="px-2 py-1.5 rounded-lg text-[10px] font-bold bg-[var(--color-bg-elevated)] border border-[var(--color-border)] text-muted hover:text-main hover:border-gold transition-colors"
-                            title="Adicionar +5 unidades"
-                          >
-                            +5
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleStockChange(p.id, stockVal + 10)}
-                            disabled={isSaving}
-                            className="px-2 py-1.5 rounded-lg text-[10px] font-bold bg-[var(--color-bg-elevated)] border border-[var(--color-border)] text-muted hover:text-main hover:border-gold transition-colors"
-                            title="Adicionar +10 unidades"
-                          >
-                            +10
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleStockChange(p.id, 0)}
-                            disabled={isSaving || stockVal === 0}
-                            className="px-2 py-1.5 rounded-lg text-[10px] font-bold bg-[var(--color-bg-elevated)] border border-[var(--color-border)] text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
-                            title="Zerar estoque"
-                          >
-                            Zerar
-                          </button>
-                        </div>
-
-                        {feedback ? (
-                          <span className="text-xs font-bold text-emerald-400 px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30">
-                            {feedback}
-                          </span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleQuickStockSave(p.id, stockVal)}
-                            disabled={isSaving || !isDifferent}
-                            className={`btn btn-sm px-3.5 py-1.5 text-xs font-bold transition-all flex items-center gap-1.5 ${
-                              isDifferent
-                                ? 'btn-gold shadow-sm animate-pulse'
-                                : 'btn-secondary opacity-60'
-                            }`}
-                          >
-                            {isSaving ? (
-                              <>
-                                <Spinner size="sm" />
-                                <span>Salvando...</span>
-                              </>
-                            ) : (
-                              <span>{isDifferent ? '💾 Salvar' : 'Salvo'}</span>
-                            )}
-                          </button>
-                        )}
-                      </div>
+                      ) : isDifferent ? (
+                        <button
+                          type="button"
+                          onClick={() => handleQuickStockSave(p.id, stockVal)}
+                          disabled={isSaving}
+                          className="btn btn-gold btn-sm px-2.5 py-1 text-xs font-bold shrink-0 shadow-xs"
+                        >
+                          {isSaving ? <Spinner size="sm" /> : 'Salvar'}
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 )
