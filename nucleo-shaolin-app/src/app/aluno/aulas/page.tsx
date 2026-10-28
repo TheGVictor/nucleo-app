@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { StudentScheduleView } from '@/components/aluno/StudentScheduleView'
-import { getRequestUserProfile } from '@/lib/user-cache'
+import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
 import { getCachedClassSchedules } from '@/lib/cached-queries'
 import type { ClassSchedule } from '@/types/database'
 
@@ -23,9 +23,10 @@ export default async function AlunoAulasPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [profile, schedulesData] = await Promise.all([
+  const [profile, schedulesData, studentModalities] = await Promise.all([
     getRequestUserProfile(user.id),
     getCachedClassSchedules(),
+    getRequestStudentModalities(user.id),
   ])
 
   if (!profile || profile.status !== 'active') {
@@ -40,12 +41,16 @@ export default async function AlunoAulasPage() {
         <div>
           <h1 className="nkfs-h-m text-main font-bold">Grade de Aulas & Horários</h1>
           <p className="nkfs-p-m text-muted mt-0.5">
-            Confira todos os horários e turmas de Kung Fu Shaolin, Tai Chi Chuan e Sanda.
+            Confira seus horários e turmas de Kung Fu Shaolin, Tai Chi Chuan e Sanda.
           </p>
         </div>
       </div>
 
-      <StudentScheduleView schedules={schedules} />
+      <StudentScheduleView
+        schedules={schedules}
+        profile={profile}
+        studentModalities={studentModalities}
+      />
     </main>
   )
 }

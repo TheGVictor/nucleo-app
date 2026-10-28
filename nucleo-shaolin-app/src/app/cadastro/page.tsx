@@ -295,7 +295,7 @@ export default function CadastroPage() {
                           onChange={e => setSelfReported(prev => ({ ...prev, [slug]: e.target.value }))}
                           className="select"
                         >
-                          <option value="">Selecione seu nível/faixa</option>
+                          <option value="">Selecione sua faixa</option>
                           {GRADUATIONS_BY_MODALITY[slug].map(g => (
                             <option key={g} value={g}>
                               {g}

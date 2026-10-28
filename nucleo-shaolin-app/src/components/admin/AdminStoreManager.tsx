@@ -10,6 +10,7 @@ import {
   getAdminProductsAction,
   getAdminOrdersAction,
   deleteOrderAction,
+  uploadProductImageAction,
 } from '@/app/admin/loja/actions'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
@@ -38,6 +39,7 @@ export function AdminStoreManager({
   const [formDescription, setFormDescription] = useState('')
   const [formImageUrl, setFormImageUrl] = useState('')
   const [modalError, setModalError] = useState<string | null>(null)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
 
   const [isPending, startTransition] = useTransition()
 
@@ -70,6 +72,31 @@ export function AdminStoreManager({
     setFormDescription(p.description || '')
     setFormImageUrl(p.image_url || '')
     setModalError(null)
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploadingImage(true)
+    setModalError(null)
+
+    const fd = new FormData()
+    fd.append('file', file)
+
+    try {
+      const res = await uploadProductImageAction(fd)
+      if (res.success && res.url) {
+        setFormImageUrl(res.url)
+      } else {
+        setModalError(res.error || 'Erro no upload da imagem')
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao enviar foto'
+      setModalError(msg)
+    } finally {
+      setIsUploadingImage(false)
+    }
   }
 
   function handleSaveProduct(e: React.FormEvent) {
@@ -557,15 +584,80 @@ export function AdminStoreManager({
                 />
               </div>
 
+              {/* Upload de Foto do Produto */}
               <div className="field">
-                <label className="label text-xs font-bold text-muted">URL da Imagem (Opcional)</label>
-                <input
-                  type="url"
-                  placeholder="https://exemplo.com/foto-produto.jpg"
-                  value={formImageUrl}
-                  onChange={(e) => setFormImageUrl(e.target.value)}
-                  className="input text-xs"
-                />
+                <label className="label text-xs font-bold text-muted">Foto do Produto (Upload ou Link)</label>
+
+                <div className="flex flex-col gap-2 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)]">
+                  {formImageUrl ? (
+                    <div className="flex items-center gap-3">
+                      <div className="w-16 h-16 rounded-lg bg-black border border-[var(--color-border)] overflow-hidden shrink-0 relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={formImageUrl}
+                          alt="Pré-visualização"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1 min-w-0 flex-1">
+                        <span className="text-[11px] font-bold text-green-500 truncate">
+                          ✓ Foto carregada
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <label className="text-[11px] text-gold hover:underline cursor-pointer font-semibold">
+                            Trocar foto
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp,image/gif"
+                              disabled={isUploadingImage}
+                              onChange={handleImageUpload}
+                              className="hidden"
+                            />
+                          </label>
+                          <span className="text-muted text-xs">•</span>
+                          <button
+                            type="button"
+                            onClick={() => setFormImageUrl('')}
+                            className="text-[11px] text-red-400 hover:underline font-semibold"
+                          >
+                            Remover
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-3 border-2 border-dashed border-[var(--color-border)] rounded-lg text-center gap-1.5">
+                      <span className="text-2xl">📸</span>
+                      <p className="text-xs font-bold text-main">Selecione uma foto do seu dispositivo</p>
+                      <p className="text-[10px] text-muted">JPG, PNG ou WEBP (máx. 5MB)</p>
+                      <label className="btn btn-outline btn-sm text-xs font-bold mt-1 cursor-pointer">
+                        {isUploadingImage ? (
+                          <>
+                            <Spinner size="sm" />
+                            <span>Enviando foto...</span>
+                          </>
+                        ) : (
+                          <span>📁 Escolher Arquivo</span>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
+                          disabled={isUploadingImage}
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  )}
+
+                  <input
+                    type="url"
+                    placeholder="Ou cole a URL da imagem aqui: https://..."
+                    value={formImageUrl}
+                    onChange={(e) => setFormImageUrl(e.target.value)}
+                    className="input text-xs font-mono"
+                  />
+                </div>
               </div>
 
               {modalError && (

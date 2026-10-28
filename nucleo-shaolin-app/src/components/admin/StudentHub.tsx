@@ -5,11 +5,6 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
 import { TechnicalSheet } from '@/components/technical/TechnicalSheet'
-import { AttendanceCard } from '@/components/attendance/AttendanceCard'
-import {
-  getStudentAttendanceCardDataAction,
-  type StudentAttendanceCardData,
-} from '@/app/admin/attendance/actions'
 import {
   getStudentTechnicalSheetAction,
   type StudentTechnicalSheetResponse,
@@ -56,14 +51,13 @@ export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: 
     initialStudents[0]?.id || null
   )
   const [search, setSearch] = useState('')
-  const [activeTab, setActiveTab] = useState<'technical' | 'attendance' | 'notice' | 'profile'>('technical')
+  const [activeTab, setActiveTab] = useState<'technical' | 'notice' | 'profile'>('technical')
   const [mobileListExpanded, setMobileListExpanded] = useState(false)
 
   // Dados do aluno selecionado
   const [technicalData, setTechnicalData] = useState<
     NonNullable<StudentTechnicalSheetResponse['data']> | null
   >(null)
-  const [attendanceData, setAttendanceData] = useState<StudentAttendanceCardData | null>(null)
   const [loadingStudent, setLoadingStudent] = useState(!!initialStudents[0]?.id)
 
   // Formulário de aviso individual
@@ -99,28 +93,18 @@ export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: 
 
   const selectedStudent = students.find((s) => s.id === selectedStudentId)
 
-  // Carrega Ficha Técnica e Presenças sempre que trocar de aluno
+  // Carrega Ficha Técnica sempre que trocar de aluno
   useEffect(() => {
     let isMounted = true
 
     if (selectedStudentId) {
-      Promise.all([
-        getStudentTechnicalSheetAction(selectedStudentId),
-        getStudentAttendanceCardDataAction(selectedStudentId),
-      ]).then(([techRes, attRes]) => {
+      getStudentTechnicalSheetAction(selectedStudentId).then((techRes) => {
         if (isMounted) {
           if (techRes.success && techRes.data) {
             setTechnicalData(techRes.data)
           } else {
             setTechnicalData(null)
           }
-
-          if (attRes.success && attRes.data) {
-            setAttendanceData(attRes.data)
-          } else {
-            setAttendanceData(null)
-          }
-
           setLoadingStudent(false)
         }
       })
@@ -249,7 +233,7 @@ export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: 
           <div className="relative">
             <input
               type="text"
-              placeholder="Buscar por nome, faixa, modalidade (CLF, Sanda, Tai Chi)..."
+              placeholder="Buscar por nome ou faixa..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="input text-xs py-2.5 pl-8.5 w-full bg-[var(--color-bg-elevated)]"
@@ -269,7 +253,7 @@ export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: 
           </div>
 
           {/* Lista de Alunos Encontrados */}
-          <div className="flex flex-col gap-1.5 max-h-[550px] overflow-y-auto pr-1">
+          <div className="flex flex-col gap-1 max-h-[550px] overflow-y-auto pr-1">
             {filteredStudents.length > 0 ? (
               filteredStudents.map((s) => {
                 const isSelected = s.id === selectedStudentId
@@ -290,49 +274,23 @@ export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: 
                         <p className="text-xs font-bold text-main truncate leading-tight">
                           {s.full_name}
                         </p>
-
-                        {/* Indicativos de Modalidades (CLF, Tai Chi, Sanda) sem distinção de categorias */}
-                        <div className="flex items-center gap-1 mt-1 flex-wrap">
-                          {s.modalitiesList && s.modalitiesList.length > 0 ? (
-                            s.modalitiesList.map((m) => (
-                              <span
-                                key={m.id || m.shortName}
-                                className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 ${
-                                  m.shortName === 'CLF'
-                                    ? 'bg-red-500/15 text-red-500 dark:text-red-400 border-red-500/30'
-                                    : m.shortName === 'Tai Chi'
-                                    ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30'
-                                    : m.shortName === 'Sanda'
-                                    ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'
-                                    : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
-                                }`}
-                                title={`${m.modalityName} • ${m.graduationName}`}
-                              >
-                                {m.shortName}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded border bg-neutral-500/15 text-muted border-neutral-500/30 uppercase tracking-wider shrink-0">
-                              CLF
-                            </span>
-                          )}
-                          <span className="text-[11px] text-faint truncate ml-0.5">
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ backgroundColor: s.graduationColor || '#D4AF37' }}
+                          />
+                          <span className="text-[11px] text-faint truncate">
                             {s.graduationName}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end shrink-0 pl-2 gap-1">
-                      {(s.role === 'instructor' || s.role === 'admin') && (
-                        <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-[var(--color-gold)] text-black shadow-xs">
-                          Instrutor
-                        </span>
-                      )}
-                      <Badge variant={s.attendanceCount > 0 ? 'gold' : 'muted'}>
-                        {s.attendanceCount} {s.attendanceCount === 1 ? 'aula' : 'aulas'}
-                      </Badge>
-                    </div>
+                    {(s.role === 'instructor' || s.role === 'admin') && (
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-[var(--color-gold)] text-black shadow-xs shrink-0 ml-2">
+                        Instrutor
+                      </span>
+                    )}
                   </button>
                 )
               })
@@ -368,29 +326,39 @@ export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: 
                     <Badge variant={selectedStudent.status === 'active' ? 'success' : 'warning'}>
                       {selectedStudent.status === 'active' ? 'Matrícula Ativa' : 'Pendente'}
                     </Badge>
+                    {(selectedStudent.role === 'instructor' || selectedStudent.role === 'admin') && (
+                      <Badge variant="gold">Instrutor</Badge>
+                    )}
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-muted mt-1 flex-wrap">
-                    <span>
-                      Modalidade: <strong className="text-main">{selectedStudent.modalityName}</strong>
-                    </span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1.5">
-                      Faixa:
-                      <span
-                        className="inline-block w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: selectedStudent.graduationColor }}
-                      />
-                      <strong className="text-main">{selectedStudent.graduationName}</strong>
-                    </span>
+
+                  {/* Modalidades cursadas pelo aluno */}
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    {selectedStudent.modalitiesList && selectedStudent.modalitiesList.length > 0 ? (
+                      selectedStudent.modalitiesList.map((m) => (
+                        <span
+                          key={m.id || m.shortName}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-[var(--color-bg-elevated)] border border-[var(--color-border)] text-main shadow-xs"
+                        >
+                          <span
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ backgroundColor: m.graduationColor || '#D4AF37' }}
+                          />
+                          <span>{m.modalityName}</span>
+                          <span className="text-gold font-bold text-[11px]">• {m.graduationName}</span>
+                        </span>
+                      ))
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-[var(--color-bg-elevated)] border border-[var(--color-border)] text-main">
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: selectedStudent.graduationColor || '#D4AF37' }}
+                        />
+                        <span>{selectedStudent.modalityName}</span>
+                        <span className="text-gold font-bold text-[11px]">• {selectedStudent.graduationName}</span>
+                      </span>
+                    )}
                   </div>
                 </div>
-              </div>
-
-              {/* Botões de Ação Rápida */}
-              <div className="flex items-center gap-2 self-start sm:self-center">
-                <Badge variant="gold">
-                  {selectedStudent.attendanceCount} Presenças
-                </Badge>
               </div>
             </div>
 
@@ -407,19 +375,6 @@ export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: 
               >
                 <span>📜</span>
                 <span>Ficha Técnica</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('attendance')}
-                className={`px-3.5 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
-                  activeTab === 'attendance'
-                    ? 'bg-[var(--color-primary)] text-white shadow-xs'
-                    : 'text-muted hover:text-main'
-                }`}
-              >
-                <span>🥋</span>
-                <span>Presenças & Frequência</span>
               </button>
 
               {/* Recado Personalizado (Exclusivo Sifu) */}
@@ -478,23 +433,6 @@ export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: 
               ) : (
                 <div className="card p-12 text-center text-muted">
                   Não foi possível carregar a ficha técnica do aluno.
-                </div>
-              )
-            ) : activeTab === 'attendance' ? (
-              attendanceData ? (
-                <AttendanceCard
-                  key={`att-${attendanceData.student.id}`}
-                  initialData={attendanceData}
-                  isInstructor={true}
-                  onUpdated={() => {
-                    getStudentAttendanceCardDataAction(selectedStudent.id).then((res) => {
-                      if (res.success && res.data) setAttendanceData(res.data)
-                    })
-                  }}
-                />
-              ) : (
-                <div className="card p-12 text-center text-muted">
-                  Não foi possível carregar as presenças do aluno.
                 </div>
               )
             ) : activeTab === 'notice' ? (
@@ -689,7 +627,7 @@ export function StudentHub({ initialStudents, currentUserRole = 'instructor' }: 
               Selecione um aluno na lista ao lado
             </p>
             <p className="nkfs-p-p text-muted mt-1 max-w-sm">
-              Pesquise ou selecione qualquer praticante para preencher a ficha técnica, registrar presenças ou enviar um recado direto.
+              Pesquise ou selecione qualquer praticante para preencher a ficha técnica, consultar dados cadastrais ou enviar um recado direto.
             </p>
           </div>
         )}

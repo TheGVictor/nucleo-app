@@ -16,10 +16,11 @@ interface EditOrderModalProps {
 }
 
 export function EditOrderModal({ order, onClose, onSuccess }: EditOrderModalProps) {
-  const unitPrice =
+  const rawPrice =
     order.product?.price != null
       ? Number(order.product.price)
-      : Number(order.total_price) / Math.max(1, order.quantity || 1)
+      : Number(order.total_price || 0) / Math.max(1, order.quantity || 1)
+  const unitPrice = isNaN(rawPrice) || rawPrice < 0 ? 0 : rawPrice
 
   // Remove tag do nome do produto se estiver embutida na string de notas
   const initialNotes = (order.notes || '')
@@ -37,11 +38,13 @@ export function EditOrderModal({ order, onClose, onSuccess }: EditOrderModalProp
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  const currentTotal = unitPrice * quantity
-  const productName = order.product?.name || order.notes || 'Produto Reservado'
+  const currentTotal = unitPrice * (quantity || 1)
+  const extractedName = order.notes?.match(/\[Produto:\s*([^\]]+)\]/)?.[1]
+  const productName = order.product?.name || extractedName || 'Produto Reservado'
 
   // Código PIX Copia e Cola formatado com o valor atualizado
-  const simulatedPixCode = `00020126580014br.gov.bcb.pix0136loja@nucleoshaolin.com.br520400005303986540${currentTotal.toFixed(2).replace('.', '')}5802BR5925NUCLEO DE KUNG FU SHAOLIN6009SAO PAULO62070503***6304ABCD`
+  const safeTotalFormatted = Math.max(0, currentTotal).toFixed(2).replace('.', '')
+  const simulatedPixCode = `00020126580014br.gov.bcb.pix0136loja@nucleoshaolin.com.br520400005303986540${safeTotalFormatted}5802BR5925NUCLEO DE KUNG FU SHAOLIN6009SAO PAULO62070503***6304ABCD`
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -122,12 +125,16 @@ export function EditOrderModal({ order, onClose, onSuccess }: EditOrderModalProp
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-xs p-3 sm:p-4 animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget && !isPending) onClose()
       }}
     >
-      <div className="w-full max-w-md bg-[var(--color-bg)] border border-[var(--color-border-gold)] rounded-2xl p-5 sm:p-6 shadow-2xl flex flex-col gap-4 text-left my-auto animate-scale-up relative">
+      <div className="min-h-full flex items-center justify-center py-4 sm:py-6">
+        <div
+          className="w-full max-w-md bg-[var(--color-bg-card,#141721)] border border-[var(--color-border-gold)] rounded-2xl p-5 sm:p-6 shadow-2xl flex flex-col gap-4 text-left relative animate-scale-up"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Botão Fechar */}
         <button
           type="button"
@@ -457,5 +464,6 @@ export function EditOrderModal({ order, onClose, onSuccess }: EditOrderModalProp
         )}
       </div>
     </div>
-  )
+  </div>
+)
 }

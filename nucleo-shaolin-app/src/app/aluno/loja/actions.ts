@@ -171,13 +171,23 @@ export async function updateStudentOrderAction(input: UpdateStudentOrderInput) {
     const quantity = Math.max(1, input.quantity || 1)
     const totalPrice = unitPrice * quantity
 
+    const productName =
+      order.product?.name ||
+      order.notes?.match(/\[Produto:\s*([^\]]+)\]/)?.[1] ||
+      'Produto'
+
+    const userNotes = input.notes?.trim() || ''
+    const finalNotes = userNotes
+      ? `${userNotes} [Produto: ${productName}]`
+      : `[Produto: ${productName}]`
+
     const { error: updateErr } = await adminClient
       .from('product_orders')
       .update({
         quantity,
         total_price: totalPrice,
         payment_method: input.paymentMethod,
-        notes: input.notes?.trim() || null,
+        notes: finalNotes,
         updated_at: new Date().toISOString(),
       })
       .eq('id', input.orderId)

@@ -402,7 +402,7 @@ export function ApprovalQueue({
                         >
                           {modalityGrads.map((g) => (
                             <option key={g.id} value={g.id}>
-                              {g.level_name} ({g.level_order}º Nível)
+                              {g.level_name}
                             </option>
                           ))}
                         </select>

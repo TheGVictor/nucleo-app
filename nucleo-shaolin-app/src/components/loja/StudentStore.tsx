@@ -298,7 +298,7 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="text-xs sm:text-sm font-bold text-main truncate">
-                            {ord.product?.name || ord.notes || 'Produto Reservado'}
+                            {ord.product?.name || ord.notes?.match(/\[Produto:\s*([^\]]+)\]/)?.[1] || 'Produto Reservado'}
                           </h4>
                           {statusBadge}
                         </div>

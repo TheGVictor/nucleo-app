@@ -160,3 +160,52 @@ export async function deleteOrderAction(orderId: string) {
     return { success: false, error: msg }
   }
 }
+
+export async function uploadProductImageAction(formData: FormData) {
+  try {
+    const file = formData.get('file') as File | null
+    if (!file) {
+      return { success: false, error: 'Nenhum arquivo enviado.' }
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!allowedTypes.includes(file.type)) {
+      return { success: false, error: 'Formato inválido. Use JPG, PNG, WEBP ou GIF.' }
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      return { success: false, error: 'A imagem deve ter no máximo 5MB.' }
+    }
+
+    const adminClient = createAdminClient()
+
+    // Garante que o bucket 'products' exista
+    try {
+      await adminClient.storage.createBucket('products', { public: true })
+    } catch {}
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const fileName = `produto_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`
+    const buffer = Buffer.from(await file.arrayBuffer())
+
+    const { error: uploadError } = await adminClient.storage
+      .from('products')
+      .upload(fileName, buffer, {
+        contentType: file.type,
+        upsert: true,
+      })
+
+    if (uploadError) {
+      return { success: false, error: 'Falha no upload da imagem: ' + uploadError.message }
+    }
+
+    const { data: publicUrlData } = adminClient.storage
+      .from('products')
+      .getPublicUrl(fileName)
+
+    return { success: true, url: publicUrlData.publicUrl }
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : 'Erro ao processar imagem.' }
+  }
+}
+

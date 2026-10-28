@@ -325,7 +325,7 @@ export function AdminVideosManager({
             <option value="all">Todas as Faixas</option>
             {graduations.map((g) => (
               <option key={g.id} value={g.id}>
-                {g.level_name} (Nível {g.level_order})
+                {g.level_name}
               </option>
             ))}
           </select>
@@ -610,7 +610,7 @@ export function AdminVideosManager({
                 >
                   {graduations.map((g) => (
                     <option key={g.id} value={g.id}>
-                      {g.level_name} (Nível {g.level_order})
+                      {g.level_name}
                     </option>
                   ))}
                 </select>
