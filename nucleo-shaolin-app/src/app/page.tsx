@@ -216,7 +216,7 @@ const faqJsonLd = {
 
 export default function HomePage() {
   const [expandedFaqIndex, setExpandedFaqIndex] = useState<number | null>(0)
-  const [isWaPopupOpen, setIsWaPopupOpen] = useState(false)
+  const [isWaPopupOpen, setIsWaPopupOpen] = useState(true)
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-main flex flex-col justify-between selection:bg-[var(--color-primary)] selection:text-white">
@@ -972,7 +972,7 @@ export default function HomePage() {
           {/* Barra Inferior de Direitos */}
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-faint">
             <span>
-              © {new Date().getFullYear()} Núcleo de Kung Fu Shaolin · Todos os direitos reservados.
+              © 2026 Núcleo de Kung Fu Shaolin · Todos os direitos reservados.
             </span>
             <span>
               {SCHOOL_ADDRESS} · Tel/WhatsApp {WHATSAPP_DISPLAY}

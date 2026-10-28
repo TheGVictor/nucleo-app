@@ -17,3 +17,4 @@ describe('normalizeTonLong', () => {
     expect(normalizeTonLong('Ton Long')).toBe('Ton Long')
   })
 })
+

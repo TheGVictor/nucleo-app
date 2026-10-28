@@ -70,7 +70,9 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
       <div className="w-full max-w-[1216px] mx-auto min-h-[50px] py-1 flex items-center justify-between gap-2 sm:gap-3 flex-nowrap min-w-0">
         {/* Lado Esquerdo: Logo e Título com Indicador de Faixa */}
         <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 overflow-hidden">
-          <Logo size="sm" />
+          <Link href="/" title="Ver Página Inicial do Site" className="shrink-0 hover:scale-105 transition-transform">
+            <Logo size="sm" />
+          </Link>
           <div className="min-w-0 flex-1 overflow-hidden">
             <div className="flex items-center gap-1.5 min-w-0">
               <p className="text-sm sm:text-base font-bold text-main leading-tight truncate">

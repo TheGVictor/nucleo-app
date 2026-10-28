@@ -6,3 +6,4 @@ export function normalizeTonLong(text: string | null | undefined): string {
   if (!text) return ''
   return text.replace(/\btan\s*g?\s*lang\b/gi, 'Ton Long')
 }
+
