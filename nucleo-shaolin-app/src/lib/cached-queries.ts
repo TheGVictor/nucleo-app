@@ -1,5 +1,6 @@
 import { unstable_cache } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { normalizeTonLong } from '@/lib/modality-utils'
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -23,7 +24,14 @@ export const getCachedAnnouncements = unstable_cache(
       .order('created_at', { ascending: false })
       .limit(15)
 
-    return data ?? []
+    return (data ?? []).map((a) => ({
+      ...a,
+      title: normalizeTonLong(a.title),
+      content: normalizeTonLong(a.content),
+      modality: a.modality
+        ? { ...a.modality, name: normalizeTonLong(a.modality.name) }
+        : null,
+    }))
   },
   ['global-announcements'],
   { revalidate: 300, tags: ['announcements'] }
@@ -40,7 +48,13 @@ export const getCachedClassSchedules = unstable_cache(
       .order('day_of_week', { ascending: true })
       .order('start_time', { ascending: true })
 
-    return data ?? []
+    return (data ?? []).map((s) => ({
+      ...s,
+      title: normalizeTonLong(s.title),
+      modality: s.modality
+        ? { ...s.modality, name: normalizeTonLong(s.modality.name) }
+        : null,
+    }))
   },
   ['global-class-schedules'],
   { revalidate: 600, tags: ['class_schedules'] }
@@ -71,7 +85,10 @@ export const getCachedModalities = unstable_cache(
       .select('id, name, slug')
       .order('name', { ascending: true })
 
-    return data ?? []
+    return (data ?? []).map((m) => ({
+      ...m,
+      name: normalizeTonLong(m.name),
+    }))
   },
   ['global-modalities'],
   { revalidate: 3600, tags: ['modalities'] }
@@ -86,7 +103,13 @@ export const getCachedVideos = unstable_cache(
       .select('*, modality:modalities(name)')
       .order('created_at', { ascending: false })
 
-    return data ?? []
+    return (data ?? []).map((v) => ({
+      ...v,
+      title: normalizeTonLong(v.title),
+      modality: v.modality
+        ? { ...v.modality, name: normalizeTonLong(v.modality.name) }
+        : null,
+    }))
   },
   ['global-videos'],
   { revalidate: 600, tags: ['videos'] }

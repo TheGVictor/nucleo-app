@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge'
 import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
 import { InstallAppButton } from '@/components/pwa/InstallPwa'
 import { getBeltTheme } from '@/lib/beltTheme'
+import { normalizeTonLong } from '@/lib/modality-utils'
 
 interface StudentModalityItem {
   id: string
@@ -191,7 +192,7 @@ export default async function PerfilPage() {
                   className="text-xs px-2.5 py-1 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] text-main font-semibold flex items-center gap-1.5"
                 >
                   <span>{m.slug === 'taichi' ? '☯️' : m.slug === 'sanda' ? '🥊' : '🥋'}</span>
-                  <span>{m.name}</span>
+                  <span>{normalizeTonLong(m.name)}</span>
                 </span>
               ))}
             </div>
@@ -201,7 +202,7 @@ export default async function PerfilPage() {
                 Fale com a coordenação para incluir uma nova modalidade no seu cadastro:
               </span>
               <a
-                href={`https://wa.me/5511999999999?text=${encodeURIComponent(
+                href={`https://wa.me/551123862729?text=${encodeURIComponent(
                   `Olá, sou o aluno ${profile.full_name} e tenho interesse em treinar uma nova modalidade no Núcleo Shaolin!`
                 )}`}
                 target="_blank"

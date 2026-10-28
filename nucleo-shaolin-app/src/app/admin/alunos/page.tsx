@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { StudentHub, type DetailedStudent } from '@/components/admin/StudentHub'
+import { normalizeTonLong } from '@/lib/modality-utils'
 
 export const instant = false
 
@@ -79,13 +80,13 @@ export default async function AdminAlunosPage() {
       const mod = Array.isArray(rawMod) ? rawMod[0] : rawMod
       const rawGrad = sm.approved_graduation
       const grad = Array.isArray(rawGrad) ? rawGrad[0] : rawGrad
-      const name = mod?.name ?? 'Kung Fu Shaolin'
+      const name = normalizeTonLong(mod?.name ?? 'Kung Fu Shaolin')
 
       let short = 'CLF'
       const norm = name.toLowerCase()
       if (norm.includes('tai')) short = 'Tai Chi'
       else if (norm.includes('sanda')) short = 'Sanda'
-      else if (norm.includes('tang')) short = 'Tang Lang'
+      else if (norm.includes('ton') || norm.includes('tang') || norm.includes('tan')) short = 'Ton Long'
       else if (norm.includes('choy') || norm.includes('kung')) short = 'CLF'
       else short = name.slice(0, 7)
 
@@ -100,7 +101,9 @@ export default async function AdminAlunosPage() {
 
     const activeMod = rawModalities[0]
     const rawModality = activeMod?.modality
-    const modalityName = Array.isArray(rawModality) ? rawModality[0]?.name : rawModality?.name ?? 'Kung Fu Shaolin'
+    const modalityName = normalizeTonLong(
+      Array.isArray(rawModality) ? rawModality[0]?.name : rawModality?.name ?? 'Kung Fu Shaolin'
+    )
     const modalityId = Array.isArray(rawModality) ? rawModality[0]?.id : rawModality?.id ?? ''
 
     const rawGrad = activeMod?.approved_graduation

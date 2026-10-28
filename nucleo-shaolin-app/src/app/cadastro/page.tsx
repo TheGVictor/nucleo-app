@@ -11,7 +11,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 const MODALITIES = [
   { slug: 'clf',      label: 'Choy Lay Fut',  short: 'CLF' },
   { slug: 'taichi',   label: 'Tai Chi Chuan', short: 'Tai Chi' },
-  { slug: 'tanglang', label: 'Tang Lang',     short: 'TL' },
+  { slug: 'tanglang', label: 'Ton Long',      short: 'TL' },
   { slug: 'sanda',    label: 'Sanda',         short: 'Sanda' },
 ]
 

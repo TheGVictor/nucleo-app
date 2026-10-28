@@ -1,5 +1,6 @@
 import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { normalizeTonLong } from '@/lib/modality-utils'
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -32,5 +33,13 @@ export const getRequestStudentModalities = cache(async (userId: string) => {
     `)
     .eq('student_id', userId)
 
-  return modalities ?? []
+  return (modalities ?? []).map((sm) => ({
+    ...sm,
+    modality: sm.modality
+      ? {
+          ...sm.modality,
+          name: normalizeTonLong(sm.modality.name),
+        }
+      : null,
+  }))
 })

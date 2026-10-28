@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { ClassSchedule } from '@/types/database'
+import { normalizeTonLong } from '@/lib/modality-utils'
 
 export interface ClassScheduleWithModality extends ClassSchedule {
   modality?: {
@@ -49,7 +50,14 @@ export async function getClassSchedulesAction(): Promise<ClassScheduleWithModali
     return []
   }
 
-  return (data as unknown as ClassScheduleWithModality[]) ?? []
+  const list = (data as unknown as ClassScheduleWithModality[]) ?? []
+  return list.map((s) => ({
+    ...s,
+    title: normalizeTonLong(s.title),
+    modality: s.modality
+      ? { ...s.modality, name: normalizeTonLong(s.modality.name) }
+      : null,
+  }))
 }
 
 export async function createClassScheduleAction(input: {

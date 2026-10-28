@@ -1,20 +1,21 @@
 # Núcleo de Kung Fu Shaolin
 
-> Escola tradicional de Kung Fu Shaolin (estilo Choy Lay Fut), Tai Chi Chuan estilo Yang e Sanda (Boxe Chinês), sob a coordenação técnica do Sifu Guilherme. Acompanhamento pedagógico com ficha técnica oficial e portal digital para alunos.
+> Escola tradicional de Kung Fu Shaolin (estilos Choy Lay Fut e Ton Long), Kung Fu Kids, Tai Chi Chuan estilo Yang e Sanda (Boxe Chinês), sob a coordenação técnica do Sifu Guilherme. Localizada na Av. Conselheiro Carrão, 2737 — São Paulo, SP. WhatsApp: (11) 2386-2729.
 
-O Núcleo de Kung Fu Shaolin é uma instituição de ensino de artes marciais tradicionais chinesas. Oferece treinamento físico e marcial integral, cultivo de disciplina e saúde corporal, metodologia progressiva de faixas e portal online oficial para alunos e instrutores.
+O Núcleo de Kung Fu Shaolin é uma instituição de ensino de artes marciais tradicionais chinesas. Oferece treinamento físico e marcial integral, cultivo de disciplina e saúde corporal, metodologia progressiva de faixas e área online exclusiva para alunos.
 
 ## Páginas Canônicas e Navegação
 
-- [Página Inicial](https://nucleo-app-iota.vercel.app/): Apresentação institucional da escola, modalidades praticadas, linhagem marcial tradicional, depoimentos, fotos e perguntas frequentes.
-- [Solicitação de Matrícula e Cadastro](https://nucleo-app-iota.vercel.app/cadastro): Formulário oficial de pré-matrícula para novos alunos com agendamento de aula experimental e envio de dados para validação do Sifu.
-- [Portal e Área do Aluno](https://nucleo-app-iota.vercel.app/login): Acesso autenticado à plataforma do aluno com frequência de aulas, histórico de graduações, ficha técnica e vídeos técnicos de Katis.
+- [Página Inicial](https://nucleo-app-iota.vercel.app/): Apresentação institucional da escola, modalidades praticadas (Choy Lay Fut, Ton Long, Kung Fu Kids, Tai Chi Chuan e Sanda), localização e perguntas frequentes.
+- [Área Exclusiva do Aluno](https://nucleo-app-iota.vercel.app/login): Acesso autenticado à plataforma do aluno com frequência de aulas, histórico de graduações, ficha técnica e vídeos técnicos de Katis.
 
 ## Modalidades Ensinadas
 
-- [Kung Fu Shaolin (Choy Lay Fut)](https://nucleo-app-iota.vercel.app/#modalidades): Sistema clássico e dinâmico combinando técnicas do Norte e Sul da China. Treino de condicionamento, autodefesa instintiva, formas tradicionais (Katis) e armas clássicas (bastão, sabre, lança).
-- [Tai Chi Chuan (Estilo Yang)](https://nucleo-app-iota.vercel.app/#modalidades): Prática suave com sequências fluidas, respiração consciente e cultivo de energia interna (Qi Gong). Indicado para saúde articular, correção postural e alívio do estresse.
-- [Sanda / Boxe Chinês](https://nucleo-app-iota.vercel.app/#modalidades): Combate marcial esportivo com socos, chutes rápidos e projeções de quedas em ambiente controlado e com total segurança.
+- [Kung Fu Shaolin (Choy Lay Fut)](https://nucleo-app-iota.vercel.app/#clf): Sistema clássico e dinâmico combinando técnicas do Norte e Sul da China. Treino de condicionamento, autodefesa instintiva, formas tradicionais (Katis) e armas clássicas (bastão, sabre, lança).
+- [Ton Long Kung Fu](https://nucleo-app-iota.vercel.app/#tonlong): Estilo Louva-a-Deus tradicional com ênfase em velocidade de mãos, capturas, bloqueios angulares e precisão em curta distância.
+- [Kung Fu Kids (Siu Lung)](https://nucleo-app-iota.vercel.app/#kids): Turmas infantis a partir dos 5 anos focadas em coordenação motora, disciplina, foco escolar, respeito aos pais e autoconfiança.
+- [Tai Chi Chuan (Estilo Yang)](https://nucleo-app-iota.vercel.app/#taichi): Prática suave com sequências fluidas, respiração consciente e cultivo de energia interna (Qi Gong). Indicado para saúde articular, correção postural e alívio do estresse.
+- [Sanda / Boxe Chinês](https://nucleo-app-iota.vercel.app/#sanda): Combate marcial esportivo com socos, chutes rápidos e projeções de quedas em ambiente controlado e com total segurança.
 
 ## Documentação Técnica Completa
 

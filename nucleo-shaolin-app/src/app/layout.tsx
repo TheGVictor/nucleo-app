@@ -22,7 +22,8 @@ const organizationJsonLd = {
       logo: 'https://nucleo-app-iota.vercel.app/icon-512.png',
       image: 'https://nucleo-app-iota.vercel.app/icon-512.png',
       description:
-        'Escola tradicional de Kung Fu Shaolin (Choy Lay Fut), Tai Chi Chuan estilo Yang e Sanda (Boxe Chinês), sob coordenação técnica do Sifu Guilherme.',
+        'Escola tradicional de Kung Fu Shaolin (Choy Lay Fut e Ton Long), Kung Fu Kids, Tai Chi Chuan estilo Yang e Sanda (Boxe Chinês), sob coordenação técnica do Sifu Guilherme.',
+      telephone: '+55-11-2386-2729',
       sameAs: [
         'https://www.instagram.com/nucleokungfushaolin/',
         'https://www.facebook.com/nucleokungfushaolin/',
@@ -33,9 +34,12 @@ const organizationJsonLd = {
         name: 'Sifu Guilherme',
         jobTitle: 'Mestre e Coordenador Técnico',
       },
-      sport: ['Kung Fu', 'Tai Chi Chuan', 'Sanda', 'Boxe Chinês'],
+      sport: ['Kung Fu', 'Choy Lay Fut', 'Ton Long', 'Kung Fu Kids', 'Tai Chi Chuan', 'Sanda', 'Boxe Chinês'],
       address: {
         '@type': 'PostalAddress',
+        streetAddress: 'Av. Conselheiro Carrão, 2737',
+        addressLocality: 'São Paulo',
+        addressRegion: 'SP',
         addressCountry: 'BR',
       },
     },
