@@ -1,13 +1,17 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { connection } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { TechnicalSheet } from '@/components/technical/TechnicalSheet'
 import { getBeltTheme } from '@/lib/beltTheme'
 import { getStudentTechnicalSheetAction } from '@/app/admin/attendance/technicalActions'
-import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
+import {
+  getRequestAuthUser,
+  getRequestUserProfile,
+  getRequestStudentModalities,
+} from '@/lib/user-cache'
 
 interface GraduationHistoryItem {
   id: string
@@ -23,21 +27,18 @@ interface AlunoFichaPageProps {
 
 export default async function AlunoFichaPage({ searchParams }: AlunoFichaPageProps) {
   await connection()
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
   const resolvedParams = searchParams ? await searchParams : {}
   const targetModalityId = resolvedParams.modality
+  const adminClient = createAdminClient()
 
-  // Carrega Perfil (deduplicado), Modalidades, Histórico de Graduações e a Ficha Técnica
+  // Carrega Perfil (deduplicado), Modalidades, Histórico de Graduações e a Ficha Técnica em paralelo
   const [profile, studentModalities, gradHistoryRes, technicalSheetRes] = await Promise.all([
     getRequestUserProfile(user.id),
     getRequestStudentModalities(user.id),
-    supabase
+    adminClient
       .from('graduation_history')
       .select('*, modality:modalities(name), graduation:graduations(level_name, color_hex)')
       .eq('student_id', user.id)

@@ -1,19 +1,38 @@
 import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { normalizeTonLong } from '@/lib/modality-utils'
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * DEDUPLICAÇÃO DE REQUISIÇÕES POR REQUEST (React Request Cache)
+ * DEDUPLICAÇÃO DE AUTENTICAÇÃO E PERFIL POR REQUEST (React Request Cache)
  * ═══════════════════════════════════════════════════════════════════════════
- * Se o Layout e a Página solicitarem o perfil do aluno na mesma renderização,
- * o React executa a busca no Supabase APENAS 1 VEZ e compartilha o resultado.
+ * Evita múltiplos round-trips de rede ao Supabase Auth (getUser) no mesmo
+ * ciclo de renderização (Layout + Page + Server Actions).
+ * Usa getSession() para decodificação instantânea do cookie JWT (~0ms).
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-export const getRequestUserProfile = cache(async (userId: string) => {
+export const getRequestAuthUser = cache(async () => {
   const supabase = await createClient()
-  const { data: profile } = await supabase
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (session?.user) {
+    return session.user
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  return user ?? null
+})
+
+export const getRequestUserProfile = cache(async (userId: string) => {
+  const admin = createAdminClient()
+  const { data: profile } = await admin
     .from('profiles')
     .select('*')
     .eq('id', userId)
@@ -23,8 +42,8 @@ export const getRequestUserProfile = cache(async (userId: string) => {
 })
 
 export const getRequestStudentModalities = cache(async (userId: string) => {
-  const supabase = await createClient()
-  const { data: modalities } = await supabase
+  const admin = createAdminClient()
+  const { data: modalities } = await admin
     .from('student_modalities')
     .select(`
       *,

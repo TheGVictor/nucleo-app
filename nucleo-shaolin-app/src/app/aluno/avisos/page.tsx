@@ -1,20 +1,19 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { AnnouncementsList } from '@/components/aluno/AnnouncementsList'
 import { Badge } from '@/components/ui/Badge'
 import { filterStudentAnnouncements } from '@/lib/announcements'
-import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
+import {
+  getRequestAuthUser,
+  getRequestUserProfile,
+  getRequestStudentModalities,
+} from '@/lib/user-cache'
 import { getCachedAnnouncements } from '@/lib/cached-queries'
 
 export const instant = false
 
 export default async function AlunoAvisosPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
   const [profile, modalities, allAnnouncements] = await Promise.all([
@@ -67,3 +66,4 @@ export default async function AlunoAvisosPage() {
     </main>
   )
 }
+

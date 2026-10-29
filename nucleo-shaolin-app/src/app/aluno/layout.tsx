@@ -1,8 +1,11 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { TopBar } from '@/components/layout/TopBar'
 import { BottomNav } from '@/components/layout/BottomNav'
-import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
+import {
+  getRequestAuthUser,
+  getRequestUserProfile,
+  getRequestStudentModalities,
+} from '@/lib/user-cache'
 
 export const instant = false
 
@@ -11,9 +14,7 @@ export default async function AlunoLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
   const [profile, modalities] = await Promise.all([

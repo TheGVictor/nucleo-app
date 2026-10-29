@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AnnouncementsManager } from '@/components/admin/AnnouncementsManager'
 import type { AnnouncementWithModality } from '@/app/admin/announcements/actions'
+import { getRequestAuthUser, getRequestUserProfile } from '@/lib/user-cache'
+import { getCachedModalities } from '@/lib/cached-queries'
 
 export const instant = false
 
@@ -14,18 +15,10 @@ interface RawModality {
 }
 
 export default async function AdminAvisosPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+  const profile = await getRequestUserProfile(user.id)
 
   if (!profile || profile.role !== 'super_admin') {
     redirect('/admin')
@@ -33,8 +26,8 @@ export default async function AdminAvisosPage() {
 
   const adminClient = createAdminClient()
 
-  const [modalitiesRes, announcementsRes, studentsRes] = await Promise.all([
-    adminClient.from('modalities').select('id, name, slug').order('name'),
+  const [modalitiesData, announcementsRes, studentsRes] = await Promise.all([
+    getCachedModalities(),
     adminClient
       .from('announcements')
       .select('*, modality:modalities(id, name, slug)')
@@ -55,7 +48,7 @@ export default async function AdminAvisosPage() {
       .order('full_name', { ascending: true }),
   ])
 
-  const modalities = (modalitiesRes.data as RawModality[]) ?? []
+  const modalities = (modalitiesData as RawModality[]) ?? []
   const announcements = (announcementsRes.data as AnnouncementWithModality[]) ?? []
 
   interface RawStudentModality {

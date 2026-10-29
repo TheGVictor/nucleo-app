@@ -64,18 +64,7 @@ export async function getStudentTechnicalSheetAction(
       }
     }
 
-    // 2. Perfil do aluno da ficha
-    const { data: student, error: studentError } = await adminClient
-      .from('profiles')
-      .select('id, full_name, birth_date, created_at, photo_url')
-      .eq('id', studentId)
-      .single()
-
-    if (studentError || !student) {
-      return { success: false, error: 'Aluno não encontrado' }
-    }
-
-    // 3. Modalidade e Graduação do aluno
+    // 2. Busca Perfil, Modalidade/Graduação e Progresso Técnico em paralelo
     let modQuery = adminClient
       .from('student_modalities')
       .select(`
@@ -90,7 +79,29 @@ export async function getStudentTechnicalSheetAction(
       modQuery = modQuery.eq('modality_id', targetModalityId)
     }
 
-    const { data: studentModalities } = await modQuery.limit(1)
+    const [
+      { data: student, error: studentError },
+      { data: studentModalities },
+      { data: progressRecords },
+    ] = await Promise.all([
+      adminClient
+        .from('profiles')
+        .select('id, full_name, birth_date, created_at, photo_url')
+        .eq('id', studentId)
+        .single(),
+      modQuery.limit(1),
+      adminClient
+        .from('technical_progress')
+        .select('*')
+        .eq('student_id', studentId)
+        .order('evaluation_date', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(1),
+    ])
+
+    if (studentError || !student) {
+      return { success: false, error: 'Aluno não encontrado' }
+    }
 
     const activeMod = studentModalities?.[0]
     const modalityName = activeMod?.modality?.name ?? 'Kung Fu Shaolin'
@@ -105,15 +116,6 @@ export async function getStudentTechnicalSheetAction(
     // Normaliza slug da faixa para carregar o schema correto
     const beltSlug = graduationName.toLowerCase().trim().replace(/\s+/g, '-')
     const schema = getTechnicalSheetSchema(beltSlug)
-
-    // 4. Busca registro salvo em technical_progress
-    const { data: progressRecords } = await adminClient
-      .from('technical_progress')
-      .select('*')
-      .eq('student_id', studentId)
-      .order('evaluation_date', { ascending: false })
-      .order('created_at', { ascending: false })
-      .limit(1)
 
     const latestRecord = progressRecords?.[0]
 

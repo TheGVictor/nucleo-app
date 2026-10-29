@@ -1,12 +1,18 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
-import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
+import {
+  getRequestAuthUser,
+  getRequestUserProfile,
+  getRequestStudentModalities,
+} from '@/lib/user-cache'
+import { getCachedModalities } from '@/lib/cached-queries'
 import { InstallAppButton } from '@/components/pwa/InstallPwa'
 import { getBeltTheme } from '@/lib/beltTheme'
 import { normalizeTonLong } from '@/lib/modality-utils'
+
+export const instant = false
 
 interface StudentModalityItem {
   id: string
@@ -17,22 +23,20 @@ interface StudentModalityItem {
 }
 
 export default async function PerfilPage() {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
-  const [profile, studentModalities, allModalitiesRes] = await Promise.all([
+  const [profile, studentModalities, allModalities] = await Promise.all([
     getRequestUserProfile(user.id),
     getRequestStudentModalities(user.id),
-    supabase.from('modalities').select('id, name, slug').order('name'),
+    getCachedModalities(),
   ])
 
   if (!profile) redirect('/login')
 
   const modalitiesList = (studentModalities || []) as unknown as StudentModalityItem[]
   const enrolledSlugs = new Set(modalitiesList.map(sm => sm.modality?.slug).filter(Boolean))
-  const otherAvailableModalities = (allModalitiesRes.data || []).filter(
+  const otherAvailableModalities = (allModalities || []).filter(
     (m) => !enrolledSlugs.has(m.slug)
   )
 

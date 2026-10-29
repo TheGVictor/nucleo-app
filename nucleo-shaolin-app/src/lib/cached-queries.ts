@@ -100,7 +100,7 @@ export const getCachedVideos = unstable_cache(
     const admin = createAdminClient()
     const { data } = await admin
       .from('videos')
-      .select('*, modality:modalities(name)')
+      .select('*, modality:modalities(id, name, slug), graduation:graduations(id, level_name, level_order, color_hex)')
       .order('created_at', { ascending: false })
 
     return (data ?? []).map((v) => ({

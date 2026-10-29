@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { ScheduleManager } from '@/components/admin/ScheduleManager'
 import { getClassSchedulesAction } from '@/app/admin/horarios/actions'
+import { getRequestAuthUser, getRequestUserProfile } from '@/lib/user-cache'
+import { getCachedModalities } from '@/lib/cached-queries'
 
 export const instant = false
 
@@ -14,33 +14,21 @@ interface RawModality {
 }
 
 export default async function AdminHorariosPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+  const [profile, modalitiesData, schedules] = await Promise.all([
+    getRequestUserProfile(user.id),
+    getCachedModalities(),
+    getClassSchedulesAction(),
+  ])
 
   if (!profile || !['instructor', 'admin', 'super_admin'].includes(profile.role)) {
     redirect('/aluno')
   }
 
   const isReadOnly = profile.role !== 'super_admin'
-
-  const adminClient = createAdminClient()
-
-  const [modalitiesRes, schedules] = await Promise.all([
-    adminClient.from('modalities').select('id, name, slug').order('name'),
-    getClassSchedulesAction(),
-  ])
-
-  const modalities = (modalitiesRes.data as RawModality[]) ?? []
+  const modalities = (modalitiesData as RawModality[]) ?? []
 
   return (
     <main className="page-container py-5 sm:py-6 flex flex-col gap-5 sm:gap-6 animate-fade-in">

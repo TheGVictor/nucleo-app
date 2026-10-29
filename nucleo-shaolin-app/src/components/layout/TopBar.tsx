@@ -117,29 +117,25 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
           {/* Alternar visão Aluno <-> Instrutor apenas para instrutores (que também são alunos) */}
           {(profile.role === 'instructor' || profile.role === 'admin') && (
             pathname.startsWith('/admin') ? (
-              <button
-                onClick={() => {
-                  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-                  window.location.href = '/aluno'
-                }}
+              <Link
+                href="/aluno"
+                prefetch={true}
                 className="btn btn-secondary btn-sm p-1.5 sm:px-2 sm:py-1 text-xs font-semibold flex items-center gap-1 shrink-0"
                 title="Acessar minha área de aluno"
               >
                 <span>🥋</span>
                 <span className="hidden sm:inline">Aluno</span>
-              </button>
+              </Link>
             ) : (
-              <button
-                onClick={() => {
-                  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-                  window.location.href = '/admin'
-                }}
+              <Link
+                href="/admin"
+                prefetch={true}
                 className="btn btn-gold btn-sm p-1.5 sm:px-2 sm:py-1 text-xs font-semibold flex items-center gap-1 shrink-0"
                 title="Acessar painel do instrutor"
               >
                 <span>🛡️</span>
                 <span className="hidden sm:inline">Instrutor</span>
-              </button>
+              </Link>
             )
           )}
 

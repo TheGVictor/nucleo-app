@@ -1,7 +1,10 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { StudentScheduleView } from '@/components/aluno/StudentScheduleView'
-import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
+import {
+  getRequestAuthUser,
+  getRequestUserProfile,
+  getRequestStudentModalities,
+} from '@/lib/user-cache'
 import { getCachedClassSchedules } from '@/lib/cached-queries'
 import type { ClassSchedule } from '@/types/database'
 
@@ -16,11 +19,7 @@ interface ScheduleWithModality extends ClassSchedule {
 }
 
 export default async function AlunoAulasPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
   const [profile, schedulesData, studentModalities] = await Promise.all([

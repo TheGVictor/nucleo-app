@@ -92,7 +92,7 @@ export function AdminBottomNav({
           <Link
             key={item.path}
             href={item.path}
-            prefetch={false}
+            prefetch={true}
             className={`relative flex flex-col items-center justify-center py-1 px-1 sm:px-2 rounded-[var(--radius-sm)] transition-all min-w-0 flex-1 ${
               isActive
                 ? 'text-[var(--color-gold)] font-bold scale-105'

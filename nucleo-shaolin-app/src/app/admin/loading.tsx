@@ -1,10 +1,14 @@
-import { Spinner } from '@/components/ui/Spinner'
-
 export default function AdminLoading() {
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-6 py-12 flex flex-col items-center justify-center min-h-[40vh] gap-3 animate-fade-in">
-      <Spinner size="lg" />
-      <p className="nkfs-p-m text-muted font-medium">Carregando painel do instrutor...</p>
-    </div>
+    <main className="page-container py-5 sm:py-6 flex flex-col gap-4 animate-pulse">
+      <div className="h-14 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)]" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="h-24 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)]" />
+        <div className="h-24 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)]" />
+        <div className="h-24 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)]" />
+        <div className="h-24 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)]" />
+      </div>
+      <div className="h-48 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)]" />
+    </main>
   )
 }

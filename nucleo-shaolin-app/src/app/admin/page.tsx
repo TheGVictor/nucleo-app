@@ -1,10 +1,9 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { connection } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ApprovalQueue } from '@/components/admin/ApprovalQueue'
-import { getRequestUserProfile } from '@/lib/user-cache'
+import { getRequestAuthUser, getRequestUserProfile } from '@/lib/user-cache'
 
 interface RawModality {
   id: string
@@ -23,9 +22,7 @@ export const instant = false
 
 export default async function AdminPage() {
   await connection()
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
   const profile = await getRequestUserProfile(user.id)
@@ -36,26 +33,57 @@ export default async function AdminPage() {
   const isSifu = profile.role === 'super_admin'
   const adminClient = createAdminClient()
 
-  // 1. Cadastros pendentes de homologação (Apenas relevante para Sifu)
-  const { data: rawPending } = await supabase
-    .from('profiles')
-    .select(`
-      id,
-      full_name,
-      cpf,
-      phone,
-      birth_date,
-      created_at,
-      student_modalities(
-        id,
-        status,
-        self_reported_level,
-        modality:modalities(id, name, slug)
-      )
-    `)
-    .eq('status', 'pending_approval')
-    .order('created_at', { ascending: false })
+  // Executa todas as consultas em paralelo (evita waterfall sequencial)
+  const [
+    pendingRes,
+    { count: activeStudents },
+    { count: totalAnnouncements },
+    { count: totalClasses },
+    { count: totalVideos },
+    graduationsRes,
+  ] = await Promise.all([
+    isSifu
+      ? adminClient
+          .from('profiles')
+          .select(`
+            id,
+            full_name,
+            cpf,
+            phone,
+            birth_date,
+            created_at,
+            student_modalities(
+              id,
+              status,
+              self_reported_level,
+              modality:modalities(id, name, slug)
+            )
+          `)
+          .eq('status', 'pending_approval')
+          .order('created_at', { ascending: false })
+      : Promise.resolve({ data: [] }),
+    adminClient
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'student')
+      .eq('status', 'active'),
+    adminClient
+      .from('announcements')
+      .select('*', { count: 'exact', head: true }),
+    adminClient
+      .from('class_schedules')
+      .select('*', { count: 'exact', head: true })
+      .eq('active', true),
+    adminClient
+      .from('videos')
+      .select('*', { count: 'exact', head: true }),
+    adminClient
+      .from('graduations')
+      .select('id, modality_id, level_name, level_order, color_hex')
+      .order('level_order', { ascending: true }),
+  ])
 
+  const rawPending = pendingRes.data
   const pending = (rawPending ?? []).map((p) => {
     const rawModalities = p.student_modalities as unknown as RawStudentModality[] | null
     const modalitiesList = Array.isArray(rawModalities) ? rawModalities : []
@@ -79,35 +107,6 @@ export default async function AdminPage() {
       student_modalities: mapped,
     }
   })
-
-  // 2. Contadores gerais e Graduações
-  const [
-    { count: activeStudents },
-    { count: totalAnnouncements },
-    { count: totalClasses },
-    { count: totalVideos },
-    graduationsRes,
-  ] = await Promise.all([
-    adminClient
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'student')
-      .eq('status', 'active'),
-    adminClient
-      .from('announcements')
-      .select('*', { count: 'exact', head: true }),
-    adminClient
-      .from('class_schedules')
-      .select('*', { count: 'exact', head: true })
-      .eq('active', true),
-    adminClient
-      .from('videos')
-      .select('*', { count: 'exact', head: true }),
-    supabase
-      .from('graduations')
-      .select('id, modality_id, level_name, level_order, color_hex')
-      .order('level_order', { ascending: true }),
-  ])
 
   const graduations = graduationsRes.data ?? []
 

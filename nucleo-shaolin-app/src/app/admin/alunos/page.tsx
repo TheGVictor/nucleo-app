@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { StudentHub, type DetailedStudent } from '@/components/admin/StudentHub'
 import { normalizeTonLong } from '@/lib/modality-utils'
+import { getRequestAuthUser, getRequestUserProfile } from '@/lib/user-cache'
 
 export const instant = false
 
@@ -26,18 +26,10 @@ interface RawStudentModObj {
 }
 
 export default async function AdminAlunosPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+  const profile = await getRequestUserProfile(user.id)
 
   if (!profile || !['instructor', 'admin', 'super_admin'].includes(profile.role)) {
     redirect('/aluno')

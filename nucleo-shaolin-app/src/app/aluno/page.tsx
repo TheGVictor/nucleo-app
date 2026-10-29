@@ -1,19 +1,18 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { filterStudentAnnouncements } from '@/lib/announcements'
-import { getRequestUserProfile, getRequestStudentModalities } from '@/lib/user-cache'
+import {
+  getRequestAuthUser,
+  getRequestUserProfile,
+  getRequestStudentModalities,
+} from '@/lib/user-cache'
 import { getCachedAnnouncements, getCachedGraduations } from '@/lib/cached-queries'
 import { getBeltTheme } from '@/lib/beltTheme'
 
 export const instant = false
 
 export default async function AlunoHomePage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
   // Obtém Perfil e Modalidades (deduplicados em memória do request do Layout)
@@ -209,6 +208,7 @@ export default async function AlunoHomePage() {
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
         <Link
           href="/aluno/ficha"
+          prefetch={true}
           className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
         >
           <div className="flex items-center justify-between">
@@ -231,6 +231,7 @@ export default async function AlunoHomePage() {
 
         <Link
           href="/aluno/aulas"
+          prefetch={true}
           className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
         >
           <div className="flex items-center justify-between">
@@ -253,6 +254,7 @@ export default async function AlunoHomePage() {
 
         <Link
           href="/aluno/videos"
+          prefetch={true}
           className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
         >
           <div className="flex items-center justify-between">

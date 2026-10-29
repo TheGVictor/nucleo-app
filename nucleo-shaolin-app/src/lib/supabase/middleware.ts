@@ -2,12 +2,15 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
-  // Ignora requisições de prefetch em segundo plano para não consumir cotas de Auth
+  const pathname = request.nextUrl.pathname
+
+  // Ignora requisições de prefetch ou rotas puramente públicas (Home e Callback)
+  // para resposta instantânea em 0ms sem round-trip de rede.
   const isPrefetch =
     request.headers.get('next-router-prefetch') === '1' ||
     request.headers.get('purpose') === 'prefetch'
 
-  if (isPrefetch) {
+  if (isPrefetch || pathname === '/' || pathname.startsWith('/auth')) {
     return NextResponse.next({ request })
   }
 
@@ -34,13 +37,15 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // Usa getSession() para ler o JWT do cookie em memória (~0ms) sem round-trip
+  // de rede a cada clique; renova o token apenas se estiver expirado.
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user ?? null
 
-  const pathname = request.nextUrl.pathname
-
-  // Rotas públicas — não redireciona
   const publicRoutes = ['/', '/login', '/cadastro', '/auth/callback']
-  const isPublic = publicRoutes.some(r => pathname === r || pathname.startsWith('/auth'))
+  const isPublic = publicRoutes.some((r) => pathname === r || pathname.startsWith('/auth'))
 
   if (!user && !isPublic) {
     return NextResponse.redirect(new URL('/login', request.url))
@@ -49,9 +54,6 @@ export async function updateSession(request: NextRequest) {
   if (user && (pathname === '/login' || pathname === '/cadastro')) {
     return NextResponse.redirect(new URL('/aluno', request.url))
   }
-
-  // A verificação de papel (instructor/admin/super_admin) para /admin
-  // é realizada com segurança máxima e sem duplicação no layout raiz de /admin
 
   return supabaseResponse
 }

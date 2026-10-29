@@ -1,56 +1,52 @@
 import { redirect } from 'next/navigation'
-import { connection } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getRequestUserProfile } from '@/lib/user-cache'
+import { getRequestAuthUser, getRequestUserProfile } from '@/lib/user-cache'
+import { getCachedModalities } from '@/lib/cached-queries'
 import { AdminVideosManager, type AdminVideoRecord, type GraduationItem } from '@/components/admin/AdminVideosManager'
 
+export const instant = false
+
 export default async function AdminVideosPage() {
-  await connection()
-
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
-  const profile = await getRequestUserProfile(user.id)
+  const [profile, modalities] = await Promise.all([
+    getRequestUserProfile(user.id),
+    getCachedModalities(),
+  ])
+
   if (!profile || !['instructor', 'admin', 'super_admin'].includes(profile.role)) {
     redirect('/aluno')
   }
 
   const adminClient = createAdminClient()
 
-  // 1. Busca a modalidade Choy Lay Fut (CLF)
-  const { data: clfMod } = await adminClient
-    .from('modalities')
-    .select('id, name, slug')
-    .or('slug.eq.clf,name.ilike.%shaolin%,name.ilike.%choy%')
-    .limit(1)
-    .single()
+  const clfMod = modalities.find(
+    (m) =>
+      m.slug === 'clf' ||
+      m.name.toLowerCase().includes('shaolin') ||
+      m.name.toLowerCase().includes('choy')
+  )
 
   const clfModalityId = clfMod?.id || '36f1b22b-5c84-4ac7-a35b-5b1ff904d33a'
 
-  // 2. Busca as graduações do CLF ordenadas por level_order
-  const { data: graduationsData } = await adminClient
-    .from('graduations')
-    .select('id, level_name, level_order, color_hex, modality_id')
-    .eq('modality_id', clfModalityId)
-    .order('level_order', { ascending: true })
+  const [{ data: graduationsData }, { data: videosData }] = await Promise.all([
+    adminClient
+      .from('graduations')
+      .select('id, level_name, level_order, color_hex, modality_id')
+      .eq('modality_id', clfModalityId)
+      .order('level_order', { ascending: true }),
+    adminClient
+      .from('videos')
+      .select(`
+        *,
+        graduation:graduations(id, level_name, level_order, color_hex)
+      `)
+      .eq('modality_id', clfModalityId)
+      .order('created_at', { ascending: false }),
+  ])
 
   const graduations: GraduationItem[] = graduationsData || []
-
-  // 3. Busca todos os vídeos cadastrados com a graduação vinculada
-  const { data: videosData } = await adminClient
-    .from('videos')
-    .select(`
-      *,
-      graduation:graduations(id, level_name, level_order, color_hex)
-    `)
-    .eq('modality_id', clfModalityId)
-    .order('created_at', { ascending: false })
-
   const initialVideos: AdminVideoRecord[] = videosData || []
 
   return (

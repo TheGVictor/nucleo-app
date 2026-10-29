@@ -1,32 +1,23 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getRequestAuthUser, getRequestUserProfile } from '@/lib/user-cache'
 import { getAdminProductsAction, getAdminOrdersAction } from './actions'
 import { AdminStoreManager } from '@/components/admin/AdminStoreManager'
 
 export const instant = false
 
 export default async function AdminLojaPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+  const [profile, products, orders] = await Promise.all([
+    getRequestUserProfile(user.id),
+    getAdminProductsAction(),
+    getAdminOrdersAction(),
+  ])
 
   if (!profile || !['instructor', 'admin', 'super_admin'].includes(profile.role)) {
     redirect('/aluno')
   }
-
-  const [products, orders] = await Promise.all([
-    getAdminProductsAction(),
-    getAdminOrdersAction(),
-  ])
 
   return (
     <main className="page-container py-5 sm:py-6 flex flex-col gap-5 sm:gap-6 animate-fade-in">

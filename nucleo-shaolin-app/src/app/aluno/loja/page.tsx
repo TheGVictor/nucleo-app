@@ -1,16 +1,12 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getRequestAuthUser } from '@/lib/user-cache'
 import { getStoreProductsAction, getStudentOrdersAction } from './actions'
 import { StudentStore } from '@/components/loja/StudentStore'
 
 export const instant = false
 
 export default async function AlunoLojaPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getRequestAuthUser()
   if (!user) redirect('/login')
 
   const [products, orders] = await Promise.all([
