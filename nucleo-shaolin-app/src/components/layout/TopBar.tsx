@@ -37,6 +37,8 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
       ? 'Meu Perfil'
       : pathname === '/aluno/loja'
       ? 'Loja Oficial'
+      : pathname === '/aluno/avisos'
+      ? 'Mural de Avisos'
       : pathname === '/admin/loja'
       ? 'Gestão da Loja'
       : pathname === '/admin/alunos'
@@ -54,6 +56,8 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
 
   const isLojaPage = pathname.includes('/loja')
   const lojaHref = pathname.startsWith('/admin') ? '/admin/loja' : '/aluno/loja'
+  const isAvisosPage = pathname.includes('/avisos')
+  const avisosHref = pathname.startsWith('/admin') ? '/admin/avisos' : '/aluno/avisos'
 
   return (
     <header
@@ -138,6 +142,22 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
               </button>
             )
           )}
+
+          {/* Acesso Direto ao Mural de Avisos / Notificações */}
+          <Link
+            href={avisosHref}
+            prefetch={true}
+            className={`px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg text-xs font-semibold flex items-center gap-1 sm:gap-1.5 transition-all shrink-0 ${
+              isAvisosPage
+                ? 'bg-[var(--color-gold)] text-black font-bold shadow-xs'
+                : 'text-muted hover:text-main hover:bg-[var(--color-bg-elevated)] border border-transparent hover:border-[var(--color-border)]'
+            }`}
+            title="Mural de Avisos e Notificações"
+            aria-label="Mural de Avisos"
+          >
+            <span className="text-sm">🔔</span>
+            <span className="hidden sm:inline">Avisos</span>
+          </Link>
 
           {/* Acesso Direto à Loja Oficial */}
           <Link

@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { parseAnnouncementContent, buildAnnouncementContent } from '../announcements'
+import {
+  parseAnnouncementContent,
+  buildAnnouncementContent,
+  filterStudentAnnouncements,
+} from '../announcements'
 
 describe('announcements utility', () => {
   describe('parseAnnouncementContent', () => {
@@ -83,6 +87,33 @@ describe('announcements utility', () => {
     it('returns clean plain text when no image and no targeted students are given', () => {
       const output = buildAnnouncementContent('  Apenas texto do aviso  ', null)
       expect(output).toBe('Apenas texto do aviso')
+    })
+  })
+
+  describe('filterStudentAnnouncements', () => {
+    it('filters general, modality-matched, and targeted announcements accurately', () => {
+      const all = [
+        { id: '1', title: 'Aviso Geral', content: 'Texto', category: 'Aviso', modality_id: null },
+        { id: '2', title: 'Aviso Sanda', content: 'Treino', category: 'Aviso', modality_id: 'mod-sanda' },
+        { id: '3', title: 'Aviso Tai Chi', content: 'Treino', category: 'Aviso', modality_id: 'mod-taichi' },
+        {
+          id: '4',
+          title: 'Grupo Exame',
+          content: JSON.stringify({ text: 'Exame', targetStudentIds: ['u-1'] }),
+          category: 'Exame',
+          modality_id: null,
+        },
+        {
+          id: '5',
+          title: 'Outro Grupo',
+          content: JSON.stringify({ text: 'Exame', targetStudentIds: ['u-99'] }),
+          category: 'Exame',
+          modality_id: null,
+        },
+      ]
+
+      const filtered = filterStudentAnnouncements(all, 'u-1', 'Thiago Augusto', ['mod-sanda'])
+      expect(filtered.map((a) => a.id)).toEqual(['1', '2', '4'])
     })
   })
 })

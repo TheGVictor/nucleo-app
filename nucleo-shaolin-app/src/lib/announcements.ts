@@ -90,3 +90,45 @@ export function buildAnnouncementContent(
 
   return cleanText
 }
+
+/**
+ * Filtra os comunicados visíveis para um aluno específico (gerais, das modalidades
+ * do aluno ou direcionados ao grupo/ID do aluno).
+ */
+export function filterStudentAnnouncements<
+  T extends {
+    title: string
+    content: string
+    category: string
+    modality_id?: string | null
+  },
+>(
+  allAnnouncements: T[],
+  userId: string,
+  fullName: string,
+  modalityIds: string[]
+): T[] {
+  return allAnnouncements.filter((a) => {
+    const { targetStudentIds } = parseAnnouncementContent(a.content)
+    if (targetStudentIds && targetStudentIds.length > 0) {
+      return targetStudentIds.includes(userId)
+    }
+    if (a.category === 'individual') {
+      return (
+        a.title.includes(fullName) ||
+        a.content.includes(fullName) ||
+        a.content.includes(userId)
+      )
+    }
+    if (
+      a.title.includes(fullName) ||
+      a.content.includes(fullName) ||
+      a.content.includes(userId)
+    ) {
+      return true
+    }
+    if (a.modality_id && modalityIds.includes(a.modality_id)) return true
+    if (!a.modality_id) return true
+    return false
+  })
+}
