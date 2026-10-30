@@ -12,6 +12,7 @@ import {
   getRequestUserProfile,
   getRequestStudentModalities,
 } from '@/lib/user-cache'
+import { isOnlySandaStudent, isSandaModality } from '@/lib/modality-utils'
 
 interface GraduationHistoryItem {
   id: string
@@ -47,6 +48,11 @@ export default async function AlunoFichaPage({ searchParams }: AlunoFichaPagePro
   ])
 
   if (!profile) redirect('/login')
+  if (isOnlySandaStudent(studentModalities)) redirect('/aluno')
+
+  const sheetModalities = (studentModalities ?? []).filter(
+    (sm) => !isSandaModality(sm.modality)
+  )
 
   const graduationHistory = gradHistoryRes.data
   const technicalData = technicalSheetRes.data
@@ -58,18 +64,18 @@ export default async function AlunoFichaPage({ searchParams }: AlunoFichaPagePro
   return (
     <main className="page-container py-5 flex flex-col gap-6 animate-fade-in">
       {/* ── SELETOR DE MODALIDADE (QUANDO O ALUNO TREINA MAIS DE UMA) ── */}
-      {studentModalities && studentModalities.length > 1 && (
+      {sheetModalities.length > 1 && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-muted uppercase tracking-wider">
               Suas Modalidades Marciais:
             </span>
             <span className="text-[11px] text-gold font-bold">
-              {studentModalities.length} modalidades ativas
+              {sheetModalities.length} modalidades ativas
             </span>
           </div>
           <div className="flex items-center gap-2 p-1.5 bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-2xl overflow-x-auto scrollbar-none">
-            {studentModalities.map((sm) => {
+            {sheetModalities.map((sm) => {
               const isSelected =
                 (targetModalityId && sm.modality?.id === targetModalityId) ||
                 (!targetModalityId && sm.modality?.name === technicalData?.modalityName)

@@ -10,7 +10,7 @@ import {
 import { getCachedModalities } from '@/lib/cached-queries'
 import { InstallAppButton } from '@/components/pwa/InstallPwa'
 import { getBeltTheme } from '@/lib/beltTheme'
-import { normalizeTonLong } from '@/lib/modality-utils'
+import { normalizeTonLong, isSandaModality } from '@/lib/modality-utils'
 
 export const instant = false
 
@@ -146,7 +146,7 @@ export default async function PerfilPage() {
 
                   {/* Ações da Modalidade */}
                   <div className="flex items-center gap-2 self-end sm:self-center shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 w-full sm:w-auto justify-end">
-                    {sm.modality?.id && (
+                    {sm.modality?.id && !isSandaModality(sm.modality) && (
                       <Link
                         href={`/aluno/ficha?modality=${sm.modality.id}`}
                         className="btn btn-secondary btn-sm py-1.5 px-3 text-xs font-bold flex items-center gap-1"

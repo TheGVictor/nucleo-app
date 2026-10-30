@@ -8,6 +8,7 @@ import {
 } from '@/lib/user-cache'
 import { getCachedAnnouncements, getCachedGraduations } from '@/lib/cached-queries'
 import { getBeltTheme } from '@/lib/beltTheme'
+import { isOnlySandaStudent } from '@/lib/modality-utils'
 
 export const instant = false
 
@@ -81,6 +82,7 @@ export default async function AlunoHomePage() {
     currentHour < 12 ? 'Bom dia' : currentHour < 18 ? 'Boa tarde' : 'Boa noite'
 
   const latestAnnouncement = announcements[0]
+  const onlySanda = isOnlySandaStudent(modalities)
 
   return (
     <main className="page-container py-5 sm:py-6 flex flex-col gap-4 sm:gap-5 animate-fade-in">
@@ -205,29 +207,35 @@ export default async function AlunoHomePage() {
       </section>
 
       {/* ── ACESSO RÁPIDO DE TREINAMENTO ────────────────────────── */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-        <Link
-          href="/aluno/ficha"
-          prefetch={true}
-          className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-lg">
-              📋
-            </span>
-            <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform">
-              Abrir →
-            </span>
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-main group-hover:text-gold transition-colors">
-              Ficha Técnica
-            </h3>
-            <p className="text-xs text-muted mt-0.5 leading-snug">
-              Currículo oficial, katis, chutes e avaliações da sua faixa.
-            </p>
-          </div>
-        </Link>
+      <section
+        className={`grid grid-cols-1 ${
+          onlySanda ? 'sm:grid-cols-1' : 'sm:grid-cols-3'
+        } gap-3 pt-1`}
+      >
+        {!onlySanda && (
+          <Link
+            href="/aluno/ficha"
+            prefetch={true}
+            className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-lg">
+                📋
+              </span>
+              <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform">
+                Abrir →
+              </span>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-main group-hover:text-gold transition-colors">
+                Ficha Técnica
+              </h3>
+              <p className="text-xs text-muted mt-0.5 leading-snug">
+                Currículo oficial, katis, chutes e avaliações da sua faixa.
+              </p>
+            </div>
+          </Link>
+        )}
 
         <Link
           href="/aluno/aulas"
@@ -252,28 +260,30 @@ export default async function AlunoHomePage() {
           </div>
         </Link>
 
-        <Link
-          href="/aluno/videos"
-          prefetch={true}
-          className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-lg">
-              🎬
-            </span>
-            <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform">
-              Abrir →
-            </span>
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-main group-hover:text-gold transition-colors">
-              Treino em Vídeo
-            </h3>
-            <p className="text-xs text-muted mt-0.5 leading-snug">
-              Biblioteca de vídeos técnicos liberados para a sua graduação.
-            </p>
-          </div>
-        </Link>
+        {!onlySanda && (
+          <Link
+            href="/aluno/videos"
+            prefetch={true}
+            className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-lg">
+                🎬
+              </span>
+              <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform">
+                Abrir →
+              </span>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-main group-hover:text-gold transition-colors">
+                Treino em Vídeo
+              </h3>
+              <p className="text-xs text-muted mt-0.5 leading-snug">
+                Biblioteca de vídeos técnicos liberados para a sua graduação.
+              </p>
+            </div>
+          </Link>
+        )}
       </section>
     </main>
   )

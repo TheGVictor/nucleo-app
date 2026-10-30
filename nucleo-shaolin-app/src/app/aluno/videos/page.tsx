@@ -5,6 +5,7 @@ import {
 } from '@/lib/user-cache'
 import { getCachedVideos } from '@/lib/cached-queries'
 import { VideosExplorer, type VideoItem } from '@/components/aluno/VideosExplorer'
+import { isOnlySandaStudent } from '@/lib/modality-utils'
 
 export const instant = false
 
@@ -30,6 +31,8 @@ export default async function VideosPage() {
     getRequestStudentModalities(user.id),
     getCachedVideos(),
   ])
+
+  if (isOnlySandaStudent(studentModalities)) redirect('/aluno')
 
   const clfMod =
     studentModalities?.find(
