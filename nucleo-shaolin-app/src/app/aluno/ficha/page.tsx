@@ -12,7 +12,7 @@ import {
   getRequestUserProfile,
   getRequestStudentModalities,
 } from '@/lib/user-cache'
-import { isOnlySandaStudent, isSandaModality } from '@/lib/modality-utils'
+import { studentHasFicha, modalityHasFicha } from '@/lib/modality-utils'
 
 interface GraduationHistoryItem {
   id: string
@@ -48,10 +48,10 @@ export default async function AlunoFichaPage({ searchParams }: AlunoFichaPagePro
   ])
 
   if (!profile) redirect('/login')
-  if (isOnlySandaStudent(studentModalities)) redirect('/aluno')
+  if (!studentHasFicha(studentModalities)) redirect('/aluno')
 
-  const sheetModalities = (studentModalities ?? []).filter(
-    (sm) => !isSandaModality(sm.modality)
+  const sheetModalities = (studentModalities ?? []).filter((sm) =>
+    modalityHasFicha(sm.modality)
   )
 
   const graduationHistory = gradHistoryRes.data

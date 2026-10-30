@@ -7,6 +7,7 @@ import {
   type TechnicalCardState,
   getTechnicalSheetSchema,
 } from '@/lib/technicalSheetData'
+import { modalityHasFicha } from '@/lib/modality-utils'
 
 export interface StudentTechnicalSheetResponse {
   success: boolean
@@ -89,7 +90,7 @@ export async function getStudentTechnicalSheetAction(
         .select('id, full_name, birth_date, created_at, photo_url')
         .eq('id', studentId)
         .single(),
-      modQuery.limit(1),
+      modQuery,
       adminClient
         .from('technical_progress')
         .select('*')
@@ -103,7 +104,9 @@ export async function getStudentTechnicalSheetAction(
       return { success: false, error: 'Aluno não encontrado' }
     }
 
-    const activeMod = studentModalities?.[0]
+    const activeMod =
+      studentModalities?.find((sm) => modalityHasFicha(sm.modality)) ??
+      studentModalities?.[0]
     const modalityName = activeMod?.modality?.name ?? 'Kung Fu Shaolin'
     const modalityId = activeMod?.modality?.id ?? ''
     const graduationName =

@@ -8,7 +8,7 @@ import {
 } from '@/lib/user-cache'
 import { getCachedAnnouncements, getCachedGraduations } from '@/lib/cached-queries'
 import { getBeltTheme } from '@/lib/beltTheme'
-import { isOnlySandaStudent } from '@/lib/modality-utils'
+import { studentHasFicha, studentHasVideos } from '@/lib/modality-utils'
 
 export const instant = false
 
@@ -82,7 +82,14 @@ export default async function AlunoHomePage() {
     currentHour < 12 ? 'Bom dia' : currentHour < 18 ? 'Boa tarde' : 'Boa noite'
 
   const latestAnnouncement = announcements[0]
-  const onlySanda = isOnlySandaStudent(modalities)
+  const showFicha = studentHasFicha(modalities)
+  const showVideos = studentHasVideos(modalities)
+  const quickActionCols =
+    showFicha && showVideos
+      ? 'sm:grid-cols-3'
+      : showFicha || showVideos
+      ? 'sm:grid-cols-2'
+      : 'sm:grid-cols-1'
 
   return (
     <main className="page-container py-5 sm:py-6 flex flex-col gap-4 sm:gap-5 animate-fade-in">
@@ -207,12 +214,8 @@ export default async function AlunoHomePage() {
       </section>
 
       {/* ── ACESSO RÁPIDO DE TREINAMENTO ────────────────────────── */}
-      <section
-        className={`grid grid-cols-1 ${
-          onlySanda ? 'sm:grid-cols-1' : 'sm:grid-cols-3'
-        } gap-3 pt-1`}
-      >
-        {!onlySanda && (
+      <section className={`grid grid-cols-1 ${quickActionCols} gap-3 pt-1`}>
+        {showFicha && (
           <Link
             href="/aluno/ficha"
             prefetch={true}
@@ -260,7 +263,7 @@ export default async function AlunoHomePage() {
           </div>
         </Link>
 
-        {!onlySanda && (
+        {showVideos && (
           <Link
             href="/aluno/videos"
             prefetch={true}

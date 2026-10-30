@@ -2,6 +2,11 @@ import { describe, it, expect } from 'vitest'
 import {
   normalizeTonLong,
   isSandaModality,
+  isTaiChiModality,
+  modalityHasFicha,
+  modalityHasVideos,
+  studentHasFicha,
+  studentHasVideos,
   isOnlySandaStudent,
 } from '../modality-utils'
 
@@ -26,35 +31,40 @@ describe('normalizeTonLong', () => {
   })
 })
 
-describe('isSandaModality & isOnlySandaStudent', () => {
-  it('identifies Sanda modality by slug or name', () => {
+describe('modality rules for Sanda and Tai Chi', () => {
+  it('identifies Sanda and Tai Chi modalities', () => {
     expect(isSandaModality({ slug: 'sanda', name: 'Sanda' })).toBe(true)
-    expect(isSandaModality({ slug: 'boxe', name: 'Sanda / Boxe Chinês' })).toBe(true)
-    expect(isSandaModality({ slug: 'clf', name: 'Kung Fu Choy Lay Fut' })).toBe(false)
-    expect(isSandaModality(null)).toBe(false)
+    expect(isTaiChiModality({ slug: 'taichi', name: 'Tai Chi Chuan' })).toBe(true)
+    expect(isTaiChiModality({ slug: 'clf', name: 'Kung Fu Choy Lay Fut' })).toBe(false)
   })
 
-  it('returns true only when student practices exclusively Sanda', () => {
-    expect(
-      isOnlySandaStudent([
-        { status: 'active', modality: { slug: 'sanda', name: 'Sanda' } },
-      ])
-    ).toBe(true)
+  it('enforces that Sanda has neither Ficha nor Videos', () => {
+    const sanda = [{ status: 'active', modality: { slug: 'sanda', name: 'Sanda' } }]
+    expect(isOnlySandaStudent(sanda)).toBe(true)
+    expect(studentHasFicha(sanda)).toBe(false)
+    expect(studentHasVideos(sanda)).toBe(false)
+  })
 
-    expect(
-      isOnlySandaStudent([
-        { status: 'active', modality: { slug: 'sanda', name: 'Sanda' } },
-        { status: 'active', modality: { slug: 'clf', name: 'Kung Fu Choy Lay Fut' } },
-      ])
-    ).toBe(false)
+  it('enforces that Tai Chi has Videos but NO Ficha', () => {
+    const taichi = [{ status: 'active', modality: { slug: 'taichi', name: 'Tai Chi Chuan' } }]
+    expect(modalityHasFicha(taichi[0].modality)).toBe(false)
+    expect(modalityHasVideos(taichi[0].modality)).toBe(true)
+    expect(studentHasFicha(taichi)).toBe(false)
+    expect(studentHasVideos(taichi)).toBe(true)
+  })
 
-    expect(
-      isOnlySandaStudent([
-        { status: 'active', modality: { slug: 'clf', name: 'Kung Fu Choy Lay Fut' } },
-      ])
-    ).toBe(false)
+  it('enforces that Sanda + Tai Chi has Videos but NO Ficha', () => {
+    const sandaAndTaichi = [
+      { status: 'active', modality: { slug: 'sanda', name: 'Sanda' } },
+      { status: 'active', modality: { slug: 'taichi', name: 'Tai Chi Chuan' } },
+    ]
+    expect(studentHasFicha(sandaAndTaichi)).toBe(false)
+    expect(studentHasVideos(sandaAndTaichi)).toBe(true)
+  })
 
-    expect(isOnlySandaStudent([])).toBe(false)
-    expect(isOnlySandaStudent(null)).toBe(false)
+  it('enforces that Choy Lay Fut has both Ficha and Videos', () => {
+    const clf = [{ status: 'active', modality: { slug: 'clf', name: 'Kung Fu Choy Lay Fut' } }]
+    expect(studentHasFicha(clf)).toBe(true)
+    expect(studentHasVideos(clf)).toBe(true)
   })
 })

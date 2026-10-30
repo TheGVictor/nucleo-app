@@ -6,7 +6,7 @@ import {
   getRequestUserProfile,
   getRequestStudentModalities,
 } from '@/lib/user-cache'
-import { isOnlySandaStudent } from '@/lib/modality-utils'
+import { studentHasFicha, studentHasVideos } from '@/lib/modality-utils'
 
 export const instant = false
 
@@ -41,7 +41,8 @@ export default async function AlunoLayout({
   const beltColor = grad?.color_hex || undefined
   const beltName = grad?.level_name || modData?.self_reported_level || undefined
 
-  const onlySanda = isOnlySandaStudent(modalities)
+  const hideFicha = !studentHasFicha(modalities)
+  const hideVideos = !studentHasVideos(modalities)
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-main flex flex-col justify-between">
@@ -49,7 +50,7 @@ export default async function AlunoLayout({
       <div className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))]">
         {children}
       </div>
-      <BottomNav hideFichaAndVideos={onlySanda} />
+      <BottomNav hideFicha={hideFicha} hideVideos={hideVideos} />
     </div>
   )
 }

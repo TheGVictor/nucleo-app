@@ -173,11 +173,28 @@ export function VideosExplorer({
   initialVideos = [],
   studentCurrentBelt = 'Faixa Laranja',
 }: VideosExplorerProps) {
-  // Identifica a graduação do aluno
+  // Identifica a graduação do aluno (compatível com Faixas de Kung Fu e Níveis de Tai Chi Chuan)
+  const normalizedBelt = studentCurrentBelt.toLowerCase().trim()
   const studentBeltObj =
-    BELT_HIERARCHY.find((b) => b.name.toLowerCase() === studentCurrentBelt.toLowerCase()) ||
-    (studentCurrentBelt.toLowerCase().includes('preta')
+    BELT_HIERARCHY.find((b) => b.name.toLowerCase() === normalizedBelt) ||
+    (normalizedBelt.includes('preta')
       ? BELT_HIERARCHY[9]
+      : normalizedBelt.includes('vermelha') && normalizedBelt.includes('branca')
+      ? BELT_HIERARCHY[7]
+      : normalizedBelt.includes('vermelha')
+      ? BELT_HIERARCHY[8]
+      : normalizedBelt.includes('azul') && normalizedBelt.includes('branca')
+      ? BELT_HIERARCHY[5]
+      : normalizedBelt.includes('azul')
+      ? BELT_HIERARCHY[6]
+      : normalizedBelt.includes('verde')
+      ? BELT_HIERARCHY[4]
+      : normalizedBelt.includes('laranja')
+      ? BELT_HIERARCHY[2]
+      : normalizedBelt.includes('amarela')
+      ? BELT_HIERARCHY[1]
+      : normalizedBelt.includes('branca')
+      ? BELT_HIERARCHY[0]
       : BELT_HIERARCHY[2]) // Padrão: Faixa Laranja
 
   const isBlackBeltOrHigher =

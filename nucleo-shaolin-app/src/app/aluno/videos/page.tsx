@@ -5,7 +5,7 @@ import {
 } from '@/lib/user-cache'
 import { getCachedVideos } from '@/lib/cached-queries'
 import { VideosExplorer, type VideoItem } from '@/components/aluno/VideosExplorer'
-import { isOnlySandaStudent } from '@/lib/modality-utils'
+import { studentHasVideos, modalityHasVideos } from '@/lib/modality-utils'
 
 export const instant = false
 
@@ -32,28 +32,30 @@ export default async function VideosPage() {
     getCachedVideos(),
   ])
 
-  if (isOnlySandaStudent(studentModalities)) redirect('/aluno')
+  if (!studentHasVideos(studentModalities)) redirect('/aluno')
 
-  const clfMod =
+  const activeVideoMod =
     studentModalities?.find(
       (sm) =>
         sm.modality?.slug === 'clf' ||
         sm.modality?.name?.toLowerCase().includes('shaolin') ||
         sm.modality?.name?.toLowerCase().includes('choy')
-    ) || studentModalities?.[0]
+    ) ||
+    studentModalities?.find((sm) => modalityHasVideos(sm.modality)) ||
+    studentModalities?.[0]
 
   const studentBelt =
-    clfMod?.approved_graduation?.level_name ||
-    clfMod?.self_reported_level ||
+    activeVideoMod?.approved_graduation?.level_name ||
+    activeVideoMod?.self_reported_level ||
     'Faixa Laranja'
 
-  const clfModalityId =
-    clfMod?.modality_id ||
-    clfMod?.modality?.id ||
+  const activeModalityId =
+    activeVideoMod?.modality_id ||
+    activeVideoMod?.modality?.id ||
     '36f1b22b-5c84-4ac7-a35b-5b1ff904d33a'
 
   const dbVideos = (allVideos as unknown as DbVideoWithGrad[]).filter(
-    (v) => !v.modality_id || v.modality_id === clfModalityId
+    (v) => !v.modality_id || v.modality_id === activeModalityId
   )
 
   // Mapeia vídeos reais do banco para a interface do explorer

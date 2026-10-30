@@ -69,16 +69,25 @@ const ALUNO_NAV: NavItem[] = [
 
 interface BottomNavProps {
   hideFichaAndVideos?: boolean
+  hideFicha?: boolean
+  hideVideos?: boolean
 }
 
-export function BottomNav({ hideFichaAndVideos = false }: BottomNavProps) {
+export function BottomNav({
+  hideFichaAndVideos = false,
+  hideFicha = false,
+  hideVideos = false,
+}: BottomNavProps) {
   const pathname = usePathname()
 
-  const visibleItems = hideFichaAndVideos
-    ? ALUNO_NAV.filter(
-        (item) => item.path !== '/aluno/ficha' && item.path !== '/aluno/videos'
-      )
-    : ALUNO_NAV
+  const shouldHideFicha = hideFicha || hideFichaAndVideos
+  const shouldHideVideos = hideVideos || hideFichaAndVideos
+
+  const visibleItems = ALUNO_NAV.filter((item) => {
+    if (shouldHideFicha && item.path === '/aluno/ficha') return false
+    if (shouldHideVideos && item.path === '/aluno/videos') return false
+    return true
+  })
 
   return (
     <nav className="bottom-nav">
