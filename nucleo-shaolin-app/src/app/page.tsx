@@ -17,7 +17,6 @@ import {
   HeartHandshake,
   ShieldCheck,
   Sparkles,
-  Quote,
   ChevronDown,
   Lock,
   Phone,
@@ -171,46 +170,30 @@ interface TestimonialItem {
   name: string
   role: string
   photo: string
-  belt: string
-  beltColor: string
-  trainingTime: string
-  modality: string
   quote: string
 }
 
 const TESTIMONIALS: TestimonialItem[] = [
   {
     name: 'Mariana Costa',
-    role: 'Aluna da Turma Adulta',
+    role: 'Faixa Verde · Kung Fu',
     photo: SITE_IMAGES.student1,
-    belt: 'Faixa Verde',
-    beltColor: '#10B981',
-    trainingTime: '2 anos e meio de treino',
-    modality: 'Kung Fu Choy Lay Fut & Ton Long',
     quote:
-      'Comecei na Núcleo sem nunca ter praticado artes marciais. As aulas de 60 minutos transformaram meu condicionamento físico, minha postura e meu foco. Ter a ficha técnica de acompanhamento deixa muito claro cada passo da nossa evolução.',
+      'Comecei na Núcleo sem nunca ter praticado artes marciais. As aulas transformaram meu condicionamento físico, minha postura e meu foco. Ter o acompanhamento passo a passo deixa muito claro cada etapa da nossa evolução.',
   },
   {
     name: 'Patrícia Santos',
-    role: 'Mãe do Lucas (8 anos)',
+    role: 'Mãe do Lucas (Turma Kids)',
     photo: SITE_IMAGES.student2,
-    belt: 'Faixa Amarela',
-    beltColor: '#F59E0B',
-    trainingTime: '1 ano e meio de treino',
-    modality: 'Kung Fu Kids',
     quote:
       'A evolução do Lucas na concentração, coordenação motora e respeito em casa e na escola foi nítida. O ambiente da Núcleo é familiar e acolhedor, e ele espera a semana inteira pelos dias de treino.',
   },
   {
     name: 'Carlos Eduardo',
-    role: 'Aluno de Práticas Internas',
+    role: 'Praticante · Tai Chi Chuan',
     photo: SITE_IMAGES.student3,
-    belt: '3º Nível — Laranja',
-    beltColor: '#F97316',
-    trainingTime: '3 anos de treino',
-    modality: 'Tai Chi Chuan',
     quote:
-      'Buscava uma prática que cuidasse da saúde articular e do controle da ansiedade. O método tradicional ensinado na Núcleo trouxe mais equilíbrio, disposição diária e uma verdadeira família.',
+      'Buscava uma prática que cuidasse da saúde articular e do equilíbrio mental. O método tradicional da Núcleo trouxe mais equilíbrio, disposição diária e uma verdadeira comunidade.',
   },
 ]
 
@@ -297,24 +280,18 @@ export default function HomePage() {
                   <span>{SCHOOL_ADDRESS} · Vila Carrão, SP</span>
                 </span>
 
-                <h1 className="text-[var(--color-text)] font-extrabold tracking-tight text-3xl sm:text-5xl leading-[1.12]">
-                  Tradição e Método nas{' '}
-                  <span className="text-gold">Artes Marciais Chinesas.</span>
+                <h1 className="text-[var(--color-text)] font-extrabold tracking-tight text-3xl sm:text-5xl lg:text-6xl leading-[1.12]">
+                  Núcleo de <span className="text-gold">Kung Fu Shaolin</span>
                 </h1>
 
                 <p className="mt-5 text-base sm:text-lg text-muted max-w-xl leading-relaxed">
-                  A <strong className="text-main">Núcleo de Kung Fu Shaolin</strong> oferece ensino presencial de{' '}
-                  <strong className="text-main">Kung Fu Choy Lay Fut</strong>,{' '}
-                  <strong className="text-main">Ton Long</strong>,{' '}
-                  <strong className="text-main">Kung Fu Kids</strong>,{' '}
-                  <strong className="text-main">Tai Chi Chuan</strong> e{' '}
-                  <strong className="text-main">Sanda (Boxe Chinês)</strong> para crianças, jovens, adultos e idosos.
+                  Escola tradicional dedicada ao desenvolvimento físico, mental e marcial. Com metodologia estruturada e acompanhamento próximo, proporcionamos saúde, disciplina, foco e autodefesa para crianças, jovens e adultos.
                 </p>
 
                 <div className="mt-8 flex flex-wrap items-center gap-4">
                   <a
                     href={getWhatsAppUrl(
-                      'Olá! Gostaria de informações sobre os treinos e modalidades na Núcleo de Kung Fu Shaolin.'
+                      'Olá! Gostaria de informações sobre os treinos na Núcleo de Kung Fu Shaolin.'
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -328,13 +305,13 @@ export default function HomePage() {
                 {/* Indicadores rápidos com ícones */}
                 <div className="mt-10 pt-6 border-t border-[var(--color-border)] grid grid-cols-3 gap-4 sm:gap-8 w-full max-w-lg">
                   <div className="flex items-start gap-2.5">
-                    <Clock className="w-4 h-4 text-gold shrink-0 mt-1" />
+                    <Sparkles className="w-4 h-4 text-gold shrink-0 mt-1" />
                     <div>
                       <span className="block text-sm sm:text-base font-extrabold text-main">
-                        60 min
+                        Do Zero
                       </span>
                       <span className="text-xs text-muted">
-                        Duração da aula
+                        Iniciantes bem-vindos
                       </span>
                     </div>
                   </div>
@@ -597,44 +574,26 @@ export default function HomePage() {
               {TESTIMONIALS.map((item, idx) => (
                 <div
                   key={idx}
-                  className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all p-6 flex flex-col justify-between gap-6 shadow-xs"
+                  className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all p-6 flex flex-col justify-between gap-5 shadow-xs"
                 >
                   <div className="flex flex-col gap-4">
-                    {/* Cabeçalho com Foto do Aluno + Nome + Modalidade */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={item.photo}
-                          alt={item.name}
-                          className="w-12 h-12 rounded-full object-cover ring-2 ring-amber-500/30 shrink-0"
-                          loading="lazy"
-                        />
-                        <div className="min-w-0">
-                          <h3 className="text-sm sm:text-base font-extrabold text-main truncate">
-                            {item.name}
-                          </h3>
-                          <p className="text-xs text-muted truncate">
-                            {item.modality}
-                          </p>
-                        </div>
+                    {/* Foto, Nome e Descrição simples e clean */}
+                    <div className="flex items-center gap-3.5">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.photo}
+                        alt={item.name}
+                        className="w-12 h-12 rounded-full object-cover ring-2 ring-amber-500/25 shrink-0"
+                        loading="lazy"
+                      />
+                      <div className="min-w-0">
+                        <h3 className="text-sm sm:text-base font-extrabold text-main truncate">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs text-muted truncate mt-0.5">
+                          {item.role}
+                        </p>
                       </div>
-                      <Quote className="w-5 h-5 text-gold/40 shrink-0" />
-                    </div>
-
-                    {/* Faixa + Tempo de Treino na Núcleo */}
-                    <div className="flex items-center justify-between gap-2 flex-wrap py-2 px-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)]">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-main">
-                        <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
-                          style={{ backgroundColor: item.beltColor }}
-                        />
-                        <span>{item.belt}</span>
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-gold">
-                        <Clock className="w-3 h-3" />
-                        <span>{item.trainingTime}</span>
-                      </span>
                     </div>
 
                     {/* Relato */}
@@ -642,203 +601,176 @@ export default function HomePage() {
                       &ldquo;{item.quote}&rdquo;
                     </p>
                   </div>
-
-                  <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between text-[11px] text-faint font-semibold">
-                    <span>{item.role}</span>
-                    <span>Núcleo Shaolin</span>
-                  </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── 6. PORTAL DO ALUNO (DESIGN PREMIUM & EXCLUSIVO · ACIMA DA FAQ) ── */}
-        <section className="py-16 sm:py-24 border-b border-[var(--color-border)] relative overflow-hidden bg-gradient-to-b from-[var(--color-bg)] via-[var(--color-bg-elevated)] to-[var(--color-bg)]">
-          {/* Luz ambiente dourada de fundo */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-amber-500/10 blur-[130px] rounded-full pointer-events-none" />
-
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-            <div className="rounded-3xl border border-amber-500/35 bg-gradient-to-br from-neutral-900 via-neutral-950 to-black p-8 sm:p-12 lg:p-16 shadow-2xl overflow-hidden relative">
-              {/* Efeito de brilho de canto */}
-              <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
-
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-                {/* Coluna da Esquerda: Proposta de Valor Premium */}
-                <div className="lg:col-span-7 flex flex-col items-start text-left">
-                  <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-xs font-bold !text-amber-400 mb-4 tracking-wide">
-                    <Sparkles className="w-3.5 h-3.5 !text-amber-400" />
-                    <span>Portal Exclusivo do Aluno · Tecnologia & Método</span>
+        {/* ── 6. PORTAL DO ALUNO (INTEGRADO, ELEGANTE & ACIMA DA FAQ) ── */}
+        <section className="py-16 sm:py-24 border-b border-[var(--color-border)]">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="rounded-3xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] p-6 sm:p-10 lg:p-12 shadow-sm transition-all">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+                {/* Informações da Área do Aluno */}
+                <div className="lg:col-span-7 flex flex-col items-start">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-xs font-bold text-gold">
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                    <span>Portal do Praticante · Exclusivo para Alunos</span>
                   </span>
 
-                  <h2 className="!text-white font-extrabold text-2xl sm:text-4xl lg:text-5xl leading-tight tracking-tight">
-                    Sua Evolução Marcial Vai Muito Além do Tatame.
+                  <h2 className="text-[var(--color-text)] font-extrabold text-2xl sm:text-4xl mt-3 tracking-tight">
+                    Tecnologia e Método na Sua Prática
                   </h2>
 
-                  <p className="mt-4 text-sm sm:text-base !text-neutral-300 leading-relaxed max-w-xl">
-                    Na Núcleo, todo praticante matriculado conta com uma plataforma digital moderna para acelerar seu aprendizado. Acesse o currículo oficial da sua faixa, revise os Katis em vídeo e acompanhe sua trajetória técnica com clareza total.
+                  <p className="text-sm sm:text-base text-muted mt-3 leading-relaxed">
+                    Na Núcleo, seu aprendizado não para ao sair da escola. Cada aluno matriculado tem acesso a uma plataforma exclusiva para consultar a ficha técnica da sua graduação, revisar vídeos de treino e acompanhar avisos em tempo real.
                   </p>
 
-                  {/* 4 Destaques com Ícones */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 w-full max-w-xl">
-                    <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10">
-                      <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center !text-amber-400 shrink-0">
-                        <FileText className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h3 className="text-xs sm:text-sm font-bold !text-white">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-7 w-full">
+                    <div className="p-4 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex flex-col gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+                          <FileText className="w-4 h-4" />
+                        </div>
+                        <h3 className="text-sm sm:text-base font-extrabold text-main">
                           Ficha Técnica da Faixa
                         </h3>
-                        <p className="text-[11px] !text-neutral-400 mt-0.5 leading-snug">
-                          Katis, defesas, chutes e critérios do seu exame.
-                        </p>
                       </div>
+                      <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                        Katis, defesas, chutes e critérios de avaliação do seu exame.
+                      </p>
                     </div>
 
-                    <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10">
-                      <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center !text-amber-400 shrink-0">
-                        <Video className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h3 className="text-xs sm:text-sm font-bold !text-white">
-                          Vídeos Oficiais de Apoio
+                    <div className="p-4 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex flex-col gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+                          <Video className="w-4 h-4" />
+                        </div>
+                        <h3 className="text-sm sm:text-base font-extrabold text-main">
+                          Vídeos de Apoio
                         </h3>
-                        <p className="text-[11px] !text-neutral-400 mt-0.5 leading-snug">
-                          Assista e revise as formas com precisão milimétrica.
-                        </p>
                       </div>
+                      <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                        Gravações detalhadas para revisar e aperfeiçoar cada movimento.
+                      </p>
                     </div>
 
-                    <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10">
-                      <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center !text-amber-400 shrink-0">
-                        <Bell className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h3 className="text-xs sm:text-sm font-bold !text-white">
-                          Mural & Avisos em Tempo Real
+                    <div className="p-4 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex flex-col gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+                          <Bell className="w-4 h-4" />
+                        </div>
+                        <h3 className="text-sm sm:text-base font-extrabold text-main">
+                          Mural & Comunicados
                         </h3>
-                        <p className="text-[11px] !text-neutral-400 mt-0.5 leading-snug">
-                          Avisos de eventos, graduações e comunicados da escola.
-                        </p>
                       </div>
+                      <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                        Avisos de graduação, eventos e grade de aulas atualizada.
+                      </p>
                     </div>
 
-                    <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10">
-                      <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center !text-amber-400 shrink-0">
-                        <ShoppingBag className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h3 className="text-xs sm:text-sm font-bold !text-white">
-                          Loja Oficial Integrada
+                    <div className="p-4 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex flex-col gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+                          <ShoppingBag className="w-4 h-4" />
+                        </div>
+                        <h3 className="text-sm sm:text-base font-extrabold text-main">
+                          Loja da Escola
                         </h3>
-                        <p className="text-[11px] !text-neutral-400 mt-0.5 leading-snug">
-                          Uniformes, faixas, armas tradicionais e luvas.
-                        </p>
                       </div>
+                      <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                        Uniformes oficiais, faixas, armas tradicionais e equipamentos.
+                      </p>
                     </div>
                   </div>
 
-                  {/* CTAs */}
                   <div className="mt-8 flex flex-wrap items-center gap-4">
                     <Link
                       href="/login"
-                      className="btn btn-gold btn-lg font-bold px-8 py-3.5 shadow-lg shadow-amber-500/20 inline-flex items-center gap-2 group"
+                      className="btn btn-gold btn-md font-bold px-7 py-3 inline-flex items-center gap-2"
                     >
-                      <Lock className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                      <Lock className="w-4 h-4 shrink-0" />
                       <span>Entrar na Área do Aluno</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 shrink-0" />
                     </Link>
-
-                    <div className="inline-flex items-center gap-2 text-xs !text-neutral-400 font-medium">
-                      <Smartphone className="w-4 h-4 !text-amber-400" />
-                      <span>Compatível com Celular (PWA) e Computador</span>
-                    </div>
+                    <span className="text-xs text-muted inline-flex items-center gap-1.5">
+                      <Smartphone className="w-4 h-4 text-gold shrink-0" />
+                      <span>Disponível no celular (PWA) ou computador</span>
+                    </span>
                   </div>
                 </div>
 
-                {/* Coluna da Direita: Mockup visual do Portal do Aluno */}
+                {/* Card de Preview da Área do Aluno */}
                 <div className="lg:col-span-5 flex justify-center w-full">
-                  <div className="w-full max-w-sm rounded-3xl bg-neutral-900/90 border border-amber-500/35 p-5 shadow-2xl relative backdrop-blur-md">
-                    {/* Header do Mockup */}
-                    <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                  <div className="w-full max-w-sm rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] p-5 shadow-xs flex flex-col gap-3.5">
+                    {/* Header do Aluno */}
+                    <div className="flex items-center justify-between pb-3.5 border-b border-[var(--color-border)]">
                       <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-600 to-amber-300 p-0.5 shrink-0">
-                          <div className="w-full h-full rounded-full bg-neutral-900 flex items-center justify-center font-black !text-amber-400 text-xs">
-                            NK
-                          </div>
+                        <div className="w-10 h-10 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold font-bold text-xs shrink-0">
+                          NK
                         </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-bold !text-white">Área do Praticante</span>
-                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                          </div>
-                          <span className="text-[11px] !text-amber-400 font-semibold block">
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold text-main block truncate">
+                            Portal do Praticante
+                          </span>
+                          <span className="text-[11px] text-muted block truncate">
                             Núcleo de Kung Fu Shaolin
                           </span>
                         </div>
                       </div>
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold !text-emerald-400">
-                        Ativo
+                      <span className="text-[10px] font-semibold text-emerald-500 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 shrink-0">
+                        Matrícula Ativa
                       </span>
                     </div>
 
-                    {/* Card de Graduação do Mockup */}
-                    <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 via-black/40 to-black border border-amber-500/30">
-                      <span className="text-[10px] uppercase font-bold !text-amber-400 tracking-wider">
-                        Modalidade Principal
-                      </span>
-                      <h4 className="text-sm font-extrabold !text-white mt-0.5">
-                        Kung Fu Choy Lay Fut
-                      </h4>
-                      <div className="mt-3 flex items-center justify-between text-xs">
-                        <span className="!text-neutral-400">Graduação Atual:</span>
-                        <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-black font-extrabold text-[11px]">
+                    {/* Graduação Atual */}
+                    <div className="p-3.5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-main">
+                          Kung Fu Choy Lay Fut
+                        </span>
+                        <span className="text-[10px] font-bold text-gold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25">
                           Faixa Verde
                         </span>
                       </div>
-                      <div className="mt-2.5 w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-gradient-to-r from-amber-500 to-amber-300 h-full w-[78%]" />
+                      <div className="w-full bg-[var(--color-bg-elevated)] h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-amber-500 h-full w-3/4 rounded-full" />
                       </div>
-                      <span className="text-[10px] !text-neutral-400 mt-1 block text-right">
-                        78% do currículo dominado
+                      <span className="text-[10px] text-muted text-right">
+                        Currículo em evolução
                       </span>
                     </div>
 
-                    {/* Ações Rápidas do Mockup */}
-                    <div className="mt-3.5 space-y-2">
-                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <FileText className="w-4 h-4 !text-amber-400" />
-                          <span className="text-xs font-semibold !text-white">
-                            Ficha Técnica de Avaliação
-                          </span>
+                    {/* Acessos Rápidos */}
+                    <div className="space-y-2">
+                      <div className="p-2.5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-main font-medium">
+                          <FileText className="w-3.5 h-3.5 text-gold shrink-0" />
+                          <span>Ficha Técnica da Graduação</span>
                         </div>
-                        <span className="text-[10px] !text-amber-400 font-bold">Ver &rarr;</span>
+                        <span className="text-[11px] text-gold font-bold">Abrir &rarr;</span>
                       </div>
 
-                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <Video className="w-4 h-4 !text-amber-400" />
-                          <span className="text-xs font-semibold !text-white">
-                            Vídeos dos Katis e Técnicas
-                          </span>
+                      <div className="p-2.5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-main font-medium">
+                          <Video className="w-3.5 h-3.5 text-gold shrink-0" />
+                          <span>Vídeos de Treino da Faixa</span>
                         </div>
-                        <span className="text-[10px] !text-amber-400 font-bold">Assistir &rarr;</span>
+                        <span className="text-[11px] text-gold font-bold">Ver &rarr;</span>
                       </div>
 
-                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <ShoppingBag className="w-4 h-4 !text-amber-400" />
-                          <span className="text-xs font-semibold !text-white">
-                            Loja Oficial de Equipamentos
-                          </span>
+                      <div className="p-2.5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-main font-medium">
+                          <ShoppingBag className="w-3.5 h-3.5 text-gold shrink-0" />
+                          <span>Loja Oficial da Escola</span>
                         </div>
-                        <span className="text-[10px] !text-amber-400 font-bold">Acessar &rarr;</span>
+                        <span className="text-[11px] text-gold font-bold">Acessar &rarr;</span>
                       </div>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-center gap-2 text-[11px] !text-neutral-400">
-                      <Lock className="w-3.5 h-3.5 !text-amber-400" />
+                    <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-center gap-1.5 text-[11px] text-muted">
+                      <Lock className="w-3.5 h-3.5 text-gold" />
                       <span>Exclusivo para alunos da Núcleo</span>
                     </div>
                   </div>
