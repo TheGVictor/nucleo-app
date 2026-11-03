@@ -137,7 +137,7 @@ const METHODOLOGY_STEPS = [
   },
   {
     step: '03',
-    badge: 'Acompanhamento Real',
+    badge: 'Ficha & Vídeos',
     icon: FileCheck2,
     title: 'Ficha Técnica & Vídeos por Faixa',
     desc: 'Cada praticante conta com acompanhamento individual do currículo da sua graduação e acesso ao portal da Núcleo com vídeos de apoio.',
@@ -407,27 +407,22 @@ export default function HomePage() {
                 return (
                   <div
                     key={item.step}
-                    className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all p-6 flex flex-col justify-between gap-6 shadow-xs group"
+                    className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all p-6 flex flex-col gap-5 shadow-xs group"
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="w-11 h-11 rounded-xl bg-amber-500/12 border border-amber-500/30 flex items-center justify-center text-gold group-hover:scale-110 transition-transform">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="w-11 h-11 rounded-xl bg-amber-500/12 border border-amber-500/30 flex items-center justify-center text-gold shrink-0 group-hover:scale-105 transition-transform">
                         <StepIcon className="w-5 h-5" />
                       </div>
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-gold">
-                        {item.badge}
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-gold whitespace-nowrap shrink-0">
+                        {item.step} · {item.badge}
                       </span>
                     </div>
 
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-black text-gold/70 font-mono">
-                          {item.step}
-                        </span>
-                        <h3 className="text-base font-extrabold text-main leading-snug">
-                          {item.title}
-                        </h3>
-                      </div>
-                      <p className="text-xs sm:text-sm text-muted mt-1.5 leading-relaxed">
+                    <div className="flex flex-col gap-2">
+                      <h3 className="text-base font-extrabold text-main leading-snug">
+                        {item.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-muted leading-relaxed">
                         {item.desc}
                       </p>
                     </div>
