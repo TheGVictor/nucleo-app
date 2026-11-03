@@ -3,9 +3,6 @@ import { redirect } from 'next/navigation'
 import {
   Bell,
   ShoppingBag,
-  FileText,
-  Calendar,
-  PlayCircle,
   ArrowRight,
   Award,
   Wind,
@@ -19,7 +16,6 @@ import {
 } from '@/lib/user-cache'
 import { getCachedAnnouncements, getCachedGraduations } from '@/lib/cached-queries'
 import { getBeltTheme } from '@/lib/beltTheme'
-import { studentHasFicha, studentHasVideos } from '@/lib/modality-utils'
 
 export const instant = false
 
@@ -93,14 +89,6 @@ export default async function AlunoHomePage() {
     currentHour < 12 ? 'Bom dia' : currentHour < 18 ? 'Boa tarde' : 'Boa noite'
 
   const latestAnnouncement = announcements[0]
-  const showFicha = studentHasFicha(modalities)
-  const showVideos = studentHasVideos(modalities)
-  const quickActionCols =
-    showFicha && showVideos
-      ? 'sm:grid-cols-3'
-      : showFicha || showVideos
-      ? 'sm:grid-cols-2'
-      : 'sm:grid-cols-1'
 
   return (
     <main className="page-container py-5 sm:py-6 flex flex-col gap-4 sm:gap-5 animate-fade-in">
@@ -224,85 +212,6 @@ export default async function AlunoHomePage() {
             <ArrowRight className="w-4 h-4" />
           </div>
         </Link>
-      </section>
-
-      {/* ── ACESSO RÁPIDO DE TREINAMENTO ────────────────────────── */}
-      <section className={`grid grid-cols-1 ${quickActionCols} gap-3 pt-1`}>
-        {showFicha && (
-          <Link
-            href="/aluno/ficha"
-            prefetch={true}
-            className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
-          >
-            <div className="flex items-center justify-between">
-              <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-gold">
-                <FileText className="w-4 h-4" />
-              </span>
-              <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
-                <span>Abrir</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </span>
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-main group-hover:text-gold transition-colors">
-                Ficha Técnica
-              </h3>
-              <p className="text-xs text-muted mt-0.5 leading-snug">
-                Currículo oficial, katis, chutes e avaliações da sua faixa.
-              </p>
-            </div>
-          </Link>
-        )}
-
-        <Link
-          href="/aluno/aulas"
-          prefetch={true}
-          className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-gold">
-              <Calendar className="w-4 h-4" />
-            </span>
-            <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
-              <span>Abrir</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </span>
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-main group-hover:text-gold transition-colors">
-              Grade de Aulas
-            </h3>
-            <p className="text-xs text-muted mt-0.5 leading-snug">
-              Dias e horários de treino das suas turmas na escola.
-            </p>
-          </div>
-        </Link>
-
-        {showVideos && (
-          <Link
-            href="/aluno/videos"
-            prefetch={true}
-            className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
-          >
-            <div className="flex items-center justify-between">
-              <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-gold">
-                <PlayCircle className="w-4 h-4" />
-              </span>
-              <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
-                <span>Abrir</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </span>
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-main group-hover:text-gold transition-colors">
-                Treino em Vídeo
-              </h3>
-              <p className="text-xs text-muted mt-0.5 leading-snug">
-                Biblioteca de vídeos técnicos liberados para a sua graduação.
-              </p>
-            </div>
-          </Link>
-        )}
       </section>
     </main>
   )
