@@ -11,9 +11,11 @@ import {
   MessageCircle,
   Smartphone,
   CheckCircle2,
+  Settings,
 } from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import {
   getRequestAuthUser,
   getRequestUserProfile,
@@ -291,6 +293,33 @@ export default async function PerfilPage() {
             {profile.health_declaration_accepted && <CheckCircle2 className="w-3.5 h-3.5" />}
             <span>{profile.health_declaration_accepted ? 'Válida' : 'Pendente'}</span>
           </span>
+        </div>
+      </section>
+
+      {/* Configurações do Aplicativo (Aparência / Dark Mode) */}
+      <section className="card p-5 flex flex-col gap-3.5 border border-[var(--color-border)]">
+        <div className="flex items-center justify-between pb-2 border-b border-[var(--color-border)]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+              <Settings className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="nkfs-h-p text-main font-bold">Configurações & Aparência</h2>
+              <p className="text-[11px] text-muted">Preferências visuais do seu portal</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 py-1">
+          <div className="min-w-0">
+            <p className="text-xs sm:text-sm font-bold text-main">Modo Escuro (Tema da Interface)</p>
+            <p className="text-[11px] text-muted mt-0.5">
+              Alterne entre o tema claro e o tema escuro da plataforma conforme sua preferência.
+            </p>
+          </div>
+          <div className="shrink-0">
+            <ThemeToggle />
+          </div>
         </div>
       </section>
 

@@ -1,11 +1,11 @@
 'use client'
 
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Bell, ShoppingBag, Shield, Award, LogOut } from 'lucide-react'
+import { Bell, ShoppingBag, Shield, Award, LogOut, User } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Logo } from '@/components/ui/Logo'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import type { Profile } from '@/types/database'
 
 interface TopBarProps {
@@ -19,8 +19,21 @@ export function TopBar({ profile, title: explicitTitle, beltColor }: TopBarProps
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   async function handleLogout() {
+    setMenuOpen(false)
     await supabase.auth.signOut()
     router.push('/login')
   }
@@ -56,7 +69,8 @@ export function TopBar({ profile, title: explicitTitle, beltColor }: TopBarProps
   )
 
   const isLojaPage = pathname.includes('/loja')
-  const isAvisosPage = pathname.includes('/avisos')
+  const lojaHref = isAdminRoute ? '/admin/loja' : '/aluno/loja'
+  const avisosHref = isAdminRoute ? '/admin/avisos' : '/aluno/avisos'
 
   return (
     <header
@@ -85,78 +99,111 @@ export function TopBar({ profile, title: explicitTitle, beltColor }: TopBarProps
           </p>
         </div>
 
-        {/* Lado Direito: Ações Essenciais (Sem Poluição Visual) */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-nowrap">
-          {/* Alternar visão Aluno <-> Instrutor apenas para instrutores */}
-          {(profile.role === 'instructor' || profile.role === 'admin') && (
-            isAdminRoute ? (
-              <Link
-                href="/aluno"
-                prefetch={true}
-                className="btn btn-secondary btn-sm p-1.5 sm:px-2.5 sm:py-1 text-xs font-semibold flex items-center gap-1 shrink-0"
-                title="Acessar minha área de aluno"
-              >
-                <Award className="w-3.5 h-3.5 text-gold" />
-                <span className="hidden sm:inline">Aluno</span>
-              </Link>
-            ) : (
-              <Link
-                href="/admin"
-                prefetch={true}
-                className="btn btn-gold btn-sm p-1.5 sm:px-2.5 sm:py-1 text-xs font-semibold flex items-center gap-1 shrink-0"
-                title="Acessar painel do instrutor"
-              >
-                <Shield className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Instrutor</span>
-              </Link>
-            )
-          )}
-
-          {/* Atalhos de Avisos e Loja apenas no painel Admin */}
-          {isAdminRoute && (
-            <>
-              <Link
-                href="/admin/avisos"
-                prefetch={true}
-                className={`px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg text-xs font-semibold flex items-center gap-1 sm:gap-1.5 transition-all shrink-0 ${
-                  isAvisosPage
-                    ? 'bg-[var(--color-gold)] text-black font-bold shadow-xs'
-                    : 'text-muted hover:text-main hover:bg-[var(--color-bg-elevated)] border border-transparent hover:border-[var(--color-border)]'
-                }`}
-                title="Mural de Avisos"
-                aria-label="Mural de Avisos"
-              >
-                <Bell className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden sm:inline">Avisos</span>
-              </Link>
-
-              <Link
-                href="/admin/loja"
-                prefetch={true}
-                className={`px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg text-xs font-semibold flex items-center gap-1 sm:gap-1.5 transition-all shrink-0 ${
-                  isLojaPage
-                    ? 'bg-[var(--color-gold)] text-black font-bold shadow-xs'
-                    : 'text-muted hover:text-main hover:bg-[var(--color-bg-elevated)] border border-transparent hover:border-[var(--color-border)]'
-                }`}
-                title="Gestão da Loja"
-                aria-label="Gestão da Loja"
-              >
-                <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden sm:inline">Loja</span>
-              </Link>
-            </>
-          )}
-
-          <ThemeToggle />
-
-          <button
-            onClick={handleLogout}
-            className="p-2 rounded-lg text-muted hover:text-main hover:bg-[var(--color-bg-elevated)] transition-colors shrink-0 flex items-center justify-center"
-            title="Sair da conta"
-            aria-label="Sair da conta"
+        {/* Lado Direito: Somente Ícone da Loja + Ícone de Perfil com Dropdown */}
+        <div className="flex items-center gap-2 shrink-0 flex-nowrap">
+          {/* 1. Ícone da Loja */}
+          <Link
+            href={lojaHref}
+            prefetch={true}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 border ${
+              isLojaPage
+                ? 'bg-[var(--color-gold)] text-black border-[var(--color-gold)] shadow-xs'
+                : 'bg-[var(--color-bg-card)] text-main hover:text-gold border-[var(--color-border)] hover:border-[var(--color-border-gold)]'
+            }`}
+            title="Loja Oficial"
+            aria-label="Loja Oficial"
           >
-            <LogOut className="w-4 h-4" />
-          </button>
+            <ShoppingBag className="w-4 h-4 shrink-0" />
+          </Link>
+
+          {/* 2. Ícone de Perfil (Abre Dropdown) */}
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((prev) => !prev)}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 border cursor-pointer ${
+                menuOpen || pathname === '/aluno/perfil'
+                  ? 'bg-[var(--color-gold)] text-black border-[var(--color-gold)] shadow-xs'
+                  : 'bg-[var(--color-bg-card)] text-main hover:text-gold border-[var(--color-border)] hover:border-[var(--color-border-gold)]'
+              }`}
+              title="Menu do Perfil"
+              aria-label="Abrir menu do perfil"
+              aria-expanded={menuOpen}
+            >
+              <User className="w-4 h-4 shrink-0" />
+            </button>
+
+            {menuOpen && (
+              <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] shadow-xl py-2 z-50 animate-fade-in">
+                <div className="px-4 py-2.5 border-b border-[var(--color-border)]">
+                  <p className="text-xs font-extrabold text-main truncate">
+                    {profile.full_name}
+                  </p>
+                  <p className="text-[11px] text-muted truncate">
+                    {profile.role === 'super_admin'
+                      ? 'Super Admin'
+                      : profile.role === 'admin' || profile.role === 'instructor'
+                      ? 'Instrutor'
+                      : 'Aluno Matriculado'}
+                  </p>
+                </div>
+
+                <div className="py-1 flex flex-col">
+                  <Link
+                    href="/aluno/perfil"
+                    prefetch={true}
+                    onClick={() => setMenuOpen(false)}
+                    className="px-4 py-2.5 text-xs font-semibold text-main hover:text-gold hover:bg-[var(--color-bg-elevated)] flex items-center gap-2.5 transition-colors"
+                  >
+                    <User className="w-4 h-4 text-gold shrink-0" />
+                    <span>Ver Perfil</span>
+                  </Link>
+
+                  <Link
+                    href={avisosHref}
+                    prefetch={true}
+                    onClick={() => setMenuOpen(false)}
+                    className="px-4 py-2.5 text-xs font-semibold text-main hover:text-gold hover:bg-[var(--color-bg-elevated)] flex items-center gap-2.5 transition-colors"
+                  >
+                    <Bell className="w-4 h-4 text-gold shrink-0" />
+                    <span>Notificações</span>
+                  </Link>
+
+                  {(profile.role === 'instructor' || profile.role === 'admin') && (
+                    <Link
+                      href={isAdminRoute ? '/aluno' : '/admin'}
+                      prefetch={true}
+                      onClick={() => setMenuOpen(false)}
+                      className="px-4 py-2.5 text-xs font-semibold text-main hover:text-gold hover:bg-[var(--color-bg-elevated)] flex items-center gap-2.5 transition-colors"
+                    >
+                      {isAdminRoute ? (
+                        <>
+                          <Award className="w-4 h-4 text-gold shrink-0" />
+                          <span>Área do Aluno</span>
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="w-4 h-4 text-gold shrink-0" />
+                          <span>Painel do Instrutor</span>
+                        </>
+                      )}
+                    </Link>
+                  )}
+                </div>
+
+                <div className="pt-1 border-t border-[var(--color-border)]">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full px-4 py-2.5 text-left text-xs font-semibold text-red-500 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4 shrink-0" />
+                    <span>Sair</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

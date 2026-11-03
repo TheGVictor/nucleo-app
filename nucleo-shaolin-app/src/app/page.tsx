@@ -28,7 +28,6 @@ import {
   Shield,
 } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 const WHATSAPP_NUMBER = '551123862729'
 const WHATSAPP_DISPLAY = '(11) 2386-2729'
@@ -267,7 +266,6 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
-            <ThemeToggle />
             <a
               href={getWhatsAppUrl(
                 'Olá! Gostaria de agendar uma aula experimental na Núcleo de Kung Fu Shaolin.'
