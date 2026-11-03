@@ -8,7 +8,6 @@ import {
   FileCheck2,
   HeartPulse,
   MapPin,
-  CalendarCheck,
   Users,
   Award,
   CheckCircle2,
@@ -26,6 +25,12 @@ import {
   Swords,
   Wind,
   Shield,
+  MessageCircle,
+  FileText,
+  Video,
+  ShoppingBag,
+  Bell,
+  Smartphone,
 } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 
@@ -118,29 +123,21 @@ const MODALITIES = [
 
 const METHODOLOGY_STEPS = [
   {
-    step: '01',
-    badge: '60 Minutos',
     icon: Clock,
     title: 'Aulas na Medida da Sua Rotina',
     desc: 'Treinos planejados de 60 minutos divididos entre aquecimento, base técnica, prática marcial e retorno à calma — fáceis de conciliar com o seu dia a dia.',
   },
   {
-    step: '02',
-    badge: 'No Seu Ritmo',
     icon: TrendingUp,
     title: 'Evolução Individual e Sem Comparações',
     desc: 'O ensino na Núcleo é adaptado à condição física e à idade de cada aluno. Você aprende desde o zero absoluto, respeitando o seu próprio tempo.',
   },
   {
-    step: '03',
-    badge: 'Ficha & Vídeos',
     icon: FileCheck2,
     title: 'Ficha Técnica & Vídeos por Faixa',
     desc: 'Cada praticante conta com acompanhamento individual do currículo da sua graduação e acesso ao portal da Núcleo com vídeos de apoio.',
   },
   {
-    step: '04',
-    badge: 'Corpo e Mente',
     icon: HeartPulse,
     title: 'Saúde, Postura e Equilíbrio Mental',
     desc: 'Mais do que defesa pessoal: o treinamento desenvolve foco, controle emocional, disciplina, mobilidade e condicionamento de dentro para fora.',
@@ -268,14 +265,14 @@ export default function HomePage() {
           <div className="flex items-center gap-2.5 shrink-0">
             <a
               href={getWhatsAppUrl(
-                'Olá! Gostaria de agendar uma aula experimental na Núcleo de Kung Fu Shaolin.'
+                'Olá! Gostaria de mais informações sobre as aulas na Núcleo de Kung Fu Shaolin.'
               )}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-gold btn-sm font-bold text-xs sm:text-sm px-4 py-2 shrink-0 inline-flex items-center gap-1.5"
             >
-              <CalendarCheck className="w-4 h-4 shrink-0" />
-              <span>Agendar Aula</span>
+              <MessageCircle className="w-4 h-4 shrink-0" />
+              <span>Falar no WhatsApp</span>
             </a>
           </div>
         </div>
@@ -317,14 +314,14 @@ export default function HomePage() {
                 <div className="mt-8 flex flex-wrap items-center gap-4">
                   <a
                     href={getWhatsAppUrl(
-                      'Olá! Gostaria de agendar uma aula experimental na Núcleo de Kung Fu Shaolin.'
+                      'Olá! Gostaria de informações sobre os treinos e modalidades na Núcleo de Kung Fu Shaolin.'
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-gold btn-lg font-bold px-7 py-3.5 shadow-sm inline-flex items-center gap-2"
                   >
-                    <CalendarCheck className="w-5 h-5 shrink-0" />
-                    <span>Agendar Aula Experimental</span>
+                    <MessageCircle className="w-5 h-5 shrink-0" />
+                    <span>Falar no WhatsApp</span>
                   </a>
                 </div>
 
@@ -398,20 +395,15 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {METHODOLOGY_STEPS.map((item) => {
+              {METHODOLOGY_STEPS.map((item, idx) => {
                 const StepIcon = item.icon
                 return (
                   <div
-                    key={item.step}
-                    className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all p-6 flex flex-col gap-5 shadow-xs group"
+                    key={idx}
+                    className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all p-6 sm:p-7 flex flex-col items-center text-center gap-4 shadow-xs group"
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-amber-500/12 border border-amber-500/30 flex items-center justify-center text-gold shrink-0 group-hover:scale-105 transition-transform">
-                        <StepIcon className="w-5 h-5" />
-                      </div>
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-gold whitespace-nowrap shrink-0">
-                        {item.step} · {item.badge}
-                      </span>
+                    <div className="w-14 h-14 rounded-2xl bg-amber-500/12 border border-amber-500/30 flex items-center justify-center text-gold shrink-0 group-hover:scale-110 transition-transform">
+                      <StepIcon className="w-6 h-6" />
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -494,13 +486,14 @@ export default function HomePage() {
                     <div className="px-6 sm:px-7 pb-6">
                       <a
                         href={getWhatsAppUrl(
-                          `Olá! Gostaria de agendar uma aula experimental de ${mod.name} na Núcleo.`
+                          `Olá! Gostaria de mais informações sobre os treinos de ${mod.name} na Núcleo de Kung Fu Shaolin.`
                         )}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs sm:text-sm font-bold text-gold hover:underline inline-flex items-center gap-1.5"
                       >
-                        <span>Agendar aula de {mod.name}</span>
+                        <MessageCircle className="w-4 h-4" />
+                        <span>Falar no WhatsApp sobre {mod.name}</span>
                         <ArrowRight className="w-4 h-4" />
                       </a>
                     </div>
@@ -557,14 +550,14 @@ export default function HomePage() {
                   <div className="mt-7">
                     <a
                       href={getWhatsAppUrl(
-                        'Olá! Gostaria de informações sobre o Kung Fu Kids na Núcleo.'
+                        'Olá! Gostaria de informações sobre as turmas de Kung Fu Kids na Núcleo de Kung Fu Shaolin.'
                       )}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-gold btn-md font-bold px-6 py-3 inline-flex items-center gap-2"
                     >
-                      <CalendarCheck className="w-4 h-4 shrink-0" />
-                      <span>Agendar Aula Experimental Kids</span>
+                      <MessageCircle className="w-4 h-4 shrink-0" />
+                      <span>Falar no WhatsApp sobre Kung Fu Kids</span>
                     </a>
                   </div>
                 </div>
@@ -660,8 +653,203 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 6. DÚVIDAS FREQUENTES (FAQ) ───────────────────────────── */}
-        <section className="py-16 sm:py-24 bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
+        {/* ── 6. PORTAL DO ALUNO (DESIGN PREMIUM & EXCLUSIVO · ACIMA DA FAQ) ── */}
+        <section className="py-16 sm:py-24 border-b border-[var(--color-border)] relative overflow-hidden bg-gradient-to-b from-[var(--color-bg)] via-[var(--color-bg-elevated)] to-[var(--color-bg)]">
+          {/* Luz ambiente dourada de fundo */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-amber-500/10 blur-[130px] rounded-full pointer-events-none" />
+
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+            <div className="rounded-3xl border border-amber-500/35 bg-gradient-to-br from-neutral-900 via-neutral-950 to-black p-8 sm:p-12 lg:p-16 shadow-2xl overflow-hidden relative">
+              {/* Efeito de brilho de canto */}
+              <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+                {/* Coluna da Esquerda: Proposta de Valor Premium */}
+                <div className="lg:col-span-7 flex flex-col items-start text-left">
+                  <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-xs font-bold !text-amber-400 mb-4 tracking-wide">
+                    <Sparkles className="w-3.5 h-3.5 !text-amber-400" />
+                    <span>Portal Exclusivo do Aluno · Tecnologia & Método</span>
+                  </span>
+
+                  <h2 className="!text-white font-extrabold text-2xl sm:text-4xl lg:text-5xl leading-tight tracking-tight">
+                    Sua Evolução Marcial Vai Muito Além do Tatame.
+                  </h2>
+
+                  <p className="mt-4 text-sm sm:text-base !text-neutral-300 leading-relaxed max-w-xl">
+                    Na Núcleo, todo praticante matriculado conta com uma plataforma digital moderna para acelerar seu aprendizado. Acesse o currículo oficial da sua faixa, revise os Katis em vídeo e acompanhe sua trajetória técnica com clareza total.
+                  </p>
+
+                  {/* 4 Destaques com Ícones */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 w-full max-w-xl">
+                    <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                      <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center !text-amber-400 shrink-0">
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs sm:text-sm font-bold !text-white">
+                          Ficha Técnica da Faixa
+                        </h3>
+                        <p className="text-[11px] !text-neutral-400 mt-0.5 leading-snug">
+                          Katis, defesas, chutes e critérios do seu exame.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                      <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center !text-amber-400 shrink-0">
+                        <Video className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs sm:text-sm font-bold !text-white">
+                          Vídeos Oficiais de Apoio
+                        </h3>
+                        <p className="text-[11px] !text-neutral-400 mt-0.5 leading-snug">
+                          Assista e revise as formas com precisão milimétrica.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                      <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center !text-amber-400 shrink-0">
+                        <Bell className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs sm:text-sm font-bold !text-white">
+                          Mural & Avisos em Tempo Real
+                        </h3>
+                        <p className="text-[11px] !text-neutral-400 mt-0.5 leading-snug">
+                          Avisos de eventos, graduações e comunicados da escola.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                      <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center !text-amber-400 shrink-0">
+                        <ShoppingBag className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs sm:text-sm font-bold !text-white">
+                          Loja Oficial Integrada
+                        </h3>
+                        <p className="text-[11px] !text-neutral-400 mt-0.5 leading-snug">
+                          Uniformes, faixas, armas tradicionais e luvas.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* CTAs */}
+                  <div className="mt-8 flex flex-wrap items-center gap-4">
+                    <Link
+                      href="/login"
+                      className="btn btn-gold btn-lg font-bold px-8 py-3.5 shadow-lg shadow-amber-500/20 inline-flex items-center gap-2 group"
+                    >
+                      <Lock className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                      <span>Entrar na Área do Aluno</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+
+                    <div className="inline-flex items-center gap-2 text-xs !text-neutral-400 font-medium">
+                      <Smartphone className="w-4 h-4 !text-amber-400" />
+                      <span>Compatível com Celular (PWA) e Computador</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Coluna da Direita: Mockup visual do Portal do Aluno */}
+                <div className="lg:col-span-5 flex justify-center w-full">
+                  <div className="w-full max-w-sm rounded-3xl bg-neutral-900/90 border border-amber-500/35 p-5 shadow-2xl relative backdrop-blur-md">
+                    {/* Header do Mockup */}
+                    <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-600 to-amber-300 p-0.5 shrink-0">
+                          <div className="w-full h-full rounded-full bg-neutral-900 flex items-center justify-center font-black !text-amber-400 text-xs">
+                            NK
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold !text-white">Área do Praticante</span>
+                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                          </div>
+                          <span className="text-[11px] !text-amber-400 font-semibold block">
+                            Núcleo de Kung Fu Shaolin
+                          </span>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold !text-emerald-400">
+                        Ativo
+                      </span>
+                    </div>
+
+                    {/* Card de Graduação do Mockup */}
+                    <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 via-black/40 to-black border border-amber-500/30">
+                      <span className="text-[10px] uppercase font-bold !text-amber-400 tracking-wider">
+                        Modalidade Principal
+                      </span>
+                      <h4 className="text-sm font-extrabold !text-white mt-0.5">
+                        Kung Fu Choy Lay Fut
+                      </h4>
+                      <div className="mt-3 flex items-center justify-between text-xs">
+                        <span className="!text-neutral-400">Graduação Atual:</span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-black font-extrabold text-[11px]">
+                          Faixa Verde
+                        </span>
+                      </div>
+                      <div className="mt-2.5 w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-gradient-to-r from-amber-500 to-amber-300 h-full w-[78%]" />
+                      </div>
+                      <span className="text-[10px] !text-neutral-400 mt-1 block text-right">
+                        78% do currículo dominado
+                      </span>
+                    </div>
+
+                    {/* Ações Rápidas do Mockup */}
+                    <div className="mt-3.5 space-y-2">
+                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <FileText className="w-4 h-4 !text-amber-400" />
+                          <span className="text-xs font-semibold !text-white">
+                            Ficha Técnica de Avaliação
+                          </span>
+                        </div>
+                        <span className="text-[10px] !text-amber-400 font-bold">Ver &rarr;</span>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <Video className="w-4 h-4 !text-amber-400" />
+                          <span className="text-xs font-semibold !text-white">
+                            Vídeos dos Katis e Técnicas
+                          </span>
+                        </div>
+                        <span className="text-[10px] !text-amber-400 font-bold">Assistir &rarr;</span>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <ShoppingBag className="w-4 h-4 !text-amber-400" />
+                          <span className="text-xs font-semibold !text-white">
+                            Loja Oficial de Equipamentos
+                          </span>
+                        </div>
+                        <span className="text-[10px] !text-amber-400 font-bold">Acessar &rarr;</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-center gap-2 text-[11px] !text-neutral-400">
+                      <Lock className="w-3.5 h-3.5 !text-amber-400" />
+                      <span>Exclusivo para alunos da Núcleo</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 7. DÚVIDAS FREQUENTES (FAQ) ───────────────────────────── */}
+        <section className="py-16 sm:py-24 bg-[var(--color-bg-elevated)]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <div className="mb-8">
               <span className="text-xs font-bold uppercase tracking-widest text-gold">
@@ -700,39 +888,6 @@ export default function HomePage() {
                   </div>
                 )
               })}
-            </div>
-          </div>
-        </section>
-
-        {/* ── 7. SEÇÃO FINAL: ÁREA EXCLUSIVA PARA NOSSOS ALUNOS (APENAS ACESSAR) ── */}
-        <section className="py-16 sm:py-20">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6">
-            <div className="rounded-2xl border border-[var(--color-border-gold)]/40 bg-[var(--color-bg-card)] p-8 sm:p-10 text-center flex flex-col items-center">
-              <div className="w-11 h-11 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold mb-3">
-                <Lock className="w-5 h-5" />
-              </div>
-
-              <span className="text-xs font-bold uppercase tracking-widest text-gold">
-                Portal Oficial da Escola
-              </span>
-
-              <h2 className="text-[var(--color-text)] font-extrabold text-xl sm:text-2xl mt-1.5">
-                Área Exclusiva para Alunos da Núcleo
-              </h2>
-
-              <p className="text-sm text-muted mt-2 max-w-md leading-relaxed">
-                Acesso restrito aos alunos matriculados na Núcleo para consulta de ficha técnica, grade de horários, mural de avisos e vídeos de treino.
-              </p>
-
-              <div className="mt-6">
-                <Link
-                  href="/login"
-                  className="btn btn-gold btn-md font-bold px-7 py-3 inline-flex items-center gap-2"
-                >
-                  <span>Acessar Área do Aluno</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
             </div>
           </div>
         </section>
