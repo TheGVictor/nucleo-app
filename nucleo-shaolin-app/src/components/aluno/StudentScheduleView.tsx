@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Award, Calendar, CalendarX2, Check, X } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import type { ClassSchedule, Profile } from '@/types/database'
 
@@ -181,8 +182,8 @@ export function StudentScheduleView({
       {/* ── CARD IDENTIFICADOR DE TURMA / FILTRO ────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-[var(--radius-lg)] bg-[var(--color-bg-card)] border border-[var(--color-border-gold)] shadow-xs">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-lg shrink-0">
-            🥋
+          <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+            <Award className="w-4 h-4" />
           </div>
           <div>
             <span className="text-[10px] uppercase font-bold text-muted block leading-none">
@@ -198,13 +199,14 @@ export function StudentScheduleView({
           <button
             type="button"
             onClick={() => setShowOnlyMyClasses(!showOnlyMyClasses)}
-            className={`btn btn-xs py-1 px-3 text-xs font-bold rounded-lg transition-all border cursor-pointer ${
+            className={`btn btn-xs py-1 px-3 text-xs font-bold rounded-lg transition-all border cursor-pointer inline-flex items-center gap-1.5 ${
               showOnlyMyClasses
                 ? 'bg-amber-500/15 border-[var(--color-border-gold)] text-gold'
                 : 'bg-[var(--color-bg-elevated)] border-[var(--color-border)] text-muted hover:text-main'
             }`}
           >
-            {showOnlyMyClasses ? '✓ Apenas Meus Horários' : 'Mostrando Toda a Grade'}
+            {showOnlyMyClasses && <Check className="w-3.5 h-3.5" />}
+            <span>{showOnlyMyClasses ? 'Apenas Meus Horários' : 'Mostrando Toda a Grade'}</span>
           </button>
         </div>
       </div>
@@ -267,7 +269,7 @@ export function StudentScheduleView({
               onClick={() => setSearch('')}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-main text-xs cursor-pointer"
             >
-              ✕
+              <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
@@ -277,7 +279,7 @@ export function StudentScheduleView({
       <div className="card p-5 flex flex-col gap-3 shadow-md">
         <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-2.5">
           <div className="flex items-center gap-2">
-            <span className="text-xl">📅</span>
+            <Calendar className="w-5 h-5 text-gold shrink-0" />
             <h2 className="nkfs-h-p text-main font-bold">
               {selectedDayInfo?.name}
             </h2>
@@ -318,7 +320,9 @@ export function StudentScheduleView({
           </div>
         ) : (
           <div className="py-12 text-center flex flex-col items-center justify-center text-muted">
-            <span className="text-3xl mb-2">🚪</span>
+            <div className="w-12 h-12 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-muted mb-3">
+              <CalendarX2 className="w-6 h-6" />
+            </div>
             <p className="nkfs-p-m font-bold text-main">
               {selectedDay === 3
                 ? 'Escola fechada às quartas-feiras'

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { Bell, ArrowLeft } from 'lucide-react'
 import { AnnouncementsList } from '@/components/aluno/AnnouncementsList'
 import { Badge } from '@/components/ui/Badge'
 import { filterStudentAnnouncements } from '@/lib/announcements'
@@ -42,21 +43,24 @@ export default async function AlunoAvisosPage() {
       {/* Cabeçalho do Mural de Avisos / Notificações */}
       <div className="section-header pb-3 border-b border-[var(--color-border)] flex items-start sm:items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🔔</span>
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+              <Bell className="w-4 h-4" />
+            </div>
             <h1 className="nkfs-h-m text-main font-bold">Mural de Avisos</h1>
             <Badge variant="gold">{announcements.length}</Badge>
           </div>
-          <p className="nkfs-p-m text-muted mt-0.5">
+          <p className="nkfs-p-m text-muted mt-1">
             Notificações, cartazes, datas de exame e comunicados oficiais da Núcleo Shaolin.
           </p>
         </div>
 
         <Link
           href="/aluno"
-          className="btn btn-outline btn-sm shrink-0 text-xs font-semibold"
+          className="btn btn-outline btn-sm shrink-0 text-xs font-semibold inline-flex items-center gap-1.5"
         >
-          ← Início
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Início</span>
         </Link>
       </div>
 

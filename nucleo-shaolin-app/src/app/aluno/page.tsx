@@ -1,5 +1,16 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import {
+  Bell,
+  ShoppingBag,
+  FileText,
+  Calendar,
+  PlayCircle,
+  ArrowRight,
+  Award,
+  Wind,
+  Shield,
+} from 'lucide-react'
 import { filterStudentAnnouncements } from '@/lib/announcements'
 import {
   getRequestAuthUser,
@@ -107,14 +118,16 @@ export default async function AlunoHomePage() {
               {modalities.map((m) => (
                 <span
                   key={m.id}
-                  className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-gold"
+                  className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-gold"
                 >
-                  {m.modality?.slug === 'taichi'
-                    ? '☯️ '
-                    : m.modality?.slug === 'sanda'
-                    ? '🥊 '
-                    : '🥋 '}
-                  {m.modality?.name}
+                  {m.modality?.slug === 'taichi' ? (
+                    <Wind className="w-3 h-3 shrink-0" />
+                  ) : m.modality?.slug === 'sanda' ? (
+                    <Shield className="w-3 h-3 shrink-0" />
+                  ) : (
+                    <Award className="w-3 h-3 shrink-0" />
+                  )}
+                  <span>{m.modality?.name}</span>
                 </span>
               ))}
             </div>
@@ -150,8 +163,8 @@ export default async function AlunoHomePage() {
           className="card p-4 sm:p-5 flex items-center justify-between gap-4 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group shadow-sm bg-gradient-to-r from-[var(--color-bg-card)] to-[var(--color-bg-elevated)]"
         >
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
-              🔔
+            <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0 group-hover:scale-110 transition-transform">
+              <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
               {announcements.length > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--color-gold)] text-black text-[10px] font-extrabold flex items-center justify-center shadow-xs">
                   {announcements.length}
@@ -178,7 +191,7 @@ export default async function AlunoHomePage() {
           </div>
           <div className="shrink-0 flex items-center gap-1 text-xs font-bold text-gold group-hover:translate-x-1 transition-transform">
             <span className="hidden sm:inline">Ver Avisos</span>
-            <span>→</span>
+            <ArrowRight className="w-4 h-4" />
           </div>
         </Link>
 
@@ -189,8 +202,8 @@ export default async function AlunoHomePage() {
           className="card p-4 sm:p-5 flex items-center justify-between gap-4 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group shadow-sm bg-gradient-to-r from-[var(--color-bg-card)] to-[var(--color-bg-elevated)]"
         >
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
-              🛍️
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0 group-hover:scale-110 transition-transform">
+              <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
@@ -208,7 +221,7 @@ export default async function AlunoHomePage() {
           </div>
           <div className="shrink-0 flex items-center gap-1 text-xs font-bold text-gold group-hover:translate-x-1 transition-transform">
             <span className="hidden sm:inline">Ver Produtos</span>
-            <span>→</span>
+            <ArrowRight className="w-4 h-4" />
           </div>
         </Link>
       </section>
@@ -222,11 +235,12 @@ export default async function AlunoHomePage() {
             className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
           >
             <div className="flex items-center justify-between">
-              <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-lg">
-                📋
+              <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-gold">
+                <FileText className="w-4 h-4" />
               </span>
-              <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform">
-                Abrir →
+              <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
+                <span>Abrir</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </span>
             </div>
             <div>
@@ -246,11 +260,12 @@ export default async function AlunoHomePage() {
           className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
         >
           <div className="flex items-center justify-between">
-            <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-lg">
-              📅
+            <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-gold">
+              <Calendar className="w-4 h-4" />
             </span>
-            <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform">
-              Abrir →
+            <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
+              <span>Abrir</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </span>
           </div>
           <div>
@@ -270,11 +285,12 @@ export default async function AlunoHomePage() {
             className="card p-4 flex flex-col justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all group"
           >
             <div className="flex items-center justify-between">
-              <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-lg">
-                🎬
+              <span className="w-9 h-9 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-gold">
+                <PlayCircle className="w-4 h-4" />
               </span>
-              <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform">
-                Abrir →
+              <span className="text-xs font-bold text-gold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
+                <span>Abrir</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </span>
             </div>
             <div>

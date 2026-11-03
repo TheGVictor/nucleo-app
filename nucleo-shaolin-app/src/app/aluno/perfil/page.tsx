@@ -1,5 +1,17 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import {
+  Award,
+  Wind,
+  Shield,
+  Swords,
+  FileText,
+  Calendar,
+  Sparkles,
+  MessageCircle,
+  Smartphone,
+  CheckCircle2,
+} from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import {
@@ -66,7 +78,7 @@ export default async function PerfilPage() {
         <div className="flex items-center justify-between pb-2 border-b border-[var(--color-border)]">
           <div>
             <h2 className="nkfs-h-p text-main font-bold flex items-center gap-2">
-              <span>🥋</span>
+              <Award className="w-5 h-5 text-gold shrink-0" />
               <span>Minhas Modalidades Marciais</span>
             </h2>
             <p className="text-xs text-muted mt-0.5">
@@ -81,14 +93,14 @@ export default async function PerfilPage() {
         <div className="flex flex-col gap-3">
           {modalitiesList.length > 0 ? (
             modalitiesList.map((sm) => {
-              const icon =
+              const ModIcon =
                 sm.modality?.slug === 'taichi'
-                  ? '☯️'
+                  ? Wind
                   : sm.modality?.slug === 'sanda'
-                  ? '🥊'
+                  ? Shield
                   : sm.modality?.slug === 'tanglang'
-                  ? '🗡️'
-                  : '🥋'
+                  ? Swords
+                  : Award
 
               const graduationName =
                 sm.approved_graduation?.level_name ??
@@ -105,8 +117,8 @@ export default async function PerfilPage() {
                   className="card-elevated p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all"
                 >
                   <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-2xl shrink-0">
-                      {icon}
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+                      <ModIcon className="w-6 h-6" />
                     </div>
 
                     <div className="min-w-0">
@@ -149,19 +161,19 @@ export default async function PerfilPage() {
                     {sm.modality?.id && modalityHasFicha(sm.modality) && (
                       <Link
                         href={`/aluno/ficha?modality=${sm.modality.id}`}
-                        className="btn btn-secondary btn-sm py-1.5 px-3 text-xs font-bold flex items-center gap-1"
+                        className="btn btn-secondary btn-sm py-1.5 px-3 text-xs font-bold flex items-center gap-1.5"
                         title="Ver ficha técnica desta modalidade"
                       >
-                        <span>📋</span>
+                        <FileText className="w-3.5 h-3.5 text-gold" />
                         <span>Ficha Técnica</span>
                       </Link>
                     )}
                     <Link
                       href="/aluno/aulas"
-                      className="btn btn-secondary btn-sm py-1.5 px-3 text-xs font-bold flex items-center gap-1"
+                      className="btn btn-secondary btn-sm py-1.5 px-3 text-xs font-bold flex items-center gap-1.5"
                       title="Ver grade de horários"
                     >
-                      <span>📅</span>
+                      <Calendar className="w-3.5 h-3.5 text-gold" />
                       <span>Horários</span>
                     </Link>
                   </div>
@@ -179,7 +191,7 @@ export default async function PerfilPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-xs sm:text-sm font-bold text-main flex items-center gap-1.5">
-                  <span>✨</span>
+                  <Sparkles className="w-4 h-4 text-gold shrink-0" />
                   <span>Treino Multidisciplinar na Núcleo Shaolin</span>
                 </h3>
                 <p className="text-[11px] text-muted leading-relaxed mt-0.5">
@@ -190,15 +202,19 @@ export default async function PerfilPage() {
 
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[11px] text-muted font-bold">Disponíveis para você:</span>
-              {otherAvailableModalities.map((m) => (
-                <span
-                  key={m.id}
-                  className="text-xs px-2.5 py-1 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] text-main font-semibold flex items-center gap-1.5"
-                >
-                  <span>{m.slug === 'taichi' ? '☯️' : m.slug === 'sanda' ? '🥊' : '🥋'}</span>
-                  <span>{normalizeTonLong(m.name)}</span>
-                </span>
-              ))}
+              {otherAvailableModalities.map((m) => {
+                const AvailIcon =
+                  m.slug === 'taichi' ? Wind : m.slug === 'sanda' ? Shield : Award
+                return (
+                  <span
+                    key={m.id}
+                    className="text-xs px-2.5 py-1 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] text-main font-semibold flex items-center gap-1.5"
+                  >
+                    <AvailIcon className="w-3.5 h-3.5 text-gold shrink-0" />
+                    <span>{normalizeTonLong(m.name)}</span>
+                  </span>
+                )
+              })}
             </div>
 
             <div className="pt-2 border-t border-[var(--color-border)]/60 flex items-center justify-between gap-3 flex-wrap">
@@ -213,7 +229,7 @@ export default async function PerfilPage() {
                 rel="noopener noreferrer"
                 className="btn btn-gold btn-sm py-1.5 px-3 text-xs font-bold flex items-center gap-1.5"
               >
-                <span>💬</span>
+                <MessageCircle className="w-3.5 h-3.5" />
                 <span>Solicitar Nova Modalidade</span>
               </a>
             </div>
@@ -255,20 +271,25 @@ export default async function PerfilPage() {
 
         <div className="flex justify-between items-center py-2.5 border-b border-[var(--color-border)] text-xs sm:text-sm">
           <span className="text-muted">Regulamento & Filosofia Marcial</span>
-          <span className="text-emerald-500 font-semibold text-xs">✓ Aceitos</span>
+          <span className="text-emerald-500 font-semibold text-xs inline-flex items-center gap-1">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Aceitos</span>
+          </span>
         </div>
 
         <div className="flex justify-between items-center py-2.5 border-b border-[var(--color-border)] text-xs sm:text-sm">
           <span className="text-muted">Direitos de Imagem & Vídeos de Aula</span>
-          <span className={`text-xs font-semibold ${profile.image_rights_accepted ? 'text-emerald-500' : 'text-muted'}`}>
-            {profile.image_rights_accepted ? '✓ Autorizado' : 'Não autorizado'}
+          <span className={`text-xs font-semibold inline-flex items-center gap-1 ${profile.image_rights_accepted ? 'text-emerald-500' : 'text-muted'}`}>
+            {profile.image_rights_accepted && <CheckCircle2 className="w-3.5 h-3.5" />}
+            <span>{profile.image_rights_accepted ? 'Autorizado' : 'Não autorizado'}</span>
           </span>
         </div>
 
         <div className="flex justify-between items-center py-2.5 text-xs sm:text-sm">
           <span className="text-muted">Declaração de Saúde para Prática</span>
-          <span className={`text-xs font-semibold ${profile.health_declaration_accepted ? 'text-emerald-500' : 'text-amber-500'}`}>
-            {profile.health_declaration_accepted ? '✓ Válida' : 'Pendente'}
+          <span className={`text-xs font-semibold inline-flex items-center gap-1 ${profile.health_declaration_accepted ? 'text-emerald-500' : 'text-amber-500'}`}>
+            {profile.health_declaration_accepted && <CheckCircle2 className="w-3.5 h-3.5" />}
+            <span>{profile.health_declaration_accepted ? 'Válida' : 'Pendente'}</span>
           </span>
         </div>
       </section>
@@ -277,7 +298,9 @@ export default async function PerfilPage() {
       <section className="card p-5 flex flex-col gap-3.5 border border-[var(--color-border)] hover:border-[var(--color-gold)] transition-all">
         <div className="flex items-center justify-between pb-2 border-b border-[var(--color-border)]">
           <div className="flex items-center gap-2.5">
-            <span className="text-xl">📲</span>
+            <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+              <Smartphone className="w-4 h-4" />
+            </div>
             <h2 className="nkfs-h-p text-main font-bold">Aplicativo no Celular</h2>
           </div>
           <span className="text-xs text-gold font-bold px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30">

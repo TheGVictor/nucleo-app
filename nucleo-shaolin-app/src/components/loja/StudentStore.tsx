@@ -1,6 +1,18 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import {
+  ShoppingBag,
+  ClipboardList,
+  Search,
+  X,
+  QrCode,
+  Store,
+  MessageSquare,
+  Pencil,
+  Trash2,
+  Package,
+} from 'lucide-react'
 import type { Product, ProductOrder } from '@/types/database'
 import { ProductModal } from './ProductModal'
 import { EditOrderModal } from './EditOrderModal'
@@ -89,7 +101,7 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                 : 'text-muted hover:text-main'
             }`}
           >
-            <span>🛍️</span>
+            <ShoppingBag className="w-3.5 h-3.5" />
             <span>Catálogo</span>
           </button>
           <button
@@ -101,7 +113,7 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                 : 'text-muted hover:text-main'
             }`}
           >
-            <span>📋</span>
+            <ClipboardList className="w-3.5 h-3.5" />
             <span>Minhas Reservas</span>
             {orders.length > 0 && (
               <span className="w-4 h-4 rounded-full bg-amber-500 text-black text-[10px] font-black flex items-center justify-center">
@@ -112,7 +124,7 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
         </div>
 
         <span className="text-xs text-muted hidden sm:inline">
-          Retirada oficial na escola Núcleo Shaolin
+          Retirada oficial na Núcleo Shaolin
         </span>
       </div>
 
@@ -129,16 +141,14 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                 onChange={(e) => setSearch(e.target.value)}
                 className="input text-xs py-2.5 pl-9 w-full bg-[var(--color-bg-card)]"
               />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted">
-                🔍
-              </span>
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
               {search && (
                 <button
                   type="button"
                   onClick={() => setSearch('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-main"
                 >
-                  ✕
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
@@ -165,7 +175,9 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
           {/* Grid de Cards de Produtos */}
           {filteredProducts.length === 0 ? (
             <div className="card p-8 text-center flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">🔍</span>
+              <div className="w-12 h-12 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-muted mb-1">
+                <Search className="w-5 h-5" />
+              </div>
               <p className="nkfs-h-p font-bold text-main">Nenhum produto encontrado</p>
               <p className="text-xs text-muted">
                 Tente buscar por outro termo ou selecione a categoria &quot;Todos&quot;.
@@ -198,8 +210,10 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                             alt={p.name}
                             className="w-full h-full object-cover"
                           />
+                        ) : icon ? (
+                          <Package className="w-10 h-10 text-gold/70" />
                         ) : (
-                          <span>{icon}</span>
+                          <Package className="w-10 h-10 text-gold/70" />
                         )}
                         <span className="absolute top-2 left-2 nkfs-tag-p text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-xs">
                           {sub}
@@ -261,7 +275,9 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
         <div className="flex flex-col gap-3">
           {orders.length === 0 ? (
             <div className="card p-8 text-center flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">📋</span>
+              <div className="w-12 h-12 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-muted mb-1">
+                <ClipboardList className="w-6 h-6" />
+              </div>
               <p className="nkfs-h-p font-bold text-main">Você ainda não possui pedidos</p>
               <p className="text-xs text-muted max-w-sm">
                 Navegue pelo catálogo e reserve uniformes, faixas ou equipamentos para pagar e retirar na recepção.
@@ -309,8 +325,8 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                     className="card p-3.5 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 border border-[var(--color-border)] shadow-xs hover:border-[var(--color-border-gold)] transition-all"
                   >
                     <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                      <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl shrink-0">
-                        {isPix ? '💠' : '🏢'}
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+                        {isPix ? <QrCode className="w-5 h-5" /> : <Store className="w-5 h-5" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -327,8 +343,9 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                           <span>{dateStr}</span>
                         </div>
                         {cleanNotes && (
-                          <p className="text-[11px] text-amber-500/90 font-medium mt-1">
-                            💬 Obs: {cleanNotes}
+                          <p className="text-[11px] text-amber-500/90 font-medium mt-1 inline-flex items-center gap-1">
+                            <MessageSquare className="w-3 h-3 shrink-0" />
+                            <span>Obs: {cleanNotes}</span>
                           </p>
                         )}
                       </div>
@@ -356,7 +373,7 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                             className="btn btn-sm py-1 px-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1 cursor-pointer shadow-xs"
                             title="Abrir QR Code e pagar via PIX"
                           >
-                            <span>💠</span>
+                            <QrCode className="w-3.5 h-3.5" />
                             <span>Pagar PIX</span>
                           </button>
                         )}
@@ -368,7 +385,7 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                             className="btn btn-secondary btn-sm py-1 px-2.5 text-xs font-bold flex items-center gap-1 cursor-pointer"
                             title="Editar quantidade, pagamento ou observações"
                           >
-                            <span>✏️</span>
+                            <Pencil className="w-3.5 h-3.5" />
                             <span>Editar</span>
                           </button>
                         )}
@@ -384,7 +401,7 @@ export function StudentStore({ initialProducts, initialOrders }: StudentStorePro
                             <span className="text-[10px]">...</span>
                           ) : (
                             <>
-                              <span>🗑️</span>
+                              <Trash2 className="w-3.5 h-3.5" />
                               <span>Excluir</span>
                             </>
                           )}

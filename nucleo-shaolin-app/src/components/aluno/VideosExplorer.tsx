@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { PlayCircle, Clock } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { formatEmbedUrl, isDirectVideo } from '@/lib/video-utils'
 
@@ -326,8 +327,10 @@ export function VideosExplorer({
           ))}
         </div>
       ) : (
-        <div className="card p-8 text-center flex flex-col items-center gap-1.5 text-muted">
-          <span className="text-3xl">🎬</span>
+        <div className="card p-8 text-center flex flex-col items-center gap-2 text-muted">
+          <div className="w-12 h-12 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-gold">
+            <PlayCircle className="w-6 h-6" />
+          </div>
           <p className="text-sm font-semibold text-main">
             Nenhum vídeo em &ldquo;{activeCategory}&rdquo; no momento
           </p>
@@ -393,8 +396,9 @@ function CleanVideoCard({ video }: { video: VideoItem }) {
         </div>
 
         {video.duration_seconds && (
-          <span className="text-xs text-faint font-mono shrink-0">
-            ⏱️ {Math.round(video.duration_seconds / 60)} min
+          <span className="text-xs text-faint font-mono shrink-0 inline-flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5" />
+            <span>{Math.round(video.duration_seconds / 60)} min</span>
           </span>
         )}
       </div>

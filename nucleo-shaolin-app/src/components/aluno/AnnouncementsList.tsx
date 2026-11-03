@@ -2,6 +2,15 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import {
+  Inbox,
+  Image as ImageIcon,
+  Award,
+  Calendar,
+  Globe,
+  ArrowRight,
+  X,
+} from 'lucide-react'
 import type { Announcement } from '@/types/database'
 import { Badge } from '@/components/ui/Badge'
 import { parseAnnouncementContent } from '@/lib/announcements'
@@ -54,11 +63,13 @@ export function AnnouncementsList({ items }: { items: EnrichedAnnouncement[] }) 
 
   if (!items.length) {
     return (
-      <div className="empty-state py-6">
-        <span className="empty-state-icon">📭</span>
+      <div className="empty-state py-6 flex flex-col items-center">
+        <div className="w-12 h-12 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex items-center justify-center text-muted mb-2">
+          <Inbox className="w-6 h-6" />
+        </div>
         <p className="nkfs-h-p font-bold text-main">Nenhum comunicado publicado</p>
         <p className="nkfs-p-m text-muted mt-1">
-          O mural é atualizado sempre que o Sifu publica novos avisos e cartazes da escola.
+          O mural é atualizado sempre que novos avisos e cartazes da escola são publicados.
         </p>
       </div>
     )
@@ -122,7 +133,11 @@ export function AnnouncementsList({ items }: { items: EnrichedAnnouncement[] }) 
                     {item.category}
                   </span>
                   {imageUrl && (
-                    <span className="text-muted text-[11px]">• 🖼️ Cartaz</span>
+                    <span className="text-muted text-[11px] inline-flex items-center gap-1">
+                      <span>•</span>
+                      <ImageIcon className="w-3 h-3" />
+                      <span>Cartaz</span>
+                    </span>
                   )}
                 </div>
                 <span className="text-[11px] text-muted font-mono">
@@ -139,14 +154,20 @@ export function AnnouncementsList({ items }: { items: EnrichedAnnouncement[] }) 
               {(item.event_date || item.modality?.name) && (
                 <div className="flex items-center gap-2 text-xs text-muted flex-wrap">
                   {item.modality?.name && (
-                    <span>🥋 {item.modality.name}</span>
+                    <span className="inline-flex items-center gap-1">
+                      <Award className="w-3.5 h-3.5 text-gold" />
+                      <span>{item.modality.name}</span>
+                    </span>
                   )}
                   {item.modality?.name && item.event_date && (
                     <span>•</span>
                   )}
                   {item.event_date && (
-                    <span className="text-gold font-medium">
-                      📅 Data: {new Date(item.event_date).toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: '2-digit' })}
+                    <span className="text-gold font-medium inline-flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>
+                        Data: {new Date(item.event_date).toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: '2-digit' })}
+                      </span>
                     </span>
                   )}
                 </div>
@@ -181,8 +202,9 @@ export function AnnouncementsList({ items }: { items: EnrichedAnnouncement[] }) 
                 <span className="text-[11px] text-faint">
                   {item.modality?.name ? item.modality.name : 'Comunicado Geral'}
                 </span>
-                <span className="text-[11px] text-gold font-semibold group-hover:translate-x-0.5 transition-transform">
-                  Ver detalhes →
+                <span className="text-[11px] text-gold font-semibold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
+                  <span>Ver detalhes</span>
+                  <ArrowRight className="w-3 h-3" />
                 </span>
               </div>
             </div>
@@ -204,8 +226,18 @@ export function AnnouncementsList({ items }: { items: EnrichedAnnouncement[] }) 
                   <Badge variant={CATEGORY_STYLE[activeItem.category] ?? 'muted'}>
                     {activeItem.category}
                   </Badge>
-                  <span className="text-xs text-muted">
-                    {activeItem.modality?.name ? `🥋 ${activeItem.modality.name}` : '🌐 Comunicado Geral'}
+                  <span className="text-xs text-muted inline-flex items-center gap-1">
+                    {activeItem.modality?.name ? (
+                      <>
+                        <Award className="w-3.5 h-3.5 text-gold" />
+                        <span>{activeItem.modality.name}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Globe className="w-3.5 h-3.5 text-gold" />
+                        <span>Comunicado Geral</span>
+                      </>
+                    )}
                   </span>
                 </div>
                 <h3 className="nkfs-h-m text-main font-bold leading-snug">
@@ -217,14 +249,16 @@ export function AnnouncementsList({ items }: { items: EnrichedAnnouncement[] }) 
                 onClick={() => setActiveItem(null)}
                 className="w-8 h-8 rounded-full border border-[var(--color-border)] flex items-center justify-center text-muted hover:text-main shrink-0"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Banner de Data do Evento (se houver) */}
             {activeItem.event_date && (
               <div className="card-gold p-3.5 flex items-center gap-3">
-                <span className="text-2xl">📅</span>
+                <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+                  <Calendar className="w-4 h-4" />
+                </div>
                 <div>
                   <span className="nkfs-tag-p text-gold uppercase tracking-wider block font-bold">
                     Data Programada

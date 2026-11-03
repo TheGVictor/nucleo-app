@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { Bell, ShoppingBag, Shield, Award } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar } from '@/components/ui/Avatar'
 import { Logo } from '@/components/ui/Logo'
@@ -123,7 +124,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
                 className="btn btn-secondary btn-sm p-1.5 sm:px-2 sm:py-1 text-xs font-semibold flex items-center gap-1 shrink-0"
                 title="Acessar minha área de aluno"
               >
-                <span>🥋</span>
+                <Award className="w-3.5 h-3.5 text-gold" />
                 <span className="hidden sm:inline">Aluno</span>
               </Link>
             ) : (
@@ -133,7 +134,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
                 className="btn btn-gold btn-sm p-1.5 sm:px-2 sm:py-1 text-xs font-semibold flex items-center gap-1 shrink-0"
                 title="Acessar painel do instrutor"
               >
-                <span>🛡️</span>
+                <Shield className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Instrutor</span>
               </Link>
             )
@@ -151,7 +152,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
             title="Mural de Avisos e Notificações"
             aria-label="Mural de Avisos"
           >
-            <span className="text-sm">🔔</span>
+            <Bell className="w-3.5 h-3.5 shrink-0" />
             <span className="hidden sm:inline">Avisos</span>
           </Link>
 
@@ -167,7 +168,7 @@ export function TopBar({ profile, title: explicitTitle, beltColor, beltName }: T
             title="Loja Oficial da Escola"
             aria-label="Loja Oficial"
           >
-            <span className="text-sm">🛍️</span>
+            <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
             <span className="hidden sm:inline">Loja</span>
           </Link>
 

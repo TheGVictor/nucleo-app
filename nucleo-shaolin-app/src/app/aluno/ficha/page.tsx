@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { connection } from 'next/server'
+import { Award, Wind, Shield } from 'lucide-react'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
@@ -79,12 +80,12 @@ export default async function AlunoFichaPage({ searchParams }: AlunoFichaPagePro
               const isSelected =
                 (targetModalityId && sm.modality?.id === targetModalityId) ||
                 (!targetModalityId && sm.modality?.name === technicalData?.modalityName)
-              const icon =
+              const ModIcon =
                 sm.modality?.slug === 'taichi'
-                  ? '☯️'
+                  ? Wind
                   : sm.modality?.slug === 'sanda'
-                  ? '🥊'
-                  : '🥋'
+                  ? Shield
+                  : Award
               return (
                 <Link
                   key={sm.id}
@@ -95,7 +96,7 @@ export default async function AlunoFichaPage({ searchParams }: AlunoFichaPagePro
                       : 'text-muted hover:text-main hover:bg-white/5'
                   }`}
                 >
-                  <span className="text-base">{icon}</span>
+                  <ModIcon className="w-4 h-4 shrink-0" />
                   <span>{sm.modality?.name}</span>
                   {sm.approved_graduation?.level_name && (
                     <span

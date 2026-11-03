@@ -2,6 +2,31 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import {
+  Clock,
+  TrendingUp,
+  FileCheck2,
+  HeartPulse,
+  MapPin,
+  CalendarCheck,
+  Users,
+  Award,
+  CheckCircle2,
+  ArrowRight,
+  Target,
+  Activity,
+  HeartHandshake,
+  ShieldCheck,
+  Sparkles,
+  Quote,
+  ChevronDown,
+  Lock,
+  Phone,
+  Flame,
+  Swords,
+  Wind,
+  Shield,
+} from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
@@ -36,21 +61,12 @@ function getWhatsAppUrl(message: string) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
 }
 
-interface ModalityItem {
-  id: string
-  name: string
-  subtitle: string
-  image: string
-  imageAlt: string
-  desc: string
-  highlights: string[]
-}
-
-const MODALITIES: ModalityItem[] = [
+const MODALITIES = [
   {
     id: 'clf',
     name: 'Kung Fu Choy Lay Fut',
     subtitle: 'Tradição do Norte e Sul da China',
+    icon: Flame,
     image: SITE_IMAGES.clf,
     imageAlt: 'Treinamento de Kung Fu Choy Lay Fut na Núcleo',
     desc: 'Une a agilidade de deslocamento e chutes do Norte com a potência de braços e bases firmes do Sul. Abrange formas clássicas (Katis), defesa pessoal e armas tradicionais.',
@@ -64,6 +80,7 @@ const MODALITIES: ModalityItem[] = [
     id: 'tonlong',
     name: 'Ton Long Kung Fu',
     subtitle: 'Estilo Louva-a-Deus Tradicional',
+    icon: Swords,
     image: SITE_IMAGES.tonlong,
     imageAlt: 'Treinamento técnico de Ton Long Kung Fu na Núcleo',
     desc: 'Reconhecido pela velocidade de mãos, capturas rápidas, bloqueios angulares e contra-ataques imediatos em curta distância, desenvolvendo reflexos apurados e precisão.',
@@ -77,6 +94,7 @@ const MODALITIES: ModalityItem[] = [
     id: 'taichi',
     name: 'Tai Chi Chuan',
     subtitle: 'Estilo Yang Tradicional & Chi Kung',
+    icon: Wind,
     image: SITE_IMAGES.taichi,
     imageAlt: 'Prática de Tai Chi Chuan na Núcleo',
     desc: 'Arte marcial interna voltada ao equilíbrio postural, coordenação respiratória e fortalecimento sem impacto articular, trabalhando sequências clássicas, espada reta e leque.',
@@ -90,6 +108,7 @@ const MODALITIES: ModalityItem[] = [
     id: 'sanda',
     name: 'Sanda · Boxe Chinês',
     subtitle: 'Combate Esportivo & Defesa Pessoal',
+    icon: Shield,
     image: SITE_IMAGES.sanda,
     imageAlt: 'Treinamento de Sanda Boxe Chinês na Núcleo',
     desc: 'Modalidade de combate do Kung Fu que integra boxe, chutes e projeções de queda. Treinos dinâmicos de alto condicionamento físico com equipamentos de proteção.',
@@ -105,24 +124,28 @@ const METHODOLOGY_STEPS = [
   {
     step: '01',
     badge: '60 Minutos',
+    icon: Clock,
     title: 'Aulas na Medida da Sua Rotina',
     desc: 'Treinos planejados de 60 minutos divididos entre aquecimento, base técnica, prática marcial e retorno à calma — fáceis de conciliar com o seu dia a dia.',
   },
   {
     step: '02',
     badge: 'No Seu Ritmo',
+    icon: TrendingUp,
     title: 'Evolução Individual e Sem Comparações',
     desc: 'O ensino na Núcleo é adaptado à condição física e à idade de cada aluno. Você aprende desde o zero absoluto, respeitando o seu próprio tempo.',
   },
   {
     step: '03',
     badge: 'Acompanhamento Real',
+    icon: FileCheck2,
     title: 'Ficha Técnica & Vídeos por Faixa',
     desc: 'Cada praticante conta com acompanhamento individual do currículo da sua graduação e acesso ao portal da Núcleo com vídeos de apoio.',
   },
   {
     step: '04',
     badge: 'Corpo e Mente',
+    icon: HeartPulse,
     title: 'Saúde, Postura e Equilíbrio Mental',
     desc: 'Mais do que defesa pessoal: o treinamento desenvolve foco, controle emocional, disciplina, mobilidade e condicionamento de dentro para fora.',
   },
@@ -130,18 +153,22 @@ const METHODOLOGY_STEPS = [
 
 const KIDS_BENEFITS = [
   {
+    icon: Target,
     title: 'Foco e Disciplina',
     desc: 'Desenvolve atenção, paciência e escuta ativa com reflexo direto nos estudos e em casa.',
   },
   {
+    icon: Activity,
     title: 'Coordenação e Postura',
     desc: 'Equilíbrio, lateralidade e consciência corporal longe do excesso de telas.',
   },
   {
+    icon: HeartHandshake,
     title: 'Respeito (Mo Duk)',
     desc: 'Valorização do respeito aos pais, professores e colegas através da ética marcial.',
   },
   {
+    icon: ShieldCheck,
     title: 'Autoconfiança',
     desc: 'Segurança emocional, postura firme e autocontrole em um ambiente acolhedor.',
   },
@@ -250,9 +277,10 @@ export default function HomePage() {
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-gold btn-sm font-bold text-xs sm:text-sm px-4 py-2 shrink-0"
+              className="btn btn-gold btn-sm font-bold text-xs sm:text-sm px-4 py-2 shrink-0 inline-flex items-center gap-1.5"
             >
-              Agendar Aula
+              <CalendarCheck className="w-4 h-4 shrink-0" />
+              <span>Agendar Aula</span>
             </a>
           </div>
         </div>
@@ -273,7 +301,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
               <div className="lg:col-span-7 flex flex-col items-start text-left">
                 <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-xs font-bold text-gold mb-4">
-                  <span>📍</span>
+                  <MapPin className="w-3.5 h-3.5 shrink-0" />
                   <span>{SCHOOL_ADDRESS} · Vila Carrão, SP</span>
                 </span>
 
@@ -300,35 +328,45 @@ export default function HomePage() {
                     rel="noopener noreferrer"
                     className="btn btn-gold btn-lg font-bold px-7 py-3.5 shadow-sm inline-flex items-center gap-2"
                   >
+                    <CalendarCheck className="w-5 h-5 shrink-0" />
                     <span>Agendar Aula Experimental</span>
                   </a>
                 </div>
 
-                {/* Indicadores rápidos e limpos */}
+                {/* Indicadores rápidos com ícones */}
                 <div className="mt-10 pt-6 border-t border-[var(--color-border)] grid grid-cols-3 gap-4 sm:gap-8 w-full max-w-lg">
-                  <div>
-                    <span className="block text-base sm:text-lg font-extrabold text-main">
-                      60 min
-                    </span>
-                    <span className="text-xs text-muted">
-                      Duração de cada aula
-                    </span>
+                  <div className="flex items-start gap-2.5">
+                    <Clock className="w-4 h-4 text-gold shrink-0 mt-1" />
+                    <div>
+                      <span className="block text-sm sm:text-base font-extrabold text-main">
+                        60 min
+                      </span>
+                      <span className="text-xs text-muted">
+                        Duração da aula
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-base sm:text-lg font-extrabold text-main">
-                      5+ anos
-                    </span>
-                    <span className="text-xs text-muted">
-                      Turmas Kids e Adultos
-                    </span>
+                  <div className="flex items-start gap-2.5">
+                    <Users className="w-4 h-4 text-gold shrink-0 mt-1" />
+                    <div>
+                      <span className="block text-sm sm:text-base font-extrabold text-main">
+                        5+ anos
+                      </span>
+                      <span className="text-xs text-muted">
+                        Kids e Adultos
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-base sm:text-lg font-extrabold text-main">
-                      100%
-                    </span>
-                    <span className="text-xs text-muted">
-                      Ritmo individualizado
-                    </span>
+                  <div className="flex items-start gap-2.5">
+                    <Award className="w-4 h-4 text-gold shrink-0 mt-1" />
+                    <div>
+                      <span className="block text-sm sm:text-base font-extrabold text-main">
+                        100%
+                      </span>
+                      <span className="text-xs text-muted">
+                        No seu ritmo
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -348,7 +386,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 2. COMO FUNCIONA NA PRÁTICA (LAYOUT EDITORIAL NUMERADO, SEM POLUIÇÃO DE IMAGEM) ── */}
+        {/* ── 2. COMO FUNCIONA NA PRÁTICA (COM ÍCONES ILUSTRATIVOS EM CADA TÓPICO) ── */}
         <section className="py-16 sm:py-24 bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="max-w-2xl mb-10 sm:mb-12">
@@ -364,35 +402,43 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {METHODOLOGY_STEPS.map((item) => (
-                <div
-                  key={item.step}
-                  className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all p-6 flex flex-col justify-between gap-6 shadow-xs"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-2xl font-black text-gold/80 font-mono">
-                      {item.step}
-                    </span>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-gold">
-                      {item.badge}
-                    </span>
-                  </div>
+              {METHODOLOGY_STEPS.map((item) => {
+                const StepIcon = item.icon
+                return (
+                  <div
+                    key={item.step}
+                    className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all p-6 flex flex-col justify-between gap-6 shadow-xs group"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="w-11 h-11 rounded-xl bg-amber-500/12 border border-amber-500/30 flex items-center justify-center text-gold group-hover:scale-110 transition-transform">
+                        <StepIcon className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-gold">
+                        {item.badge}
+                      </span>
+                    </div>
 
-                  <div>
-                    <h3 className="text-base font-extrabold text-main leading-snug">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-muted mt-2 leading-relaxed">
-                      {item.desc}
-                    </p>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-black text-gold/70 font-mono">
+                          {item.step}
+                        </span>
+                        <h3 className="text-base font-extrabold text-main leading-snug">
+                          {item.title}
+                        </h3>
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted mt-1.5 leading-relaxed">
+                        {item.desc}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </section>
 
-        {/* ── 3. MODALIDADES DA NÚCLEO (GRID 2x2 MODERNO E INTUITIVO) ──── */}
+        {/* ── 3. MODALIDADES DA NÚCLEO (GRID 2x2 MODERNO COM ÍCONES) ──── */}
         <section className="py-16 sm:py-24 border-b border-[var(--color-border)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="max-w-2xl mb-10 sm:mb-12">
@@ -408,74 +454,81 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-              {MODALITIES.map((mod) => (
-                <div
-                  key={mod.id}
-                  className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all overflow-hidden flex flex-col justify-between shadow-xs group"
-                >
-                  <div>
-                    <div className="relative aspect-[16/9] overflow-hidden bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={mod.image}
-                        alt={mod.imageAlt}
-                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
+              {MODALITIES.map((mod) => {
+                const ModIcon = mod.icon
+                return (
+                  <div
+                    key={mod.id}
+                    className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all overflow-hidden flex flex-col justify-between shadow-xs group"
+                  >
+                    <div>
+                      <div className="relative aspect-[16/9] overflow-hidden bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={mod.image}
+                          alt={mod.imageAlt}
+                          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                        />
+                        <div className="absolute top-3 left-3 w-9 h-9 rounded-xl bg-black/70 backdrop-blur-md border border-white/15 flex items-center justify-center !text-amber-400">
+                          <ModIcon className="w-4 h-4" />
+                        </div>
+                      </div>
+
+                      <div className="p-6 sm:p-7">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-gold">
+                          {mod.subtitle}
+                        </span>
+                        <h3 className="text-xl sm:text-2xl font-extrabold text-main mt-1 tracking-tight">
+                          {mod.name}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-muted mt-2.5 leading-relaxed">
+                          {mod.desc}
+                        </p>
+
+                        <ul className="space-y-2 mt-5 pt-4 border-t border-[var(--color-border)]">
+                          {mod.highlights.map((h, hIdx) => (
+                            <li
+                              key={hIdx}
+                              className="flex items-start gap-2.5 text-xs sm:text-sm text-[var(--color-text)]"
+                            >
+                              <CheckCircle2 className="w-4 h-4 text-gold shrink-0 mt-0.5" />
+                              <span>{h}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
 
-                    <div className="p-6 sm:p-7">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-gold">
-                        {mod.subtitle}
-                      </span>
-                      <h3 className="text-xl sm:text-2xl font-extrabold text-main mt-1 tracking-tight">
-                        {mod.name}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-muted mt-2.5 leading-relaxed">
-                        {mod.desc}
-                      </p>
-
-                      <ul className="space-y-2 mt-5 pt-4 border-t border-[var(--color-border)]">
-                        {mod.highlights.map((h, hIdx) => (
-                          <li
-                            key={hIdx}
-                            className="flex items-start gap-2.5 text-xs sm:text-sm text-[var(--color-text)]"
-                          >
-                            <span className="text-gold font-bold shrink-0">✓</span>
-                            <span>{h}</span>
-                          </li>
-                        ))}
-                      </ul>
+                    <div className="px-6 sm:px-7 pb-6">
+                      <a
+                        href={getWhatsAppUrl(
+                          `Olá! Gostaria de agendar uma aula experimental de ${mod.name} na Núcleo.`
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs sm:text-sm font-bold text-gold hover:underline inline-flex items-center gap-1.5"
+                      >
+                        <span>Agendar aula de {mod.name}</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </a>
                     </div>
                   </div>
-
-                  <div className="px-6 sm:px-7 pb-6">
-                    <a
-                      href={getWhatsAppUrl(
-                        `Olá! Gostaria de agendar uma aula experimental de ${mod.name} na Núcleo.`
-                      )}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs sm:text-sm font-bold text-gold hover:underline inline-flex items-center gap-1.5"
-                    >
-                      <span>Agendar aula de {mod.name}</span>
-                      <span>→</span>
-                    </a>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </section>
 
-        {/* ── 4. KUNG FU KIDS (LAYOUT EDITORIAL LIMPO, SEM FOTO REPETITIVA) ── */}
+        {/* ── 4. KUNG FU KIDS (COM ÍCONES EM CADA PILAR INFANTIL) ── */}
         <section className="py-16 sm:py-24 bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="rounded-3xl bg-[var(--color-bg-card)] border border-[var(--color-border)] p-6 sm:p-10 lg:p-12 shadow-sm">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                 <div className="lg:col-span-5 flex flex-col items-start">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-xs font-bold text-gold">
-                    🐉 Turmas Infantis · A partir dos 5 anos
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                    <span>Turmas Infantis · A partir dos 5 anos</span>
                   </span>
 
                   <h2 className="text-[var(--color-text)] font-extrabold text-2xl sm:text-4xl mt-3 tracking-tight">
@@ -493,30 +546,36 @@ export default function HomePage() {
                       )}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn btn-gold btn-md font-bold px-6 py-3"
+                      className="btn btn-gold btn-md font-bold px-6 py-3 inline-flex items-center gap-2"
                     >
-                      Agendar Aula Experimental Kids
+                      <CalendarCheck className="w-4 h-4 shrink-0" />
+                      <span>Agendar Aula Experimental Kids</span>
                     </a>
                   </div>
                 </div>
 
                 <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {KIDS_BENEFITS.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="p-5 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex flex-col gap-1.5"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-[var(--color-gold)] shrink-0" />
-                        <h3 className="text-sm sm:text-base font-extrabold text-main">
-                          {item.title}
-                        </h3>
+                  {KIDS_BENEFITS.map((item, idx) => {
+                    const BenefitIcon = item.icon
+                    return (
+                      <div
+                        key={idx}
+                        className="p-5 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex flex-col gap-2.5"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+                            <BenefitIcon className="w-4 h-4" />
+                          </div>
+                          <h3 className="text-sm sm:text-base font-extrabold text-main">
+                            {item.title}
+                          </h3>
+                        </div>
+                        <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                          {item.desc}
+                        </p>
                       </div>
-                      <p className="text-xs sm:text-sm text-muted leading-relaxed pl-4">
-                        {item.desc}
-                      </p>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             </div>
@@ -546,22 +605,25 @@ export default function HomePage() {
                 >
                   <div className="flex flex-col gap-4">
                     {/* Cabeçalho com Foto do Aluno + Nome + Modalidade */}
-                    <div className="flex items-center gap-3.5">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.photo}
-                        alt={item.name}
-                        className="w-12 h-12 rounded-full object-cover ring-2 ring-amber-500/30 shrink-0"
-                        loading="lazy"
-                      />
-                      <div className="min-w-0">
-                        <h3 className="text-sm sm:text-base font-extrabold text-main truncate">
-                          {item.name}
-                        </h3>
-                        <p className="text-xs text-muted truncate">
-                          {item.modality}
-                        </p>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={item.photo}
+                          alt={item.name}
+                          className="w-12 h-12 rounded-full object-cover ring-2 ring-amber-500/30 shrink-0"
+                          loading="lazy"
+                        />
+                        <div className="min-w-0">
+                          <h3 className="text-sm sm:text-base font-extrabold text-main truncate">
+                            {item.name}
+                          </h3>
+                          <p className="text-xs text-muted truncate">
+                            {item.modality}
+                          </p>
+                        </div>
                       </div>
+                      <Quote className="w-5 h-5 text-gold/40 shrink-0" />
                     </div>
 
                     {/* Faixa + Tempo de Treino na Núcleo */}
@@ -573,8 +635,9 @@ export default function HomePage() {
                         />
                         <span>{item.belt}</span>
                       </span>
-                      <span className="text-[11px] font-bold text-gold">
-                        {item.trainingTime}
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-gold">
+                        <Clock className="w-3 h-3" />
+                        <span>{item.trainingTime}</span>
                       </span>
                     </div>
 
@@ -620,9 +683,11 @@ export default function HomePage() {
                       className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 font-semibold text-[var(--color-text)] hover:text-gold transition-colors cursor-pointer"
                     >
                       <span className="text-sm sm:text-base font-bold">{faq.q}</span>
-                      <span className="text-gold font-bold text-xl shrink-0">
-                        {isOpen ? '−' : '+'}
-                      </span>
+                      <ChevronDown
+                        className={`w-5 h-5 text-gold shrink-0 transition-transform duration-200 ${
+                          isOpen ? 'rotate-180' : ''
+                        }`}
+                      />
                     </button>
                     {isOpen && (
                       <div className="px-4 sm:px-5 pb-5 text-muted text-sm leading-relaxed border-t border-[var(--color-border)] pt-3.5">
@@ -640,11 +705,15 @@ export default function HomePage() {
         <section className="py-16 sm:py-20">
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <div className="rounded-2xl border border-[var(--color-border-gold)]/40 bg-[var(--color-bg-card)] p-8 sm:p-10 text-center flex flex-col items-center">
+              <div className="w-11 h-11 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold mb-3">
+                <Lock className="w-5 h-5" />
+              </div>
+
               <span className="text-xs font-bold uppercase tracking-widest text-gold">
                 Portal Oficial da Escola
               </span>
 
-              <h2 className="text-[var(--color-text)] font-extrabold text-xl sm:text-2xl mt-2">
+              <h2 className="text-[var(--color-text)] font-extrabold text-xl sm:text-2xl mt-1.5">
                 Área Exclusiva para Alunos da Núcleo
               </h2>
 
@@ -655,9 +724,10 @@ export default function HomePage() {
               <div className="mt-6">
                 <Link
                   href="/login"
-                  className="btn btn-gold btn-md font-bold px-7 py-3"
+                  className="btn btn-gold btn-md font-bold px-7 py-3 inline-flex items-center gap-2"
                 >
-                  Acessar Área do Aluno
+                  <span>Acessar Área do Aluno</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
@@ -665,7 +735,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      {/* ── FOOTER MODERNO COM IMAGEM DE BACKGROUND (SEM ATALHOS INTERNOS E SEM MENÇÃO EXPLÍCITA AO SIFU) ── */}
+      {/* ── FOOTER MODERNO COM IMAGEM DE BACKGROUND ── */}
       <footer className="relative border-t border-[var(--color-border)] text-neutral-300 overflow-hidden">
         <div className="absolute inset-0 z-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -697,18 +767,22 @@ export default function HomePage() {
                 href={GOOGLE_MAPS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="!text-neutral-200 hover:!text-amber-400 transition-colors"
+                className="!text-neutral-200 hover:!text-amber-400 transition-colors inline-flex items-center gap-1.5"
               >
-                <strong className="!text-white">{SCHOOL_ADDRESS}</strong> · {SCHOOL_NEIGHBORHOOD}
+                <MapPin className="w-4 h-4 !text-amber-400 shrink-0" />
+                <span>
+                  <strong className="!text-white">{SCHOOL_ADDRESS}</strong> · {SCHOOL_NEIGHBORHOOD}
+                </span>
               </a>
 
               <a
                 href={getWhatsAppUrl('Olá! Vim pelo site da Núcleo de Kung Fu Shaolin.')}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:!text-amber-400 transition-colors font-bold !text-white"
+                className="hover:!text-amber-400 transition-colors font-bold !text-white inline-flex items-center gap-1.5"
               >
-                WhatsApp: {WHATSAPP_DISPLAY}
+                <Phone className="w-4 h-4 !text-amber-400 shrink-0" />
+                <span>WhatsApp: {WHATSAPP_DISPLAY}</span>
               </a>
             </div>
           </div>
