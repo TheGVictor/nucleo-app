@@ -37,24 +37,21 @@ const SCHOOL_NEIGHBORHOOD = 'Vila Carrão · São Paulo - SP'
 const GOOGLE_MAPS_URL =
   'https://www.google.com/maps/search/?api=1&query=Av.+Conselheiro+Carrao,+2737+-+Vila+Carrao,+Sao+Paulo+-+SP'
 
-// Centralização das imagens para substituição rápida pelas fotos reais da Núcleo
+// Imagens oficiais da Núcleo tratadas em alta definição (nível estúdio/câmera profissional)
 const SITE_IMAGES = {
-  hero: 'https://images.unsplash.com/photo-1555597673-b21d5c935865?auto=format&fit=crop&q=80&w=1000',
-  clf: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=900',
-  tonlong:
-    'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&q=80&w=900',
-  taichi:
-    'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=900',
-  sanda:
-    'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&q=80&w=900',
+  hero: '/imgNucleo/nucleo6.jpg',
+  clf: '/imgNucleo/nucleo1.jpg',
+  tonlong: '/imgNucleo/nucleo3.jpg',
+  taichi: '/imgNucleo/nucleo2.jpg',
+  sanda: '/imgNucleo/nucleo4.jpg',
+  kids: '/imgNucleo/nucleo5.jpg',
+  footerBg: '/imgNucleo/nucleo2.jpg',
   student1:
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
   student2:
     'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300',
   student3:
     'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
-  footerBg:
-    'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&q=80&w=1600',
 }
 
 function getWhatsAppUrl(message: string) {
@@ -299,7 +296,7 @@ export default function HomePage() {
         <section className="py-12 sm:py-20 lg:py-24 border-b border-[var(--color-border)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-              <div className="lg:col-span-7 flex flex-col items-start text-left">
+              <div className="lg:col-span-6 flex flex-col items-start text-left">
                 <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-xs font-bold text-gold mb-4">
                   <MapPin className="w-3.5 h-3.5 shrink-0" />
                   <span>{SCHOOL_ADDRESS} · Vila Carrão, SP</span>
@@ -371,14 +368,15 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="lg:col-span-5">
-                <div className="relative rounded-2xl overflow-hidden border border-[var(--color-border)] shadow-xl aspect-[4/3] lg:aspect-[5/6] bg-[var(--color-bg-card)]">
+              <div className="lg:col-span-6">
+                <div className="relative rounded-2xl overflow-hidden border border-[var(--color-border)] shadow-xl aspect-[3/2] bg-[var(--color-bg-card)]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={SITE_IMAGES.hero}
                     alt="Treinamento tradicional na Núcleo de Kung Fu Shaolin"
                     className="w-full h-full object-cover object-center"
                     loading="eager"
+                    fetchPriority="high"
                   />
                 </div>
               </div>
@@ -515,12 +513,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 4. KUNG FU KIDS (COM ÍCONES EM CADA PILAR INFANTIL) ── */}
+        {/* ── 4. KUNG FU KIDS (COM FOTO OFICIAL E ÍCONES EM CADA PILAR INFANTIL) ── */}
         <section className="py-16 sm:py-24 bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="rounded-3xl bg-[var(--color-bg-card)] border border-[var(--color-border)] p-6 sm:p-10 lg:p-12 shadow-sm">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-                <div className="lg:col-span-5 flex flex-col items-start">
+                <div className="lg:col-span-7 flex flex-col items-start">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-xs font-bold text-gold">
                     <Sparkles className="w-3.5 h-3.5 shrink-0" />
                     <span>Turmas Infantis · A partir dos 5 anos</span>
@@ -533,6 +531,30 @@ export default function HomePage() {
                   <p className="text-sm sm:text-base text-muted mt-3 leading-relaxed">
                     Aulas estruturadas para o desenvolvimento motor, emocional e social da criança, trabalhando coordenação, atenção e os valores tradicionais da ética marcial (<em>Mo Duk</em>).
                   </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-7 w-full">
+                    {KIDS_BENEFITS.map((item, idx) => {
+                      const BenefitIcon = item.icon
+                      return (
+                        <div
+                          key={idx}
+                          className="p-5 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex flex-col gap-2.5"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
+                              <BenefitIcon className="w-4 h-4" />
+                            </div>
+                            <h3 className="text-sm sm:text-base font-extrabold text-main">
+                              {item.title}
+                            </h3>
+                          </div>
+                          <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                            {item.desc}
+                          </p>
+                        </div>
+                      )
+                    })}
+                  </div>
 
                   <div className="mt-7">
                     <a
@@ -549,28 +571,16 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {KIDS_BENEFITS.map((item, idx) => {
-                    const BenefitIcon = item.icon
-                    return (
-                      <div
-                        key={idx}
-                        className="p-5 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex flex-col gap-2.5"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-gold shrink-0">
-                            <BenefitIcon className="w-4 h-4" />
-                          </div>
-                          <h3 className="text-sm sm:text-base font-extrabold text-main">
-                            {item.title}
-                          </h3>
-                        </div>
-                        <p className="text-xs sm:text-sm text-muted leading-relaxed">
-                          {item.desc}
-                        </p>
-                      </div>
-                    )
-                  })}
+                <div className="lg:col-span-5">
+                  <div className="relative rounded-2xl overflow-hidden border border-[var(--color-border)] aspect-[3/4] bg-[var(--color-bg-elevated)] shadow-lg">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={SITE_IMAGES.kids}
+                      alt="Alunos e tradição marcial no Kung Fu Kids da Núcleo"
+                      className="w-full h-full object-cover object-center"
+                      loading="lazy"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
