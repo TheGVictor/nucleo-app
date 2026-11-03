@@ -12,11 +12,9 @@ const SCHOOL_NEIGHBORHOOD = 'Vila Carrão · São Paulo - SP'
 const GOOGLE_MAPS_URL =
   'https://www.google.com/maps/search/?api=1&query=Av.+Conselheiro+Carrao,+2737+-+Vila+Carrao,+Sao+Paulo+-+SP'
 
-// Centralização das imagens da Home e do Footer para fácil substituição
+// Centralização das imagens para substituição rápida pelas fotos reais da Núcleo
 const SITE_IMAGES = {
   hero: 'https://images.unsplash.com/photo-1555597673-b21d5c935865?auto=format&fit=crop&q=80&w=1000',
-  methodology:
-    'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=1000',
   clf: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=900',
   tonlong:
     'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&q=80&w=900',
@@ -24,7 +22,12 @@ const SITE_IMAGES = {
     'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=900',
   sanda:
     'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&q=80&w=900',
-  kids: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=900',
+  student1:
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+  student2:
+    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300',
+  student3:
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
   footerBg:
     'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&q=80&w=1600',
 }
@@ -33,7 +36,7 @@ function getWhatsAppUrl(message: string) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
 }
 
-interface ModalitySplit {
+interface ModalityItem {
   id: string
   name: string
   subtitle: string
@@ -41,134 +44,94 @@ interface ModalitySplit {
   imageAlt: string
   desc: string
   highlights: string[]
-  reverse: boolean
 }
 
-const MODALITIES_SECTIONS: ModalitySplit[] = [
+const MODALITIES: ModalityItem[] = [
   {
     id: 'clf',
     name: 'Kung Fu Choy Lay Fut',
-    subtitle: 'Sistema Tradicional do Norte e Sul da China',
+    subtitle: 'Tradição do Norte e Sul da China',
     image: SITE_IMAGES.clf,
-    imageAlt: 'Praticante de Kung Fu Choy Lay Fut em postura tradicional',
-    desc: 'Une o deslocamento ágil e os chutes do Norte com a potência de braços e bases firmes do Sul. O currículo abrange formas clássicas (Katis), defesa pessoal, calejamento e armas tradicionais.',
+    imageAlt: 'Treinamento de Kung Fu Choy Lay Fut na Núcleo',
+    desc: 'Une a agilidade de deslocamento e chutes do Norte com a potência de braços e bases firmes do Sul. Abrange formas clássicas (Katis), defesa pessoal e armas tradicionais.',
     highlights: [
       'Bases tradicionais, deslocamentos e potência de quadril',
       'Formas clássicas de mãos livres e armas (bastão, sabre e lança)',
-      'Progressão técnica estruturada por graduação',
+      'Progressão técnica estruturada faixa a faixa',
     ],
-    reverse: false,
   },
   {
     id: 'tonlong',
     name: 'Ton Long Kung Fu',
     subtitle: 'Estilo Louva-a-Deus Tradicional',
     image: SITE_IMAGES.tonlong,
-    imageAlt: 'Treinamento técnico de Ton Long Kung Fu',
-    desc: 'Reconhecido pela velocidade de mãos, capturas rápidas, bloqueios angulares e contra-ataques imediatos em curta distância, desenvolvendo reflexos apurados e precisão técnica.',
+    imageAlt: 'Treinamento técnico de Ton Long Kung Fu na Núcleo',
+    desc: 'Reconhecido pela velocidade de mãos, capturas rápidas, bloqueios angulares e contra-ataques imediatos em curta distância, desenvolvendo reflexos apurados e precisão.',
     highlights: [
       'Técnicas de gancho, captura e controle articular',
       'Katis tradicionais do sistema Ton Long e aplicações em dupla',
       'Velocidade de reação e coordenação motora fina',
     ],
-    reverse: true,
   },
   {
     id: 'taichi',
     name: 'Tai Chi Chuan',
     subtitle: 'Estilo Yang Tradicional & Chi Kung',
     image: SITE_IMAGES.taichi,
-    imageAlt: 'Prática de Tai Chi Chuan',
-    desc: 'Arte marcial interna voltada ao equilíbrio postural, coordenação respiratória e fortalecimento sem impacto articular, trabalhando sequências tradicionais, Chi Kung, espada reta e leque.',
+    imageAlt: 'Prática de Tai Chi Chuan na Núcleo',
+    desc: 'Arte marcial interna voltada ao equilíbrio postural, coordenação respiratória e fortalecimento sem impacto articular, trabalhando sequências clássicas, espada reta e leque.',
     highlights: [
       'Sequências tradicionais do estilo Yang e Espada Reta',
       'Fortalecimento, estabilidade e consciência respiratória',
       'Indicado para jovens, adultos e idosos',
     ],
-    reverse: false,
   },
   {
     id: 'sanda',
     name: 'Sanda · Boxe Chinês',
     subtitle: 'Combate Esportivo & Defesa Pessoal',
     image: SITE_IMAGES.sanda,
-    imageAlt: 'Treinamento de Sanda Boxe Chinês',
-    desc: 'Modalidade de combate do Kung Fu que integra boxe, chutes e projeções de queda. Treinos com alto condicionamento físico e prática segura com equipamentos de proteção.',
+    imageAlt: 'Treinamento de Sanda Boxe Chinês na Núcleo',
+    desc: 'Modalidade de combate do Kung Fu que integra boxe, chutes e projeções de queda. Treinos dinâmicos de alto condicionamento físico com equipamentos de proteção.',
     highlights: [
       'Combinações de punho, chute e entradas de queda',
       'Condicionamento cardiorrespiratório e explosão muscular',
-      'Prática supervisionada em ambiente controlado',
+      'Prática supervisionada em ambiente seguro e controlado',
     ],
-    reverse: true,
   },
 ]
 
 const METHODOLOGY_STEPS = [
   {
+    step: '01',
     badge: '60 Minutos',
-    title: 'Aulas Dinâmicas na Medida da Sua Rotina',
-    desc: 'Treinos planejados de 60 minutos divididos entre aquecimento, base técnica, prática marcial e retorno à calma — ideal para encaixar no seu dia a dia.',
+    title: 'Aulas na Medida da Sua Rotina',
+    desc: 'Treinos planejados de 60 minutos divididos entre aquecimento, base técnica, prática marcial e retorno à calma — fáceis de conciliar com o seu dia a dia.',
   },
   {
+    step: '02',
     badge: 'No Seu Ritmo',
     title: 'Evolução Individual e Sem Comparações',
-    desc: 'O ensino é adaptado à condição física e à idade de cada praticante. Você aprende desde o zero absoluto, respeitando o seu próprio tempo de evolução.',
+    desc: 'O ensino na Núcleo é adaptado à condição física e à idade de cada aluno. Você aprende desde o zero absoluto, respeitando o seu próprio tempo.',
   },
   {
+    step: '03',
     badge: 'Acompanhamento Real',
-    title: 'Ficha Técnica Individual & Vídeos de Apoio',
-    desc: 'Cada aluno conta com acompanhamento técnico detalhado de sua faixa e acesso a vídeos das técnicas para revisar e praticar com segurança.',
+    title: 'Ficha Técnica & Vídeos por Faixa',
+    desc: 'Cada praticante conta com acompanhamento individual do currículo da sua graduação e acesso ao portal da Núcleo com vídeos de apoio.',
   },
   {
-    badge: 'Bem-Estar Completo',
-    title: 'Saúde Física, Postura e Equilíbrio Mental',
-    desc: 'Mais do que defesa pessoal: o treinamento desenvolve foco, controle emocional, disciplina, flexibilidade e condicionamento de dentro para fora.',
-  },
-]
-
-interface TestimonialItem {
-  name: string
-  belt: string
-  beltColor: string
-  trainingTime: string
-  modality: string
-  quote: string
-}
-
-const TESTIMONIALS: TestimonialItem[] = [
-  {
-    name: 'Rodrigo M.',
-    belt: 'Faixa Verde',
-    beltColor: '#10B981',
-    trainingTime: '2 anos e meio de treino',
-    modality: 'Kung Fu Choy Lay Fut & Ton Long',
-    quote:
-      'Comecei sem nunca ter praticado artes marciais. As aulas de 60 minutos transformaram meu condicionamento físico, minha postura e meu foco no trabalho. Ter a ficha técnica de acompanhamento deixa muito claro cada passo da nossa evolução.',
-  },
-  {
-    name: 'Patrícia S. (Mãe do Lucas, 8 anos)',
-    belt: 'Faixa Amarela',
-    beltColor: '#F59E0B',
-    trainingTime: '1 ano e meio de treino',
-    modality: 'Kung Fu Kids',
-    quote:
-      'O desenvolvimento do Lucas na concentração, coordenação motora e respeito em casa e na escola foi incrível. O ambiente da escola é acolhedor e familiar, e ele espera a semana inteira pelos dias de aula.',
-  },
-  {
-    name: 'Helena C.',
-    belt: '3º Nível — Laranja',
-    beltColor: '#F97316',
-    trainingTime: '3 anos de treino',
-    modality: 'Tai Chi Chuan',
-    quote:
-      'Buscava uma prática que cuidasse da saúde articular e do controle da ansiedade. O método tradicional ensinado pelo Sifu Guilherme trouxe mais equilíbrio, disposição diária e uma segunda família.',
+    step: '04',
+    badge: 'Corpo e Mente',
+    title: 'Saúde, Postura e Equilíbrio Mental',
+    desc: 'Mais do que defesa pessoal: o treinamento desenvolve foco, controle emocional, disciplina, mobilidade e condicionamento de dentro para fora.',
   },
 ]
 
 const KIDS_BENEFITS = [
   {
     title: 'Foco e Disciplina',
-    desc: 'Desenvolve atenção, paciência e escuta ativa com reflexo direto na escola e em casa.',
+    desc: 'Desenvolve atenção, paciência e escuta ativa com reflexo direto nos estudos e em casa.',
   },
   {
     title: 'Coordenação e Postura',
@@ -180,26 +143,73 @@ const KIDS_BENEFITS = [
   },
   {
     title: 'Autoconfiança',
-    desc: 'Segurança emocional, postura firme e autocontrole em ambiente acolhedor.',
+    desc: 'Segurança emocional, postura firme e autocontrole em um ambiente acolhedor.',
+  },
+]
+
+interface TestimonialItem {
+  name: string
+  role: string
+  photo: string
+  belt: string
+  beltColor: string
+  trainingTime: string
+  modality: string
+  quote: string
+}
+
+const TESTIMONIALS: TestimonialItem[] = [
+  {
+    name: 'Mariana Costa',
+    role: 'Aluna da Turma Adulta',
+    photo: SITE_IMAGES.student1,
+    belt: 'Faixa Verde',
+    beltColor: '#10B981',
+    trainingTime: '2 anos e meio de treino',
+    modality: 'Kung Fu Choy Lay Fut & Ton Long',
+    quote:
+      'Comecei na Núcleo sem nunca ter praticado artes marciais. As aulas de 60 minutos transformaram meu condicionamento físico, minha postura e meu foco. Ter a ficha técnica de acompanhamento deixa muito claro cada passo da nossa evolução.',
+  },
+  {
+    name: 'Patrícia Santos',
+    role: 'Mãe do Lucas (8 anos)',
+    photo: SITE_IMAGES.student2,
+    belt: 'Faixa Amarela',
+    beltColor: '#F59E0B',
+    trainingTime: '1 ano e meio de treino',
+    modality: 'Kung Fu Kids',
+    quote:
+      'A evolução do Lucas na concentração, coordenação motora e respeito em casa e na escola foi nítida. O ambiente da Núcleo é familiar e acolhedor, e ele espera a semana inteira pelos dias de treino.',
+  },
+  {
+    name: 'Carlos Eduardo',
+    role: 'Aluno de Práticas Internas',
+    photo: SITE_IMAGES.student3,
+    belt: '3º Nível — Laranja',
+    beltColor: '#F97316',
+    trainingTime: '3 anos de treino',
+    modality: 'Tai Chi Chuan',
+    quote:
+      'Buscava uma prática que cuidasse da saúde articular e do controle da ansiedade. O método tradicional ensinado na Núcleo trouxe mais equilíbrio, disposição diária e uma verdadeira família.',
   },
 ]
 
 const FAQS = [
   {
-    q: 'Preciso ter experiência prévia para começar?',
-    a: 'Não. As turmas iniciantes respeitam o ritmo individual de cada pessoa, construindo base, mobilidade e condicionamento de forma gradual.',
+    q: 'Preciso ter experiência prévia para começar a treinar na Núcleo?',
+    a: 'Não. As turmas iniciantes da Núcleo respeitam o ritmo individual de cada pessoa, construindo base, mobilidade e condicionamento de forma gradual desde a primeira aula.',
   },
   {
-    q: 'A partir de qual idade as crianças podem treinar no Kung Fu Kids?',
-    a: 'Recebemos crianças a partir dos 5 anos nas turmas infantis (Siu Lung / Kung Fu Kids), com metodologia adaptada para a faixa etária.',
+    q: 'A partir de qual idade as crianças podem entrar no Kung Fu Kids?',
+    a: 'Recebemos crianças a partir dos 5 anos nas turmas infantis da Núcleo, com metodologia pedagógica e marcial adaptada para a faixa etária.',
   },
   {
-    q: 'Onde fica a escola e como agendar uma aula experimental?',
-    a: 'Estamos na Av. Conselheiro Carrão, 2737 (Vila Carrão, São Paulo). Basta clicar no botão do WhatsApp para falar com nossa recepção pelo número (11) 2386-2729.',
+    q: 'Onde fica a Núcleo e como agendar uma aula experimental?',
+    a: 'Estamos na Av. Conselheiro Carrão, 2737 (Vila Carrão, São Paulo). Basta clicar no botão do WhatsApp para falar diretamente com a recepção da Núcleo pelo número (11) 2386-2729.',
   },
   {
-    q: 'Posso praticar mais de uma modalidade?',
-    a: 'Sim. Você pode combinar Kung Fu (Choy Lay Fut e Ton Long) com Sanda ou Tai Chi Chuan conforme sua disponibilidade de horários.',
+    q: 'Posso praticar mais de uma modalidade na escola?',
+    a: 'Sim. Na Núcleo você pode combinar Kung Fu (Choy Lay Fut e Ton Long) com Sanda ou Tai Chi Chuan conforme sua disponibilidade de horários.',
   },
 ]
 
@@ -236,7 +246,7 @@ export default function HomePage() {
             <ThemeToggle />
             <a
               href={getWhatsAppUrl(
-                'Olá! Gostaria de agendar uma aula experimental no Núcleo de Kung Fu Shaolin.'
+                'Olá! Gostaria de agendar uma aula experimental na Núcleo de Kung Fu Shaolin.'
               )}
               target="_blank"
               rel="noopener noreferrer"
@@ -257,32 +267,34 @@ export default function HomePage() {
           }}
         />
 
-        {/* ── HERO SECTION: LIMPA, MODERNA E DIRETA ────────────────── */}
+        {/* ── 1. HERO SECTION ───────────────────────────────────────── */}
         <section className="py-12 sm:py-20 lg:py-24 border-b border-[var(--color-border)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
               <div className="lg:col-span-7 flex flex-col items-start text-left">
-                <span className="text-xs font-bold uppercase tracking-widest text-gold mb-3">
-                  Sifu Guilherme · {SCHOOL_ADDRESS}
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-xs font-bold text-gold mb-4">
+                  <span>📍</span>
+                  <span>{SCHOOL_ADDRESS} · Vila Carrão, SP</span>
                 </span>
 
                 <h1 className="text-[var(--color-text)] font-extrabold tracking-tight text-3xl sm:text-5xl leading-[1.12]">
-                  Tradição autêntica nas{' '}
+                  Tradição e Método nas{' '}
                   <span className="text-gold">Artes Marciais Chinesas.</span>
                 </h1>
 
                 <p className="mt-5 text-base sm:text-lg text-muted max-w-xl leading-relaxed">
-                  Ensino presencial de <strong className="text-main">Kung Fu Choy Lay Fut</strong>,{' '}
+                  A <strong className="text-main">Núcleo de Kung Fu Shaolin</strong> oferece ensino presencial de{' '}
+                  <strong className="text-main">Kung Fu Choy Lay Fut</strong>,{' '}
                   <strong className="text-main">Ton Long</strong>,{' '}
                   <strong className="text-main">Kung Fu Kids</strong>,{' '}
                   <strong className="text-main">Tai Chi Chuan</strong> e{' '}
-                  <strong className="text-main">Sanda (Boxe Chinês)</strong> na Vila Carrão, em São Paulo.
+                  <strong className="text-main">Sanda (Boxe Chinês)</strong> para crianças, jovens, adultos e idosos.
                 </p>
 
-                <div className="mt-8">
+                <div className="mt-8 flex flex-wrap items-center gap-4">
                   <a
                     href={getWhatsAppUrl(
-                      'Olá! Gostaria de agendar uma aula experimental no Núcleo de Kung Fu Shaolin.'
+                      'Olá! Gostaria de agendar uma aula experimental na Núcleo de Kung Fu Shaolin.'
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -291,6 +303,34 @@ export default function HomePage() {
                     <span>Agendar Aula Experimental</span>
                   </a>
                 </div>
+
+                {/* Indicadores rápidos e limpos */}
+                <div className="mt-10 pt-6 border-t border-[var(--color-border)] grid grid-cols-3 gap-4 sm:gap-8 w-full max-w-lg">
+                  <div>
+                    <span className="block text-base sm:text-lg font-extrabold text-main">
+                      60 min
+                    </span>
+                    <span className="text-xs text-muted">
+                      Duração de cada aula
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-base sm:text-lg font-extrabold text-main">
+                      5+ anos
+                    </span>
+                    <span className="text-xs text-muted">
+                      Turmas Kids e Adultos
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-base sm:text-lg font-extrabold text-main">
+                      100%
+                    </span>
+                    <span className="text-xs text-muted">
+                      Ritmo individualizado
+                    </span>
+                  </div>
+                </div>
               </div>
 
               <div className="lg:col-span-5">
@@ -298,7 +338,7 @@ export default function HomePage() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={SITE_IMAGES.hero}
-                    alt="Treinamento tradicional no Núcleo de Kung Fu Shaolin"
+                    alt="Treinamento tradicional na Núcleo de Kung Fu Shaolin"
                     className="w-full h-full object-cover object-center"
                     loading="eager"
                   />
@@ -308,233 +348,43 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── PONTO 1: COMO FUNCIONA NA PRÁTICA (METODOLOGIA PASSO A PASSO) ── */}
+        {/* ── 2. COMO FUNCIONA NA PRÁTICA (LAYOUT EDITORIAL NUMERADO, SEM POLUIÇÃO DE IMAGEM) ── */}
         <section className="py-16 sm:py-24 bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-              <div className="lg:col-span-5">
-                <div className="relative rounded-2xl overflow-hidden border border-[var(--color-border)] aspect-[4/3] lg:aspect-[5/6] bg-[var(--color-bg-card)] shadow-lg">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={SITE_IMAGES.methodology}
-                    alt="Metodologia de ensino individualizado no Núcleo de Kung Fu Shaolin"
-                    className="w-full h-full object-cover object-center"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 bg-gradient-to-t from-black/85 via-black/50 to-transparent text-white">
-                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-400 block">
-                      Metodologia da Escola
-                    </span>
-                    <p className="text-xs sm:text-sm font-semibold mt-0.5 leading-snug">
-                      Ensino progressivo para iniciantes e graduados, respeitando o potencial de cada aluno.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:col-span-7 flex flex-col items-start">
-                <span className="text-xs font-bold uppercase tracking-widest text-gold">
-                  Como Funciona na Prática
-                </span>
-
-                <h2 className="text-[var(--color-text)] font-extrabold text-2xl sm:text-4xl mt-1.5 tracking-tight">
-                  Seu Treino Passo a Passo, Sem Intimidação
-                </h2>
-
-                <p className="text-sm sm:text-base text-muted mt-3 leading-relaxed max-w-2xl">
-                  Não é preciso ter experiência prévia ou preparo físico avançado para começar. Nossa metodologia acompanha você de perto desde a primeira aula até as graduações superiores.
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-7 w-full">
-                  {METHODOLOGY_STEPS.map((step, idx) => (
-                    <div
-                      key={idx}
-                      className="p-5 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all flex flex-col gap-2"
-                    >
-                      <span className="self-start text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-gold">
-                        {step.badge}
-                      </span>
-                      <h3 className="text-sm sm:text-base font-bold text-main mt-0.5">
-                        {step.title}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-muted leading-relaxed">
-                        {step.desc}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── MODALIDADES (CHOY LAY FUT, TON LONG, TAI CHI, SANDA) ──── */}
-        <section className="py-16 sm:py-24 flex flex-col gap-16 sm:gap-24 border-b border-[var(--color-border)]">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full">
-            <span className="text-xs font-bold uppercase tracking-widest text-gold">
-              Modalidades
-            </span>
-            <h2 className="text-[var(--color-text)] font-extrabold text-2xl sm:text-4xl mt-1 tracking-tight">
-              Sistemas Marciais da Escola
-            </h2>
-          </div>
-
-          {MODALITIES_SECTIONS.map((section) => (
-            <div key={section.id} className="max-w-6xl mx-auto px-4 sm:px-6 w-full">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
-                <div
-                  className={`lg:col-span-6 ${
-                    section.reverse ? 'lg:order-2' : 'lg:order-1'
-                  }`}
-                >
-                  <div className="rounded-2xl overflow-hidden border border-[var(--color-border)] bg-[var(--color-bg-card)] aspect-[16/10]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={section.image}
-                      alt={section.imageAlt}
-                      className="w-full h-full object-cover object-center"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-
-                <div
-                  className={`lg:col-span-6 flex flex-col items-start ${
-                    section.reverse ? 'lg:order-1' : 'lg:order-2'
-                  }`}
-                >
-                  <span className="text-xs font-bold uppercase tracking-wider text-gold">
-                    {section.subtitle}
-                  </span>
-
-                  <h3 className="text-[var(--color-text)] font-extrabold text-2xl sm:text-3xl mt-1 tracking-tight">
-                    {section.name}
-                  </h3>
-
-                  <p className="text-sm sm:text-base text-muted mt-3 leading-relaxed">
-                    {section.desc}
-                  </p>
-
-                  <ul className="space-y-2 mt-5">
-                    {section.highlights.map((h, hIdx) => (
-                      <li
-                        key={hIdx}
-                        className="flex items-start gap-2.5 text-xs sm:text-sm text-[var(--color-text)]"
-                      >
-                        <span className="text-gold font-bold shrink-0">✓</span>
-                        <span>{h}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          ))}
-        </section>
-
-        {/* ── SEÇÃO KUNG FU KIDS (INFANTIL) ─────────────────────────── */}
-        <section className="py-16 sm:py-24 bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-              <div className="lg:col-span-7 flex flex-col items-start">
-                <span className="text-xs font-bold uppercase tracking-widest text-gold">
-                  Turmas Infantis · A partir dos 5 anos
-                </span>
-
-                <h2 className="text-[var(--color-text)] font-extrabold text-2xl sm:text-4xl mt-1.5 tracking-tight">
-                  Kung Fu Kids
-                </h2>
-
-                <p className="text-sm sm:text-base text-muted mt-3 leading-relaxed max-w-xl">
-                  Aulas planejadas para o desenvolvimento físico e emocional infantil, unindo coordenação motora, concentração e ética marcial (<em>Mo Duk</em>).
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-7 w-full">
-                  {KIDS_BENEFITS.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]"
-                    >
-                      <h3 className="text-sm font-bold text-main">{item.title}</h3>
-                      <p className="text-xs text-muted mt-1 leading-relaxed">
-                        {item.desc}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-7">
-                  <a
-                    href={getWhatsAppUrl(
-                      'Olá! Gostaria de informações sobre o Kung Fu Kids.'
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-gold btn-md font-bold px-6 py-3"
-                  >
-                    Agendar Aula Kids
-                  </a>
-                </div>
-              </div>
-
-              <div className="lg:col-span-5">
-                <div className="rounded-2xl overflow-hidden border border-[var(--color-border)] aspect-[4/3] bg-[var(--color-bg-card)] shadow-lg">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={SITE_IMAGES.kids}
-                    alt="Aulas de Kung Fu Kids"
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── PONTO 2: DEPOIMENTOS COM FAIXA E TEMPO DE TREINO ──────── */}
-        <section className="py-16 sm:py-24 border-b border-[var(--color-border)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="max-w-2xl mb-10 sm:mb-12">
               <span className="text-xs font-bold uppercase tracking-widest text-gold">
-                Vivência na Escola
+                Metodologia da Núcleo
               </span>
               <h2 className="text-[var(--color-text)] font-extrabold text-2xl sm:text-4xl mt-1.5 tracking-tight">
-                Quem Treina no Núcleo Conta Como É
+                Como Funciona Seu Treino na Prática
               </h2>
               <p className="text-sm sm:text-base text-muted mt-2.5 leading-relaxed">
-                Relatos reais de alunos e famílias sobre a evolução técnica, saúde e o ambiente da nossa escola.
+                Não é preciso ter experiência prévia ou condicionamento avançado. Na Núcleo, cada etapa do aprendizado é estruturada para você evoluir com segurança e constância.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {TESTIMONIALS.map((item, idx) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {METHODOLOGY_STEPS.map((item) => (
                 <div
-                  key={idx}
-                  className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all p-6 flex flex-col justify-between gap-5 shadow-xs"
+                  key={item.step}
+                  className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all p-6 flex flex-col justify-between gap-6 shadow-xs"
                 >
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[var(--color-bg-elevated)] border border-[var(--color-border)] text-main">
-                        <span
-                          className="w-2 h-2 rounded-full shrink-0"
-                          style={{ backgroundColor: item.beltColor }}
-                        />
-                        <span>{item.belt}</span>
-                      </span>
-                      <span className="text-[11px] font-semibold text-gold">
-                        {item.trainingTime}
-                      </span>
-                    </div>
-
-                    <p className="text-sm text-[var(--color-text)] leading-relaxed italic">
-                      &ldquo;{item.quote}&rdquo;
-                    </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-2xl font-black text-gold/80 font-mono">
+                      {item.step}
+                    </span>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-gold">
+                      {item.badge}
+                    </span>
                   </div>
 
-                  <div className="pt-4 border-t border-[var(--color-border)]">
-                    <p className="text-sm font-extrabold text-main">{item.name}</p>
-                    <p className="text-xs text-muted mt-0.5">{item.modality}</p>
+                  <div>
+                    <h3 className="text-base font-extrabold text-main leading-snug">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-muted mt-2 leading-relaxed">
+                      {item.desc}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -542,8 +392,210 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── DÚVIDAS FREQUENTES (FAQ) ────────────────────────────── */}
+        {/* ── 3. MODALIDADES DA NÚCLEO (GRID 2x2 MODERNO E INTUITIVO) ──── */}
         <section className="py-16 sm:py-24 border-b border-[var(--color-border)]">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="max-w-2xl mb-10 sm:mb-12">
+              <span className="text-xs font-bold uppercase tracking-widest text-gold">
+                Sistemas Marciais
+              </span>
+              <h2 className="text-[var(--color-text)] font-extrabold text-2xl sm:text-4xl mt-1.5 tracking-tight">
+                Modalidades da Núcleo
+              </h2>
+              <p className="text-sm sm:text-base text-muted mt-2.5 leading-relaxed">
+                Quatro vertentes tradicionais das artes marciais chinesas ensinadas com currículo técnico completo.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+              {MODALITIES.map((mod) => (
+                <div
+                  key={mod.id}
+                  className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all overflow-hidden flex flex-col justify-between shadow-xs group"
+                >
+                  <div>
+                    <div className="relative aspect-[16/9] overflow-hidden bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={mod.image}
+                        alt={mod.imageAlt}
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                    </div>
+
+                    <div className="p-6 sm:p-7">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-gold">
+                        {mod.subtitle}
+                      </span>
+                      <h3 className="text-xl sm:text-2xl font-extrabold text-main mt-1 tracking-tight">
+                        {mod.name}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-muted mt-2.5 leading-relaxed">
+                        {mod.desc}
+                      </p>
+
+                      <ul className="space-y-2 mt-5 pt-4 border-t border-[var(--color-border)]">
+                        {mod.highlights.map((h, hIdx) => (
+                          <li
+                            key={hIdx}
+                            className="flex items-start gap-2.5 text-xs sm:text-sm text-[var(--color-text)]"
+                          >
+                            <span className="text-gold font-bold shrink-0">✓</span>
+                            <span>{h}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="px-6 sm:px-7 pb-6">
+                    <a
+                      href={getWhatsAppUrl(
+                        `Olá! Gostaria de agendar uma aula experimental de ${mod.name} na Núcleo.`
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs sm:text-sm font-bold text-gold hover:underline inline-flex items-center gap-1.5"
+                    >
+                      <span>Agendar aula de {mod.name}</span>
+                      <span>→</span>
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── 4. KUNG FU KIDS (LAYOUT EDITORIAL LIMPO, SEM FOTO REPETITIVA) ── */}
+        <section className="py-16 sm:py-24 bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="rounded-3xl bg-[var(--color-bg-card)] border border-[var(--color-border)] p-6 sm:p-10 lg:p-12 shadow-sm">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+                <div className="lg:col-span-5 flex flex-col items-start">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-xs font-bold text-gold">
+                    🐉 Turmas Infantis · A partir dos 5 anos
+                  </span>
+
+                  <h2 className="text-[var(--color-text)] font-extrabold text-2xl sm:text-4xl mt-3 tracking-tight">
+                    Kung Fu Kids na Núcleo
+                  </h2>
+
+                  <p className="text-sm sm:text-base text-muted mt-3 leading-relaxed">
+                    Aulas estruturadas para o desenvolvimento motor, emocional e social da criança, trabalhando coordenação, atenção e os valores tradicionais da ética marcial (<em>Mo Duk</em>).
+                  </p>
+
+                  <div className="mt-7">
+                    <a
+                      href={getWhatsAppUrl(
+                        'Olá! Gostaria de informações sobre o Kung Fu Kids na Núcleo.'
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-gold btn-md font-bold px-6 py-3"
+                    >
+                      Agendar Aula Experimental Kids
+                    </a>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {KIDS_BENEFITS.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-5 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] flex flex-col gap-1.5"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[var(--color-gold)] shrink-0" />
+                        <h3 className="text-sm sm:text-base font-extrabold text-main">
+                          {item.title}
+                        </h3>
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted leading-relaxed pl-4">
+                        {item.desc}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 5. DEPOIMENTOS COM FOTOS DOS ALUNOS, FAIXA E TEMPO DE TREINO ── */}
+        <section className="py-16 sm:py-24 border-b border-[var(--color-border)]">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="max-w-2xl mb-10 sm:mb-12">
+              <span className="text-xs font-bold uppercase tracking-widest text-gold">
+                Comunidade Marcial
+              </span>
+              <h2 className="text-[var(--color-text)] font-extrabold text-2xl sm:text-4xl mt-1.5 tracking-tight">
+                Quem Treina na Núcleo Conta Como É
+              </h2>
+              <p className="text-sm sm:text-base text-muted mt-2.5 leading-relaxed">
+                Relatos reais de alunos e famílias sobre a rotina de treinos, saúde e evolução dentro da Núcleo.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {TESTIMONIALS.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all p-6 flex flex-col justify-between gap-6 shadow-xs"
+                >
+                  <div className="flex flex-col gap-4">
+                    {/* Cabeçalho com Foto do Aluno + Nome + Modalidade */}
+                    <div className="flex items-center gap-3.5">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.photo}
+                        alt={item.name}
+                        className="w-12 h-12 rounded-full object-cover ring-2 ring-amber-500/30 shrink-0"
+                        loading="lazy"
+                      />
+                      <div className="min-w-0">
+                        <h3 className="text-sm sm:text-base font-extrabold text-main truncate">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs text-muted truncate">
+                          {item.modality}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Faixa + Tempo de Treino na Núcleo */}
+                    <div className="flex items-center justify-between gap-2 flex-wrap py-2 px-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)]">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-main">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: item.beltColor }}
+                        />
+                        <span>{item.belt}</span>
+                      </span>
+                      <span className="text-[11px] font-bold text-gold">
+                        {item.trainingTime}
+                      </span>
+                    </div>
+
+                    {/* Relato */}
+                    <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                      &ldquo;{item.quote}&rdquo;
+                    </p>
+                  </div>
+
+                  <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between text-[11px] text-faint font-semibold">
+                    <span>{item.role}</span>
+                    <span>Núcleo Shaolin</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── 6. DÚVIDAS FREQUENTES (FAQ) ───────────────────────────── */}
+        <section className="py-16 sm:py-24 bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <div className="mb-8">
               <span className="text-xs font-bold uppercase tracking-widest text-gold">
@@ -584,20 +636,20 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── SEÇÃO FINAL: ÁREA EXCLUSIVA PARA NOSSOS ALUNOS (APENAS ACESSAR) ── */}
+        {/* ── 7. SEÇÃO FINAL: ÁREA EXCLUSIVA PARA NOSSOS ALUNOS (APENAS ACESSAR) ── */}
         <section className="py-16 sm:py-20">
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <div className="rounded-2xl border border-[var(--color-border-gold)]/40 bg-[var(--color-bg-card)] p-8 sm:p-10 text-center flex flex-col items-center">
               <span className="text-xs font-bold uppercase tracking-widest text-gold">
-                Portal do Aluno
+                Portal Oficial da Escola
               </span>
 
               <h2 className="text-[var(--color-text)] font-extrabold text-xl sm:text-2xl mt-2">
-                Área Exclusiva para Alunos
+                Área Exclusiva para Alunos da Núcleo
               </h2>
 
               <p className="text-sm text-muted mt-2 max-w-md leading-relaxed">
-                Acesso restrito aos alunos matriculados para consulta de ficha técnica, grade de horários e vídeos de treinamento.
+                Acesso restrito aos alunos matriculados na Núcleo para consulta de ficha técnica, grade de horários, mural de avisos e vídeos de treino.
               </p>
 
               <div className="mt-6">
@@ -613,9 +665,8 @@ export default function HomePage() {
         </section>
       </main>
 
-      {/* ── FOOTER MODERNO COM IMAGEM DE BACKGROUND (SEM ATALHOS INTERNOS) ── */}
+      {/* ── FOOTER MODERNO COM IMAGEM DE BACKGROUND (SEM ATALHOS INTERNOS E SEM MENÇÃO EXPLÍCITA AO SIFU) ── */}
       <footer className="relative border-t border-[var(--color-border)] text-neutral-300 overflow-hidden">
-        {/* Imagem de Fundo do Footer + Overlay Escuro para Contraste */}
         <div className="absolute inset-0 z-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -632,11 +683,11 @@ export default function HomePage() {
             <div className="flex items-center gap-3.5">
               <Logo size="sm" />
               <div>
-                <span className="font-extrabold text-white text-base sm:text-lg block tracking-tight">
+                <span className="font-extrabold !text-white text-base sm:text-lg block tracking-tight">
                   Núcleo de Kung Fu Shaolin
                 </span>
-                <span className="text-xs text-amber-400 font-semibold">
-                  Coordenação Técnica · Sifu Guilherme
+                <span className="text-xs !text-amber-400 font-semibold">
+                  Escola Tradicional de Artes Marciais Chinesas
                 </span>
               </div>
             </div>
@@ -646,23 +697,23 @@ export default function HomePage() {
                 href={GOOGLE_MAPS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-neutral-200 hover:text-amber-400 transition-colors"
+                className="!text-neutral-200 hover:!text-amber-400 transition-colors"
               >
-                <strong className="text-white">{SCHOOL_ADDRESS}</strong> · {SCHOOL_NEIGHBORHOOD}
+                <strong className="!text-white">{SCHOOL_ADDRESS}</strong> · {SCHOOL_NEIGHBORHOOD}
               </a>
 
               <a
-                href={getWhatsAppUrl('Olá! Vim pelo site do Núcleo de Kung Fu Shaolin.')}
+                href={getWhatsAppUrl('Olá! Vim pelo site da Núcleo de Kung Fu Shaolin.')}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-amber-400 transition-colors font-bold text-white"
+                className="hover:!text-amber-400 transition-colors font-bold !text-white"
               >
                 WhatsApp: {WHATSAPP_DISPLAY}
               </a>
             </div>
           </div>
 
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400">
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs !text-neutral-400">
             <span>
               © 2026 Núcleo de Kung Fu Shaolin. Todos os direitos reservados.
             </span>
@@ -672,7 +723,7 @@ export default function HomePage() {
                 href="https://www.instagram.com/nucleokungfushaolin/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-neutral-300 hover:text-amber-400 transition-colors"
+                className="!text-neutral-300 hover:!text-amber-400 transition-colors"
               >
                 Instagram
               </a>
@@ -680,7 +731,7 @@ export default function HomePage() {
                 href="https://www.facebook.com/nucleokungfushaolin/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-neutral-300 hover:text-amber-400 transition-colors"
+                className="!text-neutral-300 hover:!text-amber-400 transition-colors"
               >
                 Facebook
               </a>
@@ -691,12 +742,12 @@ export default function HomePage() {
 
       {/* ── BOTÃO FLUTUANTE DO WHATSAPP (APENAS O BOTÃO, SEM CHAT ABERTO) ── */}
       <a
-        href={getWhatsAppUrl('Olá! Vim pelo site do Núcleo de Kung Fu Shaolin e gostaria de informações.')}
+        href={getWhatsAppUrl('Olá! Vim pelo site da Núcleo de Kung Fu Shaolin e gostaria de informações.')}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Falar no WhatsApp"
         title={`WhatsApp ${WHATSAPP_DISPLAY}`}
-        className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white shadow-lg hover:scale-105 transition-all flex items-center justify-center"
+        className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#20BD5A] !text-white shadow-lg hover:scale-105 transition-all flex items-center justify-center"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

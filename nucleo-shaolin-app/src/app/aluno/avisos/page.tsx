@@ -48,7 +48,7 @@ export default async function AlunoAvisosPage() {
             <Badge variant="gold">{announcements.length}</Badge>
           </div>
           <p className="nkfs-p-m text-muted mt-0.5">
-            Notificações, cartazes, datas de exame e comunicados oficiais do Núcleo Shaolin.
+            Notificações, cartazes, datas de exame e comunicados oficiais da Núcleo Shaolin.
           </p>
         </div>
 

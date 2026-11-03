@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Núcleo Shaolin',
     short_name: 'Núcleo Shaolin',
-    description: 'Aplicativo oficial do Núcleo Shaolin',
+    description: 'Aplicativo oficial da Núcleo Shaolin',
     start_url: '/aluno',
     scope: '/',
     display: 'standalone',

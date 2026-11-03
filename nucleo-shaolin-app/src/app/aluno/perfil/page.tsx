@@ -180,7 +180,7 @@ export default async function PerfilPage() {
               <div>
                 <h3 className="text-xs sm:text-sm font-bold text-main flex items-center gap-1.5">
                   <span>✨</span>
-                  <span>Treino Multidisciplinar no Núcleo Shaolin</span>
+                  <span>Treino Multidisciplinar na Núcleo Shaolin</span>
                 </h3>
                 <p className="text-[11px] text-muted leading-relaxed mt-0.5">
                   Praticantes matriculados podem integrar outras artes marciais da escola com planos especiais.
@@ -207,7 +207,7 @@ export default async function PerfilPage() {
               </span>
               <a
                 href={`https://wa.me/551123862729?text=${encodeURIComponent(
-                  `Olá, sou o aluno ${profile.full_name} e tenho interesse em treinar uma nova modalidade no Núcleo Shaolin!`
+                  `Olá, sou o aluno ${profile.full_name} e tenho interesse em treinar uma nova modalidade na Núcleo Shaolin!`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -285,7 +285,7 @@ export default async function PerfilPage() {
           </span>
         </div>
         <p className="text-xs text-muted leading-relaxed">
-          Adicione o <strong>Núcleo Shaolin</strong> à tela inicial do seu celular (iPhone ou Android) para usar como um aplicativo nativo em tela cheia, sem precisar digitar o endereço da web no navegador.
+          Adicione a <strong>Núcleo Shaolin</strong> à tela inicial do seu celular (iPhone ou Android) para usar como um aplicativo nativo em tela cheia, sem precisar digitar o endereço da web no navegador.
         </p>
         <InstallAppButton />
       </section>

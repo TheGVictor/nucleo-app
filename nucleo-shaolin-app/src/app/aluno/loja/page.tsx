@@ -24,7 +24,7 @@ export default async function AlunoLojaPage() {
             <h1 className="nkfs-h-m text-main font-bold">Loja Oficial da Escola</h1>
           </div>
           <p className="nkfs-p-m text-muted mt-0.5">
-            Adquira uniformes oficiais, faixas de graduação, armas tradicionais e equipamentos com retirada no Núcleo Shaolin.
+            Adquira uniformes oficiais, faixas de graduação, armas tradicionais e equipamentos com retirada na Núcleo Shaolin.
           </p>
         </div>
       </div>

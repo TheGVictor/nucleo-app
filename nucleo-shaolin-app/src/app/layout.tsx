@@ -22,18 +22,13 @@ const organizationJsonLd = {
       logo: 'https://nucleo-app-iota.vercel.app/icon-512.png',
       image: 'https://nucleo-app-iota.vercel.app/icon-512.png',
       description:
-        'Escola tradicional de Kung Fu Shaolin (Choy Lay Fut e Ton Long), Kung Fu Kids, Tai Chi Chuan estilo Yang e Sanda (Boxe Chinês), sob coordenação técnica do Sifu Guilherme.',
+        'Escola tradicional de Kung Fu Shaolin (Choy Lay Fut e Ton Long), Kung Fu Kids, Tai Chi Chuan estilo Yang e Sanda (Boxe Chinês) na Vila Carrão, São Paulo.',
       telephone: '+55-11-2386-2729',
       sameAs: [
         'https://www.instagram.com/nucleokungfushaolin/',
         'https://www.facebook.com/nucleokungfushaolin/',
         'https://www.wikidata.org/wiki/Q1143825',
       ],
-      founder: {
-        '@type': 'Person',
-        name: 'Sifu Guilherme',
-        jobTitle: 'Mestre e Coordenador Técnico',
-      },
       sport: ['Kung Fu', 'Choy Lay Fut', 'Ton Long', 'Kung Fu Kids', 'Tai Chi Chuan', 'Sanda', 'Boxe Chinês'],
       address: {
         '@type': 'PostalAddress',
@@ -49,7 +44,7 @@ const organizationJsonLd = {
       url: 'https://nucleo-app-iota.vercel.app',
       name: 'Núcleo de Kung Fu Shaolin',
       description:
-        'Aprenda Kung Fu Shaolin tradicional, Tai Chi Chuan e Boxe Chinês. Acompanhe sua evolução marcial, histórico de graduações e ficha técnica no Núcleo Shaolin.',
+        'Aprenda Kung Fu Shaolin tradicional, Tai Chi Chuan e Boxe Chinês. Acompanhe sua evolução marcial, histórico de graduações e ficha técnica na Núcleo Shaolin.',
       publisher: {
         '@id': 'https://nucleo-app-iota.vercel.app/#organization',
       },
@@ -91,7 +86,7 @@ export const metadata: Metadata = {
     template: '%s | Núcleo de Kung Fu Shaolin',
   },
   description:
-    'Aprenda Kung Fu Shaolin tradicional, Tai Chi Chuan e Boxe Chinês. Acompanhe sua evolução marcial, histórico de graduações e ficha técnica no Núcleo Shaolin.',
+    'Aprenda Kung Fu Shaolin tradicional, Tai Chi Chuan e Boxe Chinês. Acompanhe sua evolução marcial, histórico de graduações e ficha técnica na Núcleo Shaolin.',
   alternates: {
     canonical: '/',
   },
@@ -118,7 +113,7 @@ export const metadata: Metadata = {
     siteName: 'Núcleo de Kung Fu Shaolin',
     title: 'Núcleo de Kung Fu Shaolin | Escola Tradicional e Portal',
     description:
-      'Aprenda Kung Fu Shaolin tradicional, Tai Chi Chuan e Boxe Chinês. Acompanhe sua evolução marcial, histórico de graduações e ficha técnica no Núcleo Shaolin.',
+      'Aprenda Kung Fu Shaolin tradicional, Tai Chi Chuan e Boxe Chinês. Acompanhe sua evolução marcial, histórico de graduações e ficha técnica na Núcleo Shaolin.',
     images: [
       {
         url: '/icon-512.png',
@@ -132,7 +127,7 @@ export const metadata: Metadata = {
     card: 'summary',
     title: 'Núcleo de Kung Fu Shaolin | Escola Tradicional e Portal',
     description:
-      'Aprenda Kung Fu Shaolin tradicional, Tai Chi Chuan e Boxe Chinês. Acompanhe sua evolução marcial e ficha técnica no Núcleo Shaolin.',
+      'Aprenda Kung Fu Shaolin tradicional, Tai Chi Chuan e Boxe Chinês. Acompanhe sua evolução marcial e ficha técnica na Núcleo Shaolin.',
     images: ['/icon-512.png'],
   },
   robots: {

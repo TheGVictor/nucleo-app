@@ -89,7 +89,7 @@ export const DEFAULT_PRODUCTS: Product[] = [
     name: 'Faixa de Graduação Bordada',
     category: 'CLF',
     price: 45.0,
-    description: 'Faixa oficial de algodão puro reforçado com bordado tradicional e insígnia do Núcleo Shaolin.',
+    description: 'Faixa oficial de algodão puro reforçado com bordado tradicional e insígnia da Núcleo Shaolin.',
     stock: 25,
     active: true,
     image_url: null,

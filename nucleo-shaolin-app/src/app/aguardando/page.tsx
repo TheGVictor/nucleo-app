@@ -167,7 +167,7 @@ export default function AguardandoPage() {
             
             <div className="card-elevated p-4 my-5 w-full text-left">
               <p className="nkfs-p-p text-muted leading-relaxed">
-                Olá, <strong className="text-main">{studentName}</strong>! Sua solicitação de matrícula e nível autodeclarado estão sob análise técnica do Sifu Guilherme.
+                Olá, <strong className="text-main">{studentName}</strong>! Sua solicitação de matrícula e nível autodeclarado estão sob análise técnica da coordenação.
               </p>
             </div>
             
@@ -212,7 +212,7 @@ export default function AguardandoPage() {
             
             <h1 className="nkfs-h-m text-main mt-3">Cadastro Aprovado!</h1>
             <p className="nkfs-p-p text-success mt-1">
-              Bem-vindo ao Núcleo de Kung Fu Shaolin
+              Bem-vindo à Núcleo de Kung Fu Shaolin
             </p>
             
             <div className="card-gold p-4 my-5 w-full">

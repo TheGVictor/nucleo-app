@@ -282,7 +282,7 @@ export function ProductModal({ product, onClose, onOrderSuccess }: ProductModalP
                 </strong>
               </div>
               <p className="text-muted leading-relaxed">
-                📍 O produto será separado para você. Realize o pagamento diretamente na <strong>recepção do Núcleo Shaolin</strong> no seu próximo treino.
+                📍 O produto será separado para você. Realize o pagamento diretamente na <strong>recepção da Núcleo Shaolin</strong> no seu próximo treino.
               </p>
             </div>
 

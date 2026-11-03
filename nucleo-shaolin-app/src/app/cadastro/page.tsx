@@ -279,7 +279,7 @@ export default function CadastroPage() {
                 <div className="flex flex-col gap-3 pt-2">
                   <div className="alert alert-warning">
                     <p className="nkfs-p-p leading-relaxed">
-                      ⓘ As graduações informadas passarão por análise e homologação prévia do Sifu Guilherme antes da liberação do conteúdo técnico.
+                      ⓘ As graduações informadas passarão por análise e homologação prévia da coordenação técnica antes da liberação do conteúdo técnico.
                     </p>
                   </div>
 
