@@ -25,7 +25,12 @@ export default async function AlunoLayout({
 
   if (!profile) redirect('/login')
 
-  // O Sifu é exclusivamente o mestre da escola e não utiliza o painel de aluno
+  // Redireciona usuários que ainda não foram aprovados ou foram recusados
+  if (profile.status === 'pending_approval' || profile.status === 'rejected') {
+    redirect('/aguardando')
+  }
+
+  // Super admin não utiliza o painel de aluno
   if (profile.role === 'super_admin') {
     redirect('/admin')
   }

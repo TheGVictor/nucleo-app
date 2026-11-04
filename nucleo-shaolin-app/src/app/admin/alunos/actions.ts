@@ -32,7 +32,7 @@ export async function sendPersonalNoticeAction(
   content: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { user, profile } = await verifyInstructor()
+    const { user } = await verifyInstructor()
     const adminClient = createAdminClient()
 
     // Busca modalidade ativa do aluno para vincular
@@ -45,7 +45,7 @@ export async function sendPersonalNoticeAction(
     const modalityId = sm?.[0]?.modality_id || null
 
     const formattedTitle = `[Para ${studentName}] ${title.trim()}`
-    const formattedContent = `${content.trim()}\n\n— Mensagem enviada pelo Sifu ${profile.full_name}`
+    const formattedContent = `${content.trim()}\n\n— Mensagem enviada pela Coordenação da Escola`
 
     const { error } = await adminClient.from('announcements').insert({
       title: formattedTitle,
@@ -167,7 +167,7 @@ export async function approveStudentWithEditsAction(
           modality_id: sm.modalityId,
           graduation_id: sm.graduationId,
           promoted_at: new Date().toISOString(),
-          notes: 'Graduação inicial homologada pelo Sifu na aprovação de cadastro',
+          notes: 'Graduação inicial homologada na aprovação de cadastro',
         })
       }
     }
@@ -193,7 +193,7 @@ export async function rejectStudentRegistrationAction(
     await verifyInstructor()
     const adminClient = createAdminClient()
 
-    const { error } = await adminClient
+    const { error: profileError } = await adminClient
       .from('profiles')
       .update({
         status: 'rejected',
@@ -201,12 +201,21 @@ export async function rejectStudentRegistrationAction(
       })
       .eq('id', studentId)
 
-    if (error) {
-      return { success: false, error: error.message }
+    if (profileError) {
+      return { success: false, error: profileError.message }
     }
+
+    // Marca também as modalidades do aluno como recusadas
+    await adminClient
+      .from('student_modalities')
+      .update({
+        status: 'rejected',
+      })
+      .eq('student_id', studentId)
 
     revalidatePath('/admin')
     revalidatePath('/admin/alunos')
+    revalidatePath('/aguardando')
 
     return { success: true }
   } catch (err: unknown) {

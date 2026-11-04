@@ -39,12 +39,12 @@ export default function LoginPage() {
 
     if (profile?.role === 'admin' || profile?.role === 'super_admin' || profile?.role === 'instructor') {
       router.push('/admin')
-    } else if (profile?.status === 'pending_approval') {
+    } else if (profile?.status === 'pending_approval' || profile?.status === 'rejected') {
       router.push('/aguardando')
     } else if (profile?.status === 'active') {
       router.push('/aluno')
     } else {
-      setError('Conta suspensa ou recusada. Entre em contato com a escola.')
+      setError('Conta suspensa ou inativa. Entre em contato com a administração da Núcleo.')
       await supabase.auth.signOut()
     }
 

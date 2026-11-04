@@ -375,20 +375,25 @@ export default async function AdminPage() {
         </div>
       </section>
 
-      {/* ── FILA DE HOMOLOGAÇÃO DE ALUNOS (EXCLUSIVO SIFU) ── */}
+      {/* ── FILA DE HOMOLOGAÇÃO DE ALUNOS ── */}
       {isSifu && (
         <section id="homologacao-alunos" className="flex flex-col gap-3 scroll-mt-6">
-          <div className="section-header">
+          <div className="flex items-center justify-between pb-1 border-b border-[var(--color-border)]">
             <div>
-              <h2 className="nkfs-h-p text-main font-bold">
-                Homologação de Alunos
+              <h2 className="text-base sm:text-lg text-main font-extrabold tracking-tight">
+                Aprovações de Cadastro
               </h2>
-              <p className="nkfs-p-m text-muted mt-0.5">
+              <p className="text-xs text-muted mt-0.5">
                 {pending.length === 0
-                  ? 'Nenhum cadastro pendente no momento'
-                  : `${pending.length} solicitação${pending.length !== 1 ? 'ões' : ''} aguardando análise técnica`}
+                  ? 'Nenhuma solicitação pendente no momento'
+                  : `${pending.length} ${pending.length === 1 ? 'solicitação aguardando' : 'solicitações aguardando'} validação técnica`}
               </p>
             </div>
+            {pending.length > 0 && (
+              <span className="text-xs font-bold text-amber-500 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25">
+                {pending.length} {pending.length === 1 ? 'pendente' : 'pendentes'}
+              </span>
+            )}
           </div>
           <ApprovalQueue initialPending={pending} graduations={graduations} />
         </section>

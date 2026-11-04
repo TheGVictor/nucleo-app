@@ -8,6 +8,7 @@ import { Logo } from '@/components/ui/Logo'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { MessageCircle } from 'lucide-react'
 
 export default function AguardandoPage() {
   const router = useRouter()
@@ -18,6 +19,11 @@ export default function AguardandoPage() {
   const [countdown, setCountdown] = useState<number | null>(null)
 
   const [isChecking, setIsChecking] = useState(false)
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
   // Efeito para contagem regressiva suave após aprovação
   useEffect(() => {
@@ -174,7 +180,7 @@ export default function AguardandoPage() {
             <div className="alert alert-warning text-left w-full">
               <span className="text-sm">ℹ️</span>
               <p className="nkfs-p-p leading-tight">
-                Assim que sua matrícula for aprovada pelo Sifu, o acesso será liberado automaticamente.
+                Assim que sua matrícula for aprovada pela coordenação, o acesso será liberado automaticamente.
               </p>
             </div>
 
@@ -217,7 +223,7 @@ export default function AguardandoPage() {
             
             <div className="card-gold p-4 my-5 w-full">
               <p className="nkfs-p-p text-muted leading-relaxed">
-                Sua faixa e matrícula foram homologadas com sucesso pelo Sifu!
+                Sua faixa e matrícula foram homologadas com sucesso pela coordenação!
               </p>
               
               {countdown !== null && (
@@ -241,26 +247,45 @@ export default function AguardandoPage() {
           </div>
         )}
 
-        {/* ── ESTADO 3: REPROVADO ── */}
+        {/* ── ESTADO 3: REPROVADO (BLOQUEADO DE REENVIAR CADASTRO) ── */}
         {status === 'rejected' && (
-          <div className="flex flex-col items-center w-full mt-4">
-            <Badge variant="error">❌ Não Homologado</Badge>
+          <div className="flex flex-col items-center w-full mt-4 animate-fade-in">
+            <Badge variant="error">Cadastro Recusado</Badge>
             
             <h1 className="nkfs-h-m text-main mt-3">Solicitação Não Aprovada</h1>
             <p className="nkfs-tag-p text-muted mt-1">Núcleo de Kung Fu Shaolin</p>
             
-            <div className="card-elevated p-4 my-5 w-full text-left">
-              <p className="nkfs-p-p text-muted leading-relaxed">
-                Sua solicitação de matrícula necessita de ajustes ou contato com a academia. Entre em contato diretamente com a secretaria ou com o Sifu.
+            <div className="card-elevated p-4 my-5 w-full text-left border border-red-500/20">
+              <p className="nkfs-p-p text-main font-medium leading-relaxed">
+                Olá, <strong>{studentName}</strong>. Sua solicitação de cadastro não foi aprovada pela coordenação.
+              </p>
+              <p className="nkfs-p-p text-muted mt-2 leading-relaxed text-xs">
+                Por razões de segurança e controle interno de matrículas, <strong>o envio de novos cadastros está desativado para esta conta</strong>.
+              </p>
+              <p className="nkfs-p-p text-muted mt-2 leading-relaxed text-xs">
+                Caso acredite que houve um equívoco ou queira orientações sobre sua matrícula, entre em contato diretamente com a administração da escola.
               </p>
             </div>
 
-            <Link
-              href="/login"
-              className="btn btn-outline btn-full"
-            >
-              Voltar ao Login
-            </Link>
+            <div className="w-full flex flex-col gap-2.5">
+              <a
+                href="https://wa.me/551123862729?text=Ol%C3%A1%2C%20meu%20cadastro%20no%20app%20da%20N%C3%BAcleo%20n%C3%A3o%20foi%20aprovado%20e%20gostaria%20de%20orienta%C3%A7%C3%B5es."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-gold btn-full flex items-center justify-center gap-2 font-bold text-xs sm:text-sm py-2.5"
+              >
+                <MessageCircle className="w-4 h-4 shrink-0" />
+                <span>Contatar Administração da Escola</span>
+              </a>
+
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="btn btn-outline btn-full text-xs py-2 text-muted hover:text-main"
+              >
+                Sair da Conta
+              </button>
+            </div>
           </div>
         )}
 

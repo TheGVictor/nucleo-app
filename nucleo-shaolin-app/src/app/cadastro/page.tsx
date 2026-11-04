@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -46,6 +46,28 @@ export default function CadastroPage() {
   const [imageRights, setImageRights] = useState(false)
   const [health, setHealth] = useState(false)
 
+  // Bloqueia acesso ao formulário se já estiver autenticado
+  useEffect(() => {
+    async function checkExistingAuth() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('status, role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (profile?.status === 'rejected' || profile?.status === 'pending_approval') {
+        router.replace('/aguardando')
+      } else if (profile?.status === 'active') {
+        router.replace(profile.role === 'admin' || profile.role === 'super_admin' ? '/admin' : '/aluno')
+      }
+    }
+
+    checkExistingAuth()
+  }, [supabase, router])
+
   function toggleModality(slug: string) {
     setSelectedModalities(prev =>
       prev.includes(slug) ? prev.filter(s => s !== slug) : [...prev, slug]
@@ -79,7 +101,27 @@ export default function CadastroPage() {
     })
 
     if (authError || !authData.user) {
-      setError(authError?.message ?? 'Erro ao criar conta.')
+      const msg = (authError?.message || '').toLowerCase()
+      if (
+        msg.includes('already registered') ||
+        msg.includes('already been registered') ||
+        msg.includes('already exists')
+      ) {
+        setError(
+          'Este e-mail já possui cadastro na escola. Se sua solicitação anterior foi recusada, novos envios estão bloqueados. Entre em contato com a administração da Núcleo pelo WhatsApp: (11) 2386-2729.'
+        )
+      } else {
+        setError(authError?.message ?? 'Erro ao criar conta.')
+      }
+      setLoading(false)
+      return
+    }
+
+    // Se o Supabase Auth não gerou novas identidades (usuário já existia)
+    if (authData.user.identities && authData.user.identities.length === 0) {
+      setError(
+        'Este e-mail já possui cadastro na escola. Se sua solicitação anterior foi recusada, novos envios estão bloqueados. Entre em contato com a administração da Núcleo pelo WhatsApp: (11) 2386-2729.'
+      )
       setLoading(false)
       return
     }
