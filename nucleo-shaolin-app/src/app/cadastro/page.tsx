@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Logo } from '@/components/ui/Logo'
 import { Spinner } from '@/components/ui/Spinner'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { finalizeStudentRegistrationAction } from './actions'
 
 const MODALITIES = [
   { slug: 'clf',      label: 'Choy Lay Fut',  short: 'CLF' },
@@ -128,31 +129,22 @@ export default function CadastroPage() {
 
     const userId = authData.user.id
 
-    // 2. Atualiza o profile criado pelo trigger com os campos extras
-    await supabase
-      .from('profiles')
-      .update({
-        terms_accepted: terms,
-        image_rights_accepted: imageRights,
-        health_declaration_accepted: health,
-      })
-      .eq('id', userId)
+    // 2. Finaliza registro com validação no servidor (blindado contra escalada de privilégio)
+    const regResult = await finalizeStudentRegistrationAction({
+      userId,
+      fullName,
+      birthDate,
+      selectedModalities,
+      selfReported,
+      termsAccepted: terms,
+      imageRightsAccepted: imageRights,
+      healthAccepted: health,
+    })
 
-    // 3. Busca IDs das modalidades selecionadas
-    const { data: modalitiesData } = await supabase
-      .from('modalities')
-      .select('id, slug')
-      .in('slug', selectedModalities)
-
-    if (modalitiesData) {
-      const inserts = (modalitiesData as { id: string; slug: string }[]).map(m => ({
-        student_id: userId,
-        modality_id: m.id,
-        self_reported_level: selfReported[m.slug] ?? null,
-        status: 'pending_approval' as const,
-      }))
-
-      await supabase.from('student_modalities').insert(inserts)
+    if (!regResult.success) {
+      setError(regResult.error ?? 'Erro ao concluir cadastro.')
+      setLoading(false)
+      return
     }
 
     router.push('/aguardando')

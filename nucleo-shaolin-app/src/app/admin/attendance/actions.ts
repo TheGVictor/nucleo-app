@@ -1,8 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import {
+  requireActiveUser,
+  requireStaffUser,
+  isValidUuid,
+  isValidImageBuffer,
+} from '@/lib/auth-guard'
 import type { Attendance } from '@/types/database'
 
 export interface StudentAttendanceCardData {
@@ -29,7 +33,17 @@ export async function getStudentAttendanceCardDataAction(studentId: string): Pro
   error?: string
 }> {
   try {
-    const adminClient = createAdminClient()
+    if (!isValidUuid(studentId)) {
+      return { success: false, error: 'Identificador de aluno inválido.' }
+    }
+
+    const { user, profile, adminClient } = await requireActiveUser()
+
+    // Anti-IDOR: aluno só pode consultar o próprio cartão; terceiros exigem permissão de instrutor/admin
+    const isStaff = ['instructor', 'admin', 'super_admin'].includes(profile.role)
+    if (user.id !== studentId && !isStaff) {
+      return { success: false, error: 'Acesso não autorizado ao cartão de presença.' }
+    }
 
     // 1. Perfil do aluno
     const { data: student, error: studentError } = await adminClient
@@ -83,7 +97,6 @@ export async function getStudentAttendanceCardDataAction(studentId: string): Pro
       const { data: urlData } = adminClient.storage
         .from('attendance_cards')
         .getPublicUrl(matchingFile.name)
-      // Adiciona timestamp para evitar cache stale após atualização de foto
       const rawDate = matchingFile.updated_at || matchingFile.created_at
       const timeVal = rawDate ? new Date(rawDate).getTime() : Date.now()
       cardPhotoUrl = `${urlData.publicUrl}?t=${timeVal}`
@@ -98,7 +111,7 @@ export async function getStudentAttendanceCardDataAction(studentId: string): Pro
         graduationColor,
         attendances: attendances ?? [],
         cardPhotoUrl,
-        totalClassesTarget: 30, // Padrão de 30 aulas para exame de faixa
+        totalClassesTarget: 30,
       },
     }
   } catch (err: unknown) {
@@ -113,23 +126,15 @@ export async function checkAttendanceBoxAction(
   classDate?: string
 ): Promise<{ success: boolean; attendance?: Attendance; error?: string }> {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, error: 'Não autenticado' }
-
-    // Verifica permissão (apenas instrutor ou super_admin)
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-      return { success: false, error: 'Apenas instrutores podem marcar presenças na ficha' }
+    if (!isValidUuid(studentId)) {
+      return { success: false, error: 'Identificador de aluno inválido.' }
     }
 
-    const adminClient = createAdminClient()
-    const targetDate = classDate || new Date().toISOString().split('T')[0]
+    const { user, adminClient } = await requireStaffUser()
+    const rawDate = classDate?.trim() || new Date().toISOString().split('T')[0]
+    const targetDate = /^\d{4}-\d{2}-\d{2}$/.test(rawDate)
+      ? rawDate
+      : new Date().toISOString().split('T')[0]
 
     const { data, error } = await adminClient
       .from('attendance')
@@ -163,21 +168,11 @@ export async function uncheckAttendanceBoxAction(
   studentId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, error: 'Não autenticado' }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-      return { success: false, error: 'Apenas instrutores podem alterar a ficha' }
+    if (!isValidUuid(attendanceId) || !isValidUuid(studentId)) {
+      return { success: false, error: 'Identificador inválido.' }
     }
 
-    const adminClient = createAdminClient()
+    const { adminClient } = await requireStaffUser()
 
     const { error } = await adminClient
       .from('attendance')
@@ -207,25 +202,13 @@ export async function uploadAttendanceCardPhotoAction(formData: FormData): Promi
   error?: string
 }> {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, error: 'Não autenticado' }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-      return { success: false, error: 'Apenas instrutores podem anexar fotos de fichas' }
-    }
+    const { adminClient } = await requireStaffUser()
 
     const file = formData.get('file') as File | null
     const studentId = formData.get('studentId') as string | null
 
-    if (!file || !studentId) {
-      return { success: false, error: 'Arquivo e identificador do aluno são obrigatórios' }
+    if (!file || !(file instanceof File) || !studentId || !isValidUuid(studentId)) {
+      return { success: false, error: 'Arquivo e identificador válido do aluno são obrigatórios' }
     }
 
     // Valida tamanho (máx 10MB)
@@ -233,18 +216,23 @@ export async function uploadAttendanceCardPhotoAction(formData: FormData): Promi
       return { success: false, error: 'A foto deve ter no máximo 10MB' }
     }
 
-    // Valida tipo
+    // Valida tipo MIME
     const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
     if (!allowed.includes(file.type)) {
       return { success: false, error: 'Formato inválido. Use JPG, PNG ou WEBP' }
     }
 
-    const adminClient = createAdminClient()
-    const ext = file.name.split('.').pop() || 'jpg'
-    const fileName = `${studentId}.${ext}`
-
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
+
+    // Valida Magic Bytes reais da imagem
+    if (!isValidImageBuffer(buffer)) {
+      return { success: false, error: 'O conteúdo do arquivo não é uma imagem válida.' }
+    }
+
+    const rawExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const safeExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(rawExt) ? rawExt : 'jpg'
+    const fileName = `${studentId}.${safeExt}`
 
     const { error: uploadError } = await adminClient.storage
       .from('attendance_cards')

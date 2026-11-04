@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isValidUuid, sanitizeText } from '@/lib/auth-guard'
 import type { ClassSchedule } from '@/types/database'
 import { normalizeTonLong } from '@/lib/modality-utils'
 
@@ -27,7 +28,7 @@ async function verifyAdminAuth() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
+  if (!profile || !['instructor', 'admin', 'super_admin'].includes(profile.role)) {
     throw new Error('Acesso negado: permissão de instrutor necessária.')
   }
 
@@ -69,14 +70,22 @@ export async function createClassScheduleAction(input: {
 }): Promise<{ success: boolean; data?: ClassScheduleWithModality; error?: string }> {
   try {
     await verifyAdminAuth()
+    if (!isValidUuid(input.modality_id)) {
+      return { success: false, error: 'Modalidade inválida.' }
+    }
+    const cleanTitle = sanitizeText(input.title, 120)
+    if (!cleanTitle) {
+      return { success: false, error: 'Título da aula é obrigatório.' }
+    }
+    const dayOfWeek = Math.max(0, Math.min(6, Math.floor(Number(input.day_of_week) || 0)))
     const adminClient = createAdminClient()
 
     const { data, error } = await adminClient
       .from('class_schedules')
       .insert({
         modality_id: input.modality_id,
-        title: input.title.trim(),
-        day_of_week: input.day_of_week,
+        title: cleanTitle,
+        day_of_week: dayOfWeek,
         start_time: input.start_time,
         end_time: input.end_time,
         active: true,

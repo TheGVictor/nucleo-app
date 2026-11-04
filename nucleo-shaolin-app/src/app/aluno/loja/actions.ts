@@ -1,11 +1,16 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import {
+  requireActiveUser,
+  isValidUuid,
+  sanitizeText,
+} from '@/lib/auth-guard'
 import type { Product, ProductOrder, OrderPaymentMethod } from '@/types/database'
-
 import { DEFAULT_PRODUCTS } from '@/lib/store-defaults'
+
+const VALID_PAYMENT_METHODS: OrderPaymentMethod[] = ['reception', 'pix']
 
 export async function getStoreProductsAction(): Promise<Product[]> {
   try {
@@ -51,13 +56,8 @@ export async function getStoreProductsAction(): Promise<Product[]> {
 
 export async function getStudentOrdersAction(): Promise<ProductOrder[]> {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) return []
+    const { user, adminClient } = await requireActiveUser()
 
-    const adminClient = createAdminClient()
     const { data, error } = await adminClient
       .from('product_orders')
       .select('*, product:products(id, name, price, image_url, category)')
@@ -80,27 +80,32 @@ interface CreateOrderInput {
 
 export async function createProductOrderAction(input: CreateOrderInput) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { user, adminClient } = await requireActiveUser()
 
-    if (!user) {
-      return { success: false, error: 'Sessão expirada. Faça login novamente.' }
+    if (!VALID_PAYMENT_METHODS.includes(input.paymentMethod)) {
+      return { success: false, error: 'Forma de pagamento inválida.' }
     }
 
-    const adminClient = createAdminClient()
+    const quantity = Math.max(1, Math.min(50, Math.floor(Number(input.quantity) || 1)))
+    const cleanNotes = input.notes ? sanitizeText(input.notes, 300) : ''
 
     // 1. Busca dados do produto (no banco ou no fallback)
     let productPrice = 0
     let productName = 'Produto'
     let currentStock: number | null = null
+    let dbProduct: { id: string; name: string; price: number; stock: number | null } | null = null
 
-    const { data: dbProduct } = await adminClient
-      .from('products')
-      .select('id, name, price, stock')
-      .eq('id', input.productId)
-      .single()
+    if (isValidUuid(input.productId)) {
+      const { data } = await adminClient
+        .from('products')
+        .select('id, name, price, stock, active')
+        .eq('id', input.productId)
+        .single()
+
+      if (data && data.active !== false) {
+        dbProduct = data
+      }
+    }
 
     if (dbProduct) {
       productPrice = Number(dbProduct.price)
@@ -113,11 +118,9 @@ export async function createProductOrderAction(input: CreateOrderInput) {
         productName = fallback.name
         currentStock = fallback.stock != null ? Number(fallback.stock) : null
       } else {
-        return { success: false, error: 'Produto não encontrado.' }
+        return { success: false, error: 'Produto não encontrado ou indisponível.' }
       }
     }
-
-    const quantity = Math.max(1, input.quantity || 1)
 
     // Validação de estoque disponível
     if (currentStock !== null && currentStock < quantity) {
@@ -143,8 +146,8 @@ export async function createProductOrderAction(input: CreateOrderInput) {
         quantity,
         total_price: totalPrice,
         payment_method: input.paymentMethod,
-        status: input.paymentMethod === 'pix' ? 'reserved' : 'reserved',
-        notes: input.notes ? `${input.notes} [Produto: ${productName}]` : `[Produto: ${productName}]`,
+        status: 'reserved',
+        notes: cleanNotes ? `${cleanNotes} [Produto: ${productName}]` : `[Produto: ${productName}]`,
       })
       .select('id')
       .single()
@@ -185,16 +188,14 @@ interface UpdateStudentOrderInput {
 
 export async function updateStudentOrderAction(input: UpdateStudentOrderInput) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { user, adminClient } = await requireActiveUser()
 
-    if (!user) {
-      return { success: false, error: 'Sessão expirada. Faça login novamente.' }
+    if (!isValidUuid(input.orderId)) {
+      return { success: false, error: 'Identificador de pedido inválido.' }
     }
-
-    const adminClient = createAdminClient()
+    if (!VALID_PAYMENT_METHODS.includes(input.paymentMethod)) {
+      return { success: false, error: 'Forma de pagamento inválida.' }
+    }
 
     // 1. Busca o pedido para garantir posse e recalcular total
     const { data: order, error: orderErr } = await adminClient
@@ -208,8 +209,11 @@ export async function updateStudentOrderAction(input: UpdateStudentOrderInput) {
       return { success: false, error: 'Reserva não encontrada ou sem permissão.' }
     }
 
-    if (order.status === 'delivered') {
-      return { success: false, error: 'Pedidos já entregues não podem ser alterados.' }
+    if (order.status !== 'reserved') {
+      return {
+        success: false,
+        error: 'Apenas reservas pendentes podem ser alteradas pelo aluno.',
+      }
     }
 
     const unitPrice =
@@ -218,7 +222,7 @@ export async function updateStudentOrderAction(input: UpdateStudentOrderInput) {
         : Number(order.total_price) / Math.max(1, order.quantity || 1)
 
     const oldQuantity = Number(order.quantity) || 1
-    const quantity = Math.max(1, input.quantity || 1)
+    const quantity = Math.max(1, Math.min(50, Math.floor(Number(input.quantity) || 1)))
     const delta = quantity - oldQuantity
     const totalPrice = unitPrice * quantity
 
@@ -255,7 +259,7 @@ export async function updateStudentOrderAction(input: UpdateStudentOrderInput) {
       order.notes?.match(/\[Produto:\s*([^\]]+)\]/)?.[1] ||
       'Produto'
 
-    const userNotes = input.notes?.trim() || ''
+    const userNotes = input.notes ? sanitizeText(input.notes, 300) : ''
     const finalNotes = userNotes
       ? `${userNotes} [Produto: ${productName}]`
       : `[Produto: ${productName}]`
@@ -286,18 +290,13 @@ export async function updateStudentOrderAction(input: UpdateStudentOrderInput) {
 
 export async function deleteStudentOrderAction(orderId: string) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { user, adminClient } = await requireActiveUser()
 
-    if (!user) {
-      return { success: false, error: 'Sessão expirada. Faça login novamente.' }
+    if (!isValidUuid(orderId)) {
+      return { success: false, error: 'Identificador de pedido inválido.' }
     }
 
-    const adminClient = createAdminClient()
-
-    // 1. Busca o pedido para repor o estoque se não estiver cancelado
+    // 1. Busca o pedido para repor o estoque se estiver em reserva
     const { data: order } = await adminClient
       .from('product_orders')
       .select('id, product_id, quantity, status')
@@ -305,8 +304,18 @@ export async function deleteStudentOrderAction(orderId: string) {
       .eq('student_id', user.id)
       .single()
 
+    if (!order) {
+      return { success: false, error: 'Pedido não encontrado.' }
+    }
+
+    if (order.status === 'paid' || order.status === 'delivered') {
+      return {
+        success: false,
+        error: 'Pedidos pagos ou entregues só podem ser cancelados pela administração.',
+      }
+    }
+
     if (
-      order &&
       order.status !== 'cancelled' &&
       order.product_id &&
       !order.product_id.startsWith('prod-') &&
@@ -347,18 +356,13 @@ export async function deleteStudentOrderAction(orderId: string) {
 
 export async function confirmStudentPixPaymentAction(orderId: string) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { user, adminClient } = await requireActiveUser()
 
-    if (!user) {
-      return { success: false, error: 'Sessão expirada. Faça login novamente.' }
+    if (!isValidUuid(orderId)) {
+      return { success: false, error: 'Identificador de pedido inválido.' }
     }
 
-    const adminClient = createAdminClient()
-
-    // 1. Busca o pedido para garantir que pertence ao aluno
+    // 1. Busca o pedido para garantir que pertence ao aluno e está reservado
     const { data: order, error: fetchErr } = await adminClient
       .from('product_orders')
       .select('id, notes, status, product:products(name)')
@@ -368,6 +372,10 @@ export async function confirmStudentPixPaymentAction(orderId: string) {
 
     if (fetchErr || !order) {
       return { success: false, error: 'Pedido não encontrado.' }
+    }
+
+    if (order.status !== 'reserved') {
+      return { success: false, error: 'Este pedido já foi processado.' }
     }
 
     const currentNotes = order.notes || ''

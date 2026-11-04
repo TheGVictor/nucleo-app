@@ -82,6 +82,9 @@ export async function createVideoAction(formData: VideoFormData) {
     }
 
     const embedUrl = formatEmbedUrl(formData.videoUrl)
+    if (!/^https?:\/\//i.test(embedUrl)) {
+      return { success: false, error: 'A URL do vídeo deve começar com https:// ou http://' }
+    }
     const durationSeconds = formData.durationMinutes
       ? Math.round(Number(formData.durationMinutes) * 60)
       : null
@@ -149,6 +152,9 @@ export async function updateVideoAction(videoId: string, formData: VideoFormData
     }
 
     const embedUrl = formatEmbedUrl(formData.videoUrl)
+    if (!/^https?:\/\//i.test(embedUrl)) {
+      return { success: false, error: 'A URL do vídeo deve começar com https:// ou http://' }
+    }
     const durationSeconds = formData.durationMinutes
       ? Math.round(Number(formData.durationMinutes) * 60)
       : null
@@ -210,6 +216,13 @@ export async function getSignedVideoUploadUrlAction(fileName: string, contentTyp
 
     if (!fileName) {
       return { success: false, error: 'Nome de arquivo inválido' }
+    }
+
+    if (contentType && !contentType.startsWith('video/')) {
+      return {
+        success: false,
+        error: 'Tipo de conteúdo inválido. Envie apenas arquivos de vídeo.',
+      }
     }
 
     const ext = fileName.split('.').pop()?.toLowerCase() || 'mp4'

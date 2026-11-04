@@ -1,13 +1,26 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { DEFAULT_PRODUCTS } from '@/lib/store-defaults'
+import {
+  requireStaffUser,
+  isValidUuid,
+  sanitizeText,
+  isSafeHttpUrl,
+  isValidImageBuffer,
+} from '@/lib/auth-guard'
 import type { Product, ProductOrder, OrderStatus } from '@/types/database'
+
+const VALID_ORDER_STATUSES: OrderStatus[] = [
+  'reserved',
+  'paid',
+  'delivered',
+  'cancelled',
+]
 
 export async function getAdminProductsAction(): Promise<Product[]> {
   try {
-    const adminClient = createAdminClient()
+    const { adminClient } = await requireStaffUser()
     const { data, error } = await adminClient
       .from('products')
       .select('*')
@@ -43,13 +56,13 @@ export async function getAdminProductsAction(): Promise<Product[]> {
 
     return DEFAULT_PRODUCTS
   } catch {
-    return DEFAULT_PRODUCTS
+    return []
   }
 }
 
 export async function getAdminOrdersAction(): Promise<ProductOrder[]> {
   try {
-    const adminClient = createAdminClient()
+    const { adminClient } = await requireStaffUser()
     const { data, error } = await adminClient
       .from('product_orders')
       .select(`
@@ -79,19 +92,42 @@ interface SaveProductInput {
 
 export async function saveProductAction(input: SaveProductInput) {
   try {
-    const adminClient = createAdminClient()
+    const { adminClient } = await requireStaffUser()
+
+    const name = sanitizeText(input.name, 120)
+    if (!name || name.length < 2) {
+      return { success: false, error: 'O nome do produto deve ter ao menos 2 caracteres.' }
+    }
+
+    const category = sanitizeText(input.category, 60) || 'Geral'
+    const description = input.description ? sanitizeText(input.description, 1000) : null
+    const price = Number(input.price)
+
+    if (!Number.isFinite(price) || price < 0 || price > 100000) {
+      return { success: false, error: 'Preço inválido.' }
+    }
+
+    const stock = Math.max(0, Math.min(10000, Math.floor(Number(input.stock ?? 10) || 0)))
+    const imageUrl = input.image_url?.trim() || null
+
+    if (imageUrl && !imageUrl.startsWith('/') && !isSafeHttpUrl(imageUrl)) {
+      return { success: false, error: 'URL da imagem inválida.' }
+    }
 
     if (input.id && !input.id.startsWith('prod-')) {
-      // Atualização de produto existente
+      if (!isValidUuid(input.id)) {
+        return { success: false, error: 'ID de produto inválido.' }
+      }
+
       const { error } = await adminClient
         .from('products')
         .update({
-          name: input.name,
-          description: input.description || null,
-          price: input.price,
-          category: input.category,
-          stock: input.stock ?? 10,
-          image_url: input.image_url || null,
+          name,
+          description,
+          price,
+          category,
+          stock,
+          image_url: imageUrl,
           active: input.active ?? true,
           updated_at: new Date().toISOString(),
         })
@@ -99,14 +135,13 @@ export async function saveProductAction(input: SaveProductInput) {
 
       if (error) throw error
     } else {
-      // Inserção de novo produto
       const { error } = await adminClient.from('products').insert({
-        name: input.name,
-        description: input.description || null,
-        price: input.price,
-        category: input.category,
-        stock: input.stock ?? 10,
-        image_url: input.image_url || null,
+        name,
+        description,
+        price,
+        category,
+        stock,
+        image_url: imageUrl,
         active: input.active ?? true,
       })
 
@@ -124,7 +159,11 @@ export async function saveProductAction(input: SaveProductInput) {
 
 export async function toggleProductActiveAction(id: string, currentActive: boolean) {
   try {
-    const adminClient = createAdminClient()
+    const { adminClient } = await requireStaffUser()
+    if (!isValidUuid(id)) {
+      return { success: false, error: 'ID de produto inválido.' }
+    }
+
     const { error } = await adminClient
       .from('products')
       .update({ active: !currentActive, updated_at: new Date().toISOString() })
@@ -142,7 +181,11 @@ export async function toggleProductActiveAction(id: string, currentActive: boole
 
 export async function deleteProductAction(id: string) {
   try {
-    const adminClient = createAdminClient()
+    const { adminClient } = await requireStaffUser()
+    if (!isValidUuid(id)) {
+      return { success: false, error: 'ID de produto inválido.' }
+    }
+
     const { error } = await adminClient.from('products').delete().eq('id', id)
     if (error) throw error
     revalidatePath('/admin/loja')
@@ -156,7 +199,14 @@ export async function deleteProductAction(id: string) {
 
 export async function updateOrderStatusAction(orderId: string, status: OrderStatus) {
   try {
-    const adminClient = createAdminClient()
+    const { adminClient } = await requireStaffUser()
+
+    if (!isValidUuid(orderId)) {
+      return { success: false, error: 'ID do pedido inválido.' }
+    }
+    if (!VALID_ORDER_STATUSES.includes(status)) {
+      return { success: false, error: 'Status de pedido inválido.' }
+    }
 
     // Busca o pedido para verificar transição de status e repor/deduzir estoque
     const { data: order } = await adminClient
@@ -165,7 +215,12 @@ export async function updateOrderStatusAction(orderId: string, status: OrderStat
       .eq('id', orderId)
       .single()
 
-    if (order && order.product_id && !order.product_id.startsWith('prod-') && order.product_id !== '00000000-0000-0000-0000-000000000000') {
+    if (
+      order &&
+      order.product_id &&
+      !order.product_id.startsWith('prod-') &&
+      order.product_id !== '00000000-0000-0000-0000-000000000000'
+    ) {
       const qty = Number(order.quantity) || 1
 
       // Se foi cancelado a partir de um estado ativo, devolve as unidades ao estoque
@@ -217,7 +272,10 @@ export async function updateOrderStatusAction(orderId: string, status: OrderStat
 
 export async function deleteOrderAction(orderId: string) {
   try {
-    const adminClient = createAdminClient()
+    const { adminClient } = await requireStaffUser()
+    if (!isValidUuid(orderId)) {
+      return { success: false, error: 'ID do pedido inválido.' }
+    }
 
     const { data: order } = await adminClient
       .from('product_orders')
@@ -225,7 +283,13 @@ export async function deleteOrderAction(orderId: string) {
       .eq('id', orderId)
       .single()
 
-    if (order && order.status !== 'cancelled' && order.product_id && !order.product_id.startsWith('prod-') && order.product_id !== '00000000-0000-0000-0000-000000000000') {
+    if (
+      order &&
+      order.status !== 'cancelled' &&
+      order.product_id &&
+      !order.product_id.startsWith('prod-') &&
+      order.product_id !== '00000000-0000-0000-0000-000000000000'
+    ) {
       const qty = Number(order.quantity) || 1
       const { data: prod } = await adminClient
         .from('products')
@@ -254,8 +318,12 @@ export async function deleteOrderAction(orderId: string) {
 
 export async function updateProductStockAction(productId: string, newStock: number) {
   try {
-    const adminClient = createAdminClient()
-    const safeStock = Math.max(0, Math.floor(newStock))
+    const { adminClient } = await requireStaffUser()
+    if (!isValidUuid(productId)) {
+      return { success: false, error: 'ID de produto inválido.' }
+    }
+
+    const safeStock = Math.max(0, Math.min(10000, Math.floor(Number(newStock) || 0)))
 
     const { error } = await adminClient
       .from('products')
@@ -274,8 +342,10 @@ export async function updateProductStockAction(productId: string, newStock: numb
 
 export async function uploadProductImageAction(formData: FormData) {
   try {
+    const { adminClient } = await requireStaffUser()
+
     const file = formData.get('file') as File | null
-    if (!file) {
+    if (!file || !(file instanceof File)) {
       return { success: false, error: 'Nenhum arquivo enviado.' }
     }
 
@@ -288,16 +358,19 @@ export async function uploadProductImageAction(formData: FormData) {
       return { success: false, error: 'A imagem deve ter no máximo 5MB.' }
     }
 
-    const adminClient = createAdminClient()
+    const buffer = Buffer.from(await file.arrayBuffer())
+    if (!isValidImageBuffer(buffer)) {
+      return { success: false, error: 'O conteúdo do arquivo não corresponde a uma imagem válida.' }
+    }
 
     // Garante que o bucket 'products' exista
     try {
       await adminClient.storage.createBucket('products', { public: true })
     } catch {}
 
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-    const fileName = `produto_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`
-    const buffer = Buffer.from(await file.arrayBuffer())
+    const rawExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const safeExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(rawExt) ? rawExt : 'jpg'
+    const fileName = `produto_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${safeExt}`
 
     const { error: uploadError } = await adminClient.storage
       .from('products')
@@ -316,7 +389,9 @@ export async function uploadProductImageAction(formData: FormData) {
 
     return { success: true, url: publicUrlData.publicUrl }
   } catch (err: unknown) {
-    return { success: false, error: err instanceof Error ? err.message : 'Erro ao processar imagem.' }
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Erro ao processar imagem.',
+    }
   }
 }
-

@@ -1,28 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
-
-async function verifyInstructor() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error('Não autenticado')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, full_name')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    throw new Error('Acesso negado: apenas instrutores autorizados.')
-  }
-
-  return { user, profile }
-}
+import {
+  requireStaffUser,
+  isValidUuid,
+  sanitizeText,
+} from '@/lib/auth-guard'
 
 // ── ENVIA RECADINHO / AVISO PERSONALIZADO PARA O ALUNO ────────
 export async function sendPersonalNoticeAction(
@@ -32,8 +15,19 @@ export async function sendPersonalNoticeAction(
   content: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { user } = await verifyInstructor()
-    const adminClient = createAdminClient()
+    if (!isValidUuid(studentId)) {
+      return { success: false, error: 'ID do aluno inválido.' }
+    }
+
+    const { user, adminClient } = await requireStaffUser()
+
+    const cleanName = sanitizeText(studentName, 120)
+    const cleanTitle = sanitizeText(title, 150)
+    const cleanContent = sanitizeText(content, 2000)
+
+    if (!cleanTitle || !cleanContent) {
+      return { success: false, error: 'Título e mensagem são obrigatórios.' }
+    }
 
     // Busca modalidade ativa do aluno para vincular
     const { data: sm } = await adminClient
@@ -44,8 +38,8 @@ export async function sendPersonalNoticeAction(
 
     const modalityId = sm?.[0]?.modality_id || null
 
-    const formattedTitle = `[Para ${studentName}] ${title.trim()}`
-    const formattedContent = `${content.trim()}\n\n— Mensagem enviada pela Coordenação da Escola`
+    const formattedTitle = `[Para ${cleanName}] ${cleanTitle}`
+    const formattedContent = `${cleanContent}\n\n— Mensagem enviada pela Coordenação da Escola`
 
     const { error } = await adminClient.from('announcements').insert({
       title: formattedTitle,
@@ -79,8 +73,15 @@ export async function updateStudentModalityAction(
   graduationId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await verifyInstructor()
-    const adminClient = createAdminClient()
+    if (
+      !isValidUuid(studentId) ||
+      !isValidUuid(modalityId) ||
+      !isValidUuid(graduationId)
+    ) {
+      return { success: false, error: 'Identificadores inválidos.' }
+    }
+
+    const { adminClient } = await requireStaffUser()
 
     const { error } = await adminClient
       .from('student_modalities')
@@ -126,16 +127,29 @@ export async function approveStudentWithEditsAction(
   data: StudentApprovalData
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await verifyInstructor()
-    const adminClient = createAdminClient()
+    if (!isValidUuid(data.studentId)) {
+      return { success: false, error: 'ID do aluno inválido.' }
+    }
+
+    const { adminClient } = await requireStaffUser()
+
+    const cleanFullName = sanitizeText(data.fullName, 120)
+    if (!cleanFullName || cleanFullName.length < 2) {
+      return { success: false, error: 'Nome do aluno inválido.' }
+    }
+
+    const cleanPhone = data.phone ? sanitizeText(data.phone, 30) : null
+    const cleanBirthDate = /^\d{4}-\d{2}-\d{2}$/.test(data.birthDate?.trim() || '')
+      ? data.birthDate.trim()
+      : undefined
 
     // 1. Atualiza dados cadastrais e ativa o perfil
     const { error: profileError } = await adminClient
       .from('profiles')
       .update({
-        full_name: data.fullName.trim(),
-        birth_date: data.birthDate,
-        phone: data.phone ? data.phone.trim() : null,
+        full_name: cleanFullName,
+        ...(cleanBirthDate ? { birth_date: cleanBirthDate } : {}),
+        phone: cleanPhone,
         status: 'active',
         updated_at: new Date().toISOString(),
       })
@@ -147,21 +161,24 @@ export async function approveStudentWithEditsAction(
 
     // 2. Para cada modalidade, ativa e define a graduação homologada
     for (const sm of data.modalities) {
+      if (!isValidUuid(sm.id)) continue
+
       const { error: smError } = await adminClient
         .from('student_modalities')
         .update({
           status: 'active',
-          approved_graduation_id: sm.graduationId,
-          self_reported_level: sm.levelName || null,
+          approved_graduation_id: isValidUuid(sm.graduationId) ? sm.graduationId : null,
+          self_reported_level: sm.levelName ? sanitizeText(sm.levelName, 80) : null,
         })
         .eq('id', sm.id)
+        .eq('student_id', data.studentId)
 
       if (smError) {
         console.error('Error updating student modality:', smError)
       }
 
       // 3. Registra no histórico de graduações
-      if (sm.graduationId) {
+      if (isValidUuid(sm.graduationId) && isValidUuid(sm.modalityId)) {
         await adminClient.from('graduation_history').insert({
           student_id: data.studentId,
           modality_id: sm.modalityId,
@@ -190,8 +207,11 @@ export async function rejectStudentRegistrationAction(
   studentId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await verifyInstructor()
-    const adminClient = createAdminClient()
+    if (!isValidUuid(studentId)) {
+      return { success: false, error: 'ID do aluno inválido.' }
+    }
+
+    const { adminClient } = await requireStaffUser()
 
     const { error: profileError } = await adminClient
       .from('profiles')

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isValidImageBuffer, isSafeHttpUrl, isValidUuid } from '@/lib/auth-guard'
 import { buildAnnouncementContent } from '@/lib/announcements'
 import type { Announcement } from '@/types/database'
 
@@ -39,8 +40,8 @@ async function verifyAdminAuth() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    throw new Error('Acesso negado: permissão de instrutor ou Sifu necessária.')
+  if (!profile || !['instructor', 'admin', 'super_admin'].includes(profile.role)) {
+    throw new Error('Acesso negado: permissão de instrutor ou coordenação necessária.')
   }
 
   return { user, profile }
@@ -112,9 +113,14 @@ export async function uploadAnnouncementImageAction(formData: FormData): Promise
       await adminClient.storage.createBucket('announcements', { public: true })
     } catch {}
 
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-    const fileName = `recado_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`
+    const rawExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const safeExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(rawExt) ? rawExt : 'jpg'
+    const fileName = `recado_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${safeExt}`
     const buffer = Buffer.from(await file.arrayBuffer())
+
+    if (!isValidImageBuffer(buffer)) {
+      return { success: false, error: 'O conteúdo do arquivo não é uma imagem válida.' }
+    }
 
     const { error: uploadError } = await adminClient.storage
       .from('announcements')
@@ -146,6 +152,9 @@ export async function createAnnouncementAction(input: AnnouncementInput) {
   }
 
   const hasImage = Boolean(input.image_url && input.image_url.trim())
+  if (hasImage && !isSafeHttpUrl(input.image_url) && !input.image_url!.trim().startsWith('/')) {
+    throw new Error('URL da imagem do aviso inválida.')
+  }
   const hasText = Boolean(input.content && input.content.trim().length >= 3)
 
   if (!hasImage && !hasText) {
@@ -202,6 +211,9 @@ export async function updateAnnouncementAction(id: string, input: AnnouncementIn
   }
 
   const hasImage = Boolean(input.image_url && input.image_url.trim())
+  if (hasImage && !isSafeHttpUrl(input.image_url) && !input.image_url!.trim().startsWith('/')) {
+    throw new Error('URL da imagem do aviso inválida.')
+  }
   const hasText = Boolean(input.content && input.content.trim().length >= 3)
 
   if (!hasImage && !hasText) {
@@ -250,7 +262,7 @@ export async function updateAnnouncementAction(id: string, input: AnnouncementIn
 export async function deleteAnnouncementAction(id: string) {
   await verifyAdminAuth()
 
-  if (!id) throw new Error('ID do aviso é obrigatório.')
+  if (!id || !isValidUuid(id)) throw new Error('ID do aviso é inválido.')
 
   const adminClient = createAdminClient()
 
