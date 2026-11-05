@@ -44,10 +44,13 @@ const GOOGLE_MAPS_URL =
 const SITE_IMAGES = {
   hero: '/imgNucleo/nucleo6.jpg',
   clf: '/imgNucleo/nucleo1.jpg',
-  tonlong: '/imgNucleo/nucleo3.jpg',
+  tonlong: '/imgNucleo/nucleo8.jpg',
   taichi: '/imgNucleo/nucleo2.jpg',
-  sanda: '/imgNucleo/nucleo4.jpg',
+  sanda: '/imgNucleo/nucleo9.jpg',
   kids: '/imgNucleo/nucleo5.jpg',
+  practiceWeapons: '/imgNucleo/nucleo3.jpg',
+  practiceFocus: '/imgNucleo/nucleo7.jpg',
+  practiceGrading: '/imgNucleo/nucleo4.jpg',
   footerBg: '/imgNucleo/nucleo2.jpg',
   student1:
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
@@ -394,6 +397,69 @@ export default function HomePage() {
                   </div>
                 )
               })}
+            </div>
+
+            {/* Vitrine fotográfica da vivência na escola (3 fotos oficiais complementares) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-8">
+              <div className="rounded-2xl overflow-hidden bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all shadow-xs group">
+                <div className="aspect-[3/2] overflow-hidden bg-[var(--color-bg)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={SITE_IMAGES.practiceWeapons}
+                    alt="Prática de armas tradicionais e bastão na Núcleo"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="p-4 sm:p-5">
+                  <h3 className="text-sm sm:text-base font-extrabold text-main">
+                    Formas Clássicas & Armas Tradicionais
+                  </h3>
+                  <p className="text-xs text-muted mt-1 leading-relaxed">
+                    Domínio progressivo de mãos livres, bastão, sabre, lança e espada conforme a graduação.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl overflow-hidden bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all shadow-xs group">
+                <div className="aspect-[3/2] overflow-hidden bg-[var(--color-bg)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={SITE_IMAGES.practiceFocus}
+                    alt="Foco, postura e disciplina nos treinos da Núcleo"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="p-4 sm:p-5">
+                  <h3 className="text-sm sm:text-base font-extrabold text-main">
+                    Postura, Foco & Ética Marcial
+                  </h3>
+                  <p className="text-xs text-muted mt-1 leading-relaxed">
+                    Concentração, respeito mútuo e consciência corporal cultivados em todas as aulas.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl overflow-hidden bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-[var(--color-border-gold)] transition-all shadow-xs group">
+                <div className="aspect-[3/2] overflow-hidden bg-[var(--color-bg)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={SITE_IMAGES.practiceGrading}
+                    alt="Exames de faixa e evolução técnica na Núcleo"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="p-4 sm:p-5">
+                  <h3 className="text-sm sm:text-base font-extrabold text-main">
+                    Exames de Faixa & Evolução Estruturada
+                  </h3>
+                  <p className="text-xs text-muted mt-1 leading-relaxed">
+                    Avaliações periódicas com currículo técnico claro para cada etapa da jornada marcial.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
